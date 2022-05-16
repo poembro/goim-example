@@ -42,7 +42,7 @@ $ cd test/ && go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运
 ```
 
 
-## 流程图
+## 看源码过程中 各个结构图
 [![](./goim.png)](https://github.com/poembro/goim-demo)
 
 
