@@ -42,9 +42,13 @@ func Init() (err error) {
 // Default new a config with specified defualt value.
 func Default() *Config {
 	return &Config{
-		Env:   &Env{Region: region, Zone: zone, DeployEnv: deployEnv, Host: host},
+		Env: &Env{Region: region, Zone: zone, DeployEnv: deployEnv, Host: host},
 		Discovery: &Discovery{
 			Nodes: "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579",
+		},
+		Consume: &Consume{
+			KafkaEnable: false,
+			RedisEnable: false,
 		},
 		Comet: &Comet{RoutineChan: 1024, RoutineSize: 32},
 		Room: &Room{
@@ -57,16 +61,22 @@ func Default() *Config {
 
 // Config is job config.
 type Config struct {
-	Env   *Env
-	Kafka *Kafka
+	Env       *Env
+	Kafka     *Kafka
+	Consume   *Consume
 	Discovery *Discovery
-	Redis *Redis
-	Comet *Comet
-	Room  *Room
+	Redis     *Redis
+	Comet     *Comet
+	Room      *Room
 }
 
 type Discovery struct {
 	Nodes string
+}
+
+type Consume struct {
+	KafkaEnable bool
+	RedisEnable bool
 }
 
 // Room is room config.

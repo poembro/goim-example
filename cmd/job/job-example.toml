@@ -1,4 +1,8 @@
 # This is a TOML document. Boom
+[consume]
+    kafkaEnable = false
+    redisEnable = true
+
 [discovery]
     nodes = "http://127.0.0.1:2379,http://127.0.0.1:2479,http://127.0.0.1:2579"
 

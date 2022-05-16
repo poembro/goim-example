@@ -50,6 +50,10 @@ func Default() *Config {
 		Discovery: &Discovery{
 			Nodes: "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579",
 		},
+		Consume: &Consume{
+			KafkaEnable: false,
+			RedisEnable: false,
+		},
 		HTTPServer: &HTTPServer{
 			Network:      "tcp",
 			Addr:         "3111",
@@ -75,6 +79,7 @@ func Default() *Config {
 type Config struct {
 	Env        *Env
 	Discovery  *Discovery
+	Consume    *Consume
 	RPCClient  *RPCClient
 	RPCServer  *RPCServer
 	HTTPServer *HTTPServer
@@ -96,6 +101,11 @@ type Env struct {
 
 type Discovery struct {
 	Nodes string
+}
+
+type Consume struct {
+	KafkaEnable bool
+	RedisEnable bool
 }
 
 // Node node config.

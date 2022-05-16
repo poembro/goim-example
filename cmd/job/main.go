@@ -22,10 +22,10 @@ func main() {
 		panic(err)
 	}
 	log.Infof("goim-job [version: %s env: %+v] start", ver, conf.Conf.Env)
-    
+
 	// job
 	j := job.New(conf.Conf)
-	go j.Subscribe() // redis
+
 	// signal
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
