@@ -42,7 +42,8 @@ $ cd test/ && go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运
 ```
 
 
-
+## 流程图
+[![](./goim.png)](https://github.com/poembro/goim-demo)
 
 
 ### 问题
