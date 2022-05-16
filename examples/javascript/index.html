@@ -1,0 +1,98 @@
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>client demo</title>
+    <script src="client.js"></script>
+    <script>
+      var onStart = function () {
+        var url = document.getElementById('url').value;
+        var mid = document.getElementById('mid').value;
+        var room_id = document.getElementById('room_id').value;
+        var platform = document.getElementById('platform').value;
+        var accepts = document.getElementById('accepts').value;
+        
+        if (!url) {
+            return alert("请输入 url")
+        }
+        if (!mid) {
+            return alert("请输入mid")
+        }
+        if (!room_id) {
+            return alert("请输入 room_id")
+        }
+        if (!platform) {
+            return alert("请输入 platform")
+        }
+        if (!accepts) {
+            return alert("请输入 accepts")
+        }
+
+        var client = new MyClient({
+          notify: function(data) {
+            console.log(data);
+            // alert(JSON.stringify(data));
+          },
+          url:url,
+          mid:mid,
+          room_id:room_id,
+          platform:platform,
+          accepts:accepts,
+        });
+      }
+    </script>
+    <style type="text/css">
+        span{ display:block;}
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>websocket</h1>
+      <h2>status:</h2>
+      <span id="status"></span>
+    </div>
+
+    <div class="body">
+      <div> 
+        <ul>
+          <li> 
+              url: <input id="url" type="text" value="ws://192.168.3.222:3102/sub"/><br />  
+          </li>
+          
+          <li> 
+              mid: <input id="mid" type="text" value="123"/><br />  
+          </li>
+
+          <li> 
+              room_id: <input id="room_id" type="text" value="live://1000"/><br />  
+          </li>
+
+          <li> 
+              platform: <input id="platform" type="text" value="web"/><br />  
+          </li>
+
+          <li>
+              accepts: <input id="accepts" type="text" value="1000,1001,1002"/><br />  
+          </li>
+        </ul>  
+      </div>
+    
+      <h2>
+        <button onclick="onStart();">启动</button><br/>
+      </h2>
+
+      <hr/>
+      <h2>命令行</h2>
+      <div>
+          <p>curl "http://ci.cn:3111/goim/push/mids?operation=1000&mids=123" -d 'mid message'</p>
+          <p>curl "http://ci.cn:3111/goim/push/room?operation=1000&type=live&room=1000" -d 'room message' </p>
+          <p>curl "http://ci.cn:3111/goim/push/all?operation=1000" -d 'broadcast message' </p>
+      </div>
+      <h2>message:</h2>
+      <div id="box"></div>
+    </div>
+  </body>
+
+
+</html>

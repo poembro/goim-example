@@ -1,0 +1,19 @@
+# This is a TOML document. Boom
+[discovery]
+    nodes = "http://127.0.0.1:2379,http://127.0.0.1:2479,http://127.0.0.1:2579"
+
+[kafka]
+    topic = "goim-push-topic"
+    group = "goim-push-group-job"
+    brokers = ["192.168.3.100:9092","192.168.3.111:9092","192.168.3.222:9092"]
+
+[redis]
+    network = "tcp"
+    addr = "127.0.0.1:6379"
+    active = 60000
+    idle = 1024
+    dialTimeout = "200ms"
+    readTimeout = "500ms"
+    writeTimeout = "500ms"
+    idleTimeout = "120s"
+    expire = "30m"
