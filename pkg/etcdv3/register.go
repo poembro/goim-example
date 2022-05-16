@@ -6,16 +6,26 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/golang/glog"
 	"go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc/resolver"
 )
 
+var etcdCli *clientv3.Client = nil
+
 func newClient(etcdAddr string) (*clientv3.Client, error) {
-	return clientv3.New(clientv3.Config{
+	if etcdCli != nil {
+		return etcdCli, nil
+	}
+
+	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:          strings.Split(etcdAddr, ","),
 		DialTimeout:        time.Second * time.Duration(5),
 		MaxCallSendMsgSize: 2 * 1024 * 1024,
 	})
+
+	etcdCli = cli
+	return cli, err
 }
 
 // RegisterEtcd  注册服务
@@ -35,7 +45,7 @@ func RegisterEtcd(etcdAddr string, ttl int, env, appid, region, zone, ip, port s
 
 	key := fmt.Sprintf("/%s/%s/%s/%s/%s:%s", env, appid, region, zone, ip, port)
 	value := fmt.Sprintf("%s:%s", ip, port)
-	fmt.Println("---服务注册至etcd----->", key)
+	log.Infof("etcdv3 service register to etcd \"%s\" ", key)
 	if _, err := cli.Put(ctx, key, value, clientv3.WithLease(lease.ID)); err != nil {
 		cancel()
 		return nil, err
@@ -53,13 +63,13 @@ func RegisterEtcd(etcdAddr string, ttl int, env, appid, region, zone, ip, port s
 			}
 			//fmt.Println("-->续约成功", ka)
 		}
-		fmt.Printf("2022-02-25 09:44:38.690	DEBUG	etcdv3/register.go:73	%s \r\n", "关闭续租")
+		log.Infof("etcdv3 %s \r\n", "关闭续租")
 	}()
 
 	closeEtcd := func() {
 		_, _ = cli.Revoke(ctx, lease.ID)
 		cancel()
-		fmt.Printf("2022-02-25 09:44:38.690	DEBUG	etcdv3/register.go:79	%s \r\n", "关闭etcd连接")
+		log.Infof("etcdv3 %s \r\n", "关闭etcd连接")
 	}
 
 	return closeEtcd, nil
@@ -90,7 +100,7 @@ func DiscoveryEtcd(etcdAddr string, env, appid, region, zone string) map[string]
 		for _, kv := range response.Kvs {
 			k := string(kv.Key)
 			v := string(kv.Value)
-			fmt.Printf("--发现服务---->k:  %s   v:  %s \r\n ", k, v)
+			log.Infof("etcdv3 service  Discovery from etcd k:\"%s\"  v:\"%s\" ", k, v)
 			ins[k] = v
 		}
 	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 
+	log "github.com/golang/glog"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 
@@ -22,7 +23,7 @@ func (b *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		cc:     cc,
 		prefix: prefix,
 	}
-	fmt.Printf("------2022--grpc 去查找logic服务目标:%s ", prefix)
+	log.Infof("etcdv3 grpc to find target:%s \r\n", prefix)
 	go r.Watcher(prefix)
 	r.ResolveNow(resolver.ResolveNowOptions{})
 	return r, nil

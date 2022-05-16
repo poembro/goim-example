@@ -2,15 +2,25 @@ package logic
 
 import (
 	"context"
+	"time"
 
 	"goim-demo/internal/logic/conf"
 	"goim-demo/internal/logic/dao"
+	"goim-demo/internal/logic/model"
+
+	"goim-demo/pkg/etcdv3"
+
+	log "github.com/golang/glog"
+)
+
+const (
+	_onlineTick     = time.Second * 10
+	_onlineDeadline = time.Minute * 5
 )
 
 // Logic struct
 type Logic struct {
-	c *conf.Config
-	//dis *naming.Discovery
+	c   *conf.Config
 	dao *dao.Dao
 	// online
 	totalIPs   int64
@@ -31,7 +41,7 @@ func New(c *conf.Config) (l *Logic) {
 		regions: make(map[string]string),
 	}
 	l.initRegions() //初始化regions属性 l.regions[上海] = sh
-
+	go l.watchComet()
 	return l
 }
 
@@ -51,4 +61,42 @@ func (l *Logic) initRegions() {
 			l.regions[province] = region
 		}
 	}
+}
+
+func (l *Logic) watchComet() {
+	etcdAddr := l.c.Discovery.Nodes
+	region := l.c.Env.Region
+	zone := l.c.Env.Zone
+	env := l.c.Env.DeployEnv
+	appid := "goim.comet"
+
+	for {
+		time.Sleep(_onlineTick)
+		ins := etcdv3.DiscoveryEtcd(etcdAddr, env, appid, region, zone)
+		if err := l.loadOnline(ins); err != nil {
+			log.Errorf("watchComet error(%v)", err)
+		}
+	}
+}
+
+func (l *Logic) loadOnline(ins map[string]string) (err error) {
+	var (
+		roomCount = make(map[string]int32)
+		online    *model.Online
+	)
+	for _, grpcAddr := range ins {
+		online, err = l.dao.ServerOnline(context.Background(), grpcAddr)
+		if err != nil {
+			return
+		}
+		if time.Since(time.Unix(online.Updated, 0)) > _onlineDeadline {
+			_ = l.dao.DelServerOnline(context.Background(), grpcAddr)
+			continue
+		}
+		for roomID, count := range online.RoomCount {
+			roomCount[roomID] += count
+		}
+	}
+	l.roomCount = roomCount
+	return
 }

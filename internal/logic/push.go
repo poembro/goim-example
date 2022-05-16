@@ -22,7 +22,7 @@ func (l *Logic) PushKeys(c context.Context, op int32, keys []string, msg []byte)
 			pushKeys[server] = append(pushKeys[server], key)
 		}
 	}
-	log.Infoln("--(l *Logic) PushKeys-->", pushKeys)
+
 	for server := range pushKeys {
 		if err = l.dao.PushMsg(c, op, server, pushKeys[server], msg); err != nil {
 			log.Infoln("--2--(l *Logic) PushKeys--", servers, err)

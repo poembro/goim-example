@@ -3,7 +3,6 @@ package job
 import (
 	"context"
 	"fmt"
-	"net"
 
 	comet "goim-demo/api/comet/grpc"
 	pb "goim-demo/api/logic/grpc"
@@ -46,9 +45,9 @@ func (j *Job) pushKeys(operation int32, serverID string, subKeys []string, body 
 
 	comets := j.cometServers
 	for grpcAddr, c := range comets {
-		host, _, _ := net.SplitHostPort(grpcAddr)
-		if host != serverID {
-			continue // 用户再某节点 则请求某节点
+		//host, _, _ := net.SplitHostPort(grpcAddr)
+		if grpcAddr != serverID {
+			continue // 用户再某节点,某端口 则请求某节点,某端口
 		}
 
 		if err := c.Push(&args); err != nil {

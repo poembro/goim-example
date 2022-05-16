@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"net"
 	"time"
 
 	logic "goim-demo/api/logic/grpc"
@@ -84,7 +85,8 @@ func NewServer(c *conf.Config) *Server {
 	for i := 0; i < c.Bucket.Size; i++ {
 		s.buckets[i] = NewBucket(c.Bucket) //new(Bucket)结构体，并将结构体里面的元素初始化 有32*32个协程在等chan *grpc.BroadcastRoomReq这个通道消息
 	}
-	s.serverID = c.Env.Host
+	_, port, _ := net.SplitHostPort(c.RPCServer.Addr)
+	s.serverID = fmt.Sprintf("%s:%s", c.Env.Host, port)
 	go s.onlineproc()
 	return s
 }
@@ -127,8 +129,7 @@ func (s *Server) onlineproc() {
 				}
 			}
 		}
-		log.Infoln("在线房间:", roomCount) // map[live://1000:1]
-		// 上报 当前节点 -> 房间 -> 人数 至redis
+		// 上报 当前节点 -> 房间 -> 人数 至redis  // map[live://1000:1]
 		if allRoomsCount, err = s.RenewOnline(context.Background(), s.serverID, roomCount); err != nil {
 			time.Sleep(time.Second)
 			continue

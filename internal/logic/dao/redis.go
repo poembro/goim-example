@@ -157,8 +157,6 @@ func (d *Dao) ServersByKeys(c context.Context, keys []string) (res []string, err
 
 // KeysByMids get a key server by mid.  HSET mid_123 2000aa78df60000 192.168.3.222
 // HGETALL mid_123
-// HGETALL mid_123
-// HGETALL mid_123
 func (d *Dao) KeysByMids(c context.Context, mids []int64) (ress map[string]string, olMids []int64, err error) {
 	conn := d.redis.Get()
 	defer conn.Close()
@@ -239,7 +237,7 @@ func (d *Dao) addServerOnline(c context.Context, key string, hashKey string, onl
 	return
 }
 
-// ServerOnline get a server online.  logic服务初始化时每隔10秒调了这里  go s.onlineproc()
+// ServerOnline get a server online.  logic服务初始化时每隔10秒调了这里
 // HGET "ol_192.168.3.100" 0
 // HGET "ol_192.168.3.100" 1
 // ...  64

@@ -22,10 +22,10 @@ import (
 func interceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		log.Infoln("---->", "无Token认证信息")
+		//log.Infoln("---->", "无Token认证信息")
 	}
 
-	log.Infoln("--comet gateway ",
+	log.Infoln("comet_grpc_gateway ",
 		"    method:", info.FullMethod,
 		"    md:", md,
 		"    req:", req)
