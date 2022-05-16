@@ -1,7 +1,7 @@
 # This is a TOML document. Boom
 [consume]
-    kafkaEnable = false
-    redisEnable = true
+    kafkaEnable = true
+    redisEnable = false
     
 [discovery]
     nodes = "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579"
@@ -44,7 +44,7 @@
 
 [kafka]
     topic = "goim-push-topic"
-    brokers = ["192.168.3.100:9092","192.168.3.111:9092","192.168.3.222:9092"]
+    brokers = ["10.0.41.145:9092"]
 
 [redis]
     network = "tcp"

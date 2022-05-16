@@ -11,7 +11,7 @@
  * 支持安全验证（未授权用户不能订阅）
  * 多协议支持（websocket，tcp）
  * 可拓扑的架构（comet、job、logic模块可动态无限扩展）
- * 基于redis 发布订阅做异步消息推送(目前demo代码为了阅读简洁暂采用redis，生产环境可更换为 kafka 等)
+ * 基于redis 、 kafka 发布订阅做异步消息推送(目前demo代码通过配置文件中consume.kafkaEnable、consume.redisEnable设置)
 
 
 ## 更改介绍
@@ -22,7 +22,7 @@
 - 服务发现 规则按 /环境/服务名/地区 (即 每个地区可以发现n个节点)
 
 ### kafka 改redis
-- 目前demo代码为了阅读简洁暂采用redis发布订阅
+- 目前demo代码支持redis/kafka 做中间件
 
 
 ## 部署
@@ -35,6 +35,9 @@ $ make build
 $ make runjob     ##运行 job 服务
 $ make runlogic   ##运行 logic 服务
 $ make runcomet   ##运行 comet 服务
+
+$ cd examples/javascript/ && go run main.go   ## 运行http静态页面
+$ cd test/ && go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运行100个并发测试脚本 
 
 ```
 

@@ -50,6 +50,11 @@ func Default() *Config {
 			KafkaEnable: false,
 			RedisEnable: false,
 		},
+		Kafka: &Kafka{
+			Topic:   "goim-push-topic",
+			Group:   "goim-push-group-job",
+			Brokers: []string{"10.0.41.145:9092"},
+		},
 		Comet: &Comet{RoutineChan: 1024, RoutineSize: 32},
 		Room: &Room{
 			Batch:  20,

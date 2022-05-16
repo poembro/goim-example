@@ -54,6 +54,10 @@ func Default() *Config {
 			KafkaEnable: false,
 			RedisEnable: false,
 		},
+		Kafka: &Kafka{
+			Topic:   "goim-push-topic",
+			Brokers: []string{"10.0.41.145:9092"},
+		},
 		HTTPServer: &HTTPServer{
 			Network:      "tcp",
 			Addr:         "3111",
