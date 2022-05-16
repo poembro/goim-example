@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv" 
 	"goim-demo/internal/logic/model"
+	"strconv"
+
 	log "github.com/golang/glog"
-	"github.com/gomodule/redigo/redis" 
+	"github.com/gomodule/redigo/redis"
 	"github.com/zhenjl/cityhash"
 )
 
@@ -37,7 +38,7 @@ func (d *Dao) pingRedis(c context.Context) (err error) {
 	return
 }
 
-// AddMapping add a mapping.  
+// AddMapping add a mapping.
 // Mapping:
 //	HSET mid_123 2000aa78df60000 192.168.3.222
 //	SET  key_2000aa78df60000  192.168.3.222
@@ -155,9 +156,9 @@ func (d *Dao) ServersByKeys(c context.Context, keys []string) (res []string, err
 }
 
 // KeysByMids get a key server by mid.  HSET mid_123 2000aa78df60000 192.168.3.222
-// HGETALL mid_123    
-// HGETALL mid_123  
-// HGETALL mid_123 
+// HGETALL mid_123
+// HGETALL mid_123
+// HGETALL mid_123
 func (d *Dao) KeysByMids(c context.Context, mids []int64) (ress map[string]string, olMids []int64, err error) {
 	conn := d.redis.Get()
 	defer conn.Close()
@@ -190,22 +191,20 @@ func (d *Dao) KeysByMids(c context.Context, mids []int64) (ress map[string]strin
 	return
 }
 
-// AddServerOnline add a server online. comet服务初始化时就grpc方式调了这里  go s.onlineproc()
-// HSET" "ol_192.168.3.100" "2" {RoomCount: map[1001]3, Server: 192.168.3.100, Updated: time.Now().Unix()}
-// EXPIRE "ol_192.168.3.100"
 func (d *Dao) AddServerOnline(c context.Context, server string, online *model.Online) (err error) {
+	var idx uint32
 	roomsMap := map[uint32]map[string]int32{}
-	for room, count := range online.RoomCount { //RoomCount是一个  map[string]int32 key对应房间号,val对应在线人数
-		rMap := roomsMap[cityhash.CityHash32([]byte(room), uint32(len(room)))%64]
+	for room, count := range online.RoomCount { // live://1000  1
+		idx = cityhash.CityHash32([]byte(room), uint32(len(room))) % 64
+		rMap := roomsMap[idx]
 		if rMap == nil {
 			rMap = make(map[string]int32)
-			roomsMap[cityhash.CityHash32([]byte(room), uint32(len(room)))%64] = rMap
+			roomsMap[idx] = rMap
 		}
 		rMap[room] = count
 	}
 	key := keyServerOnline(server)
 	for hashKey, value := range roomsMap {
-		//hashKey 就是房间号 取余64 得到的hash值   online.Updated := time.Now().Unix()
 		err = d.addServerOnline(c, key, strconv.FormatInt(int64(hashKey), 10), &model.Online{RoomCount: value, Server: online.Server, Updated: online.Updated})
 		if err != nil {
 			return
@@ -218,7 +217,7 @@ func (d *Dao) addServerOnline(c context.Context, key string, hashKey string, onl
 	conn := d.redis.Get()
 	defer conn.Close()
 	b, _ := json.Marshal(online)
-	
+
 	if err = conn.Send("HSET", key, hashKey, b); err != nil {
 		log.Errorf("conn.Send(SET %s,%s) error(%v)", key, hashKey, err)
 		return
@@ -241,8 +240,8 @@ func (d *Dao) addServerOnline(c context.Context, key string, hashKey string, onl
 }
 
 // ServerOnline get a server online.  logic服务初始化时每隔10秒调了这里  go s.onlineproc()
-// HGET "ol_192.168.3.100" 0 
-// HGET "ol_192.168.3.100" 1 
+// HGET "ol_192.168.3.100" 0
+// HGET "ol_192.168.3.100" 1
 // ...  64
 func (d *Dao) ServerOnline(c context.Context, server string) (online *model.Online, err error) {
 	online = &model.Online{RoomCount: map[string]int32{}}
@@ -291,5 +290,3 @@ func (d *Dao) DelServerOnline(c context.Context, server string) (err error) {
 	}
 	return
 }
-
-

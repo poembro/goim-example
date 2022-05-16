@@ -24,7 +24,12 @@ func interceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInf
 	if !ok {
 		log.Infoln("---->", "无Token认证信息")
 	}
-	log.Infoln("---->", md, req)
+
+	log.Infoln("--comet gateway ",
+		"    method:", info.FullMethod,
+		"    md:", md,
+		"    req:", req)
+
 	// 继续处理请求
 	return handler(ctx, req)
 }

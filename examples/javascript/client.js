@@ -16,9 +16,6 @@
 
     var Client = function(options) {
         this.options = options || {};
-        var MAX_CONNECT_TIMES = 10; //最大重连次数
-        var DELAY = 15000;          //每隔30秒连一次
-        this.createConnect(MAX_CONNECT_TIMES, DELAY);
     }
 
     Client.prototype.createConnect = function(max, delay) {
@@ -26,8 +23,11 @@
         if (max === 0) {
             return;
         }
-        connect();
 
+        function reConnect() {
+            self.createConnect(--max, delay * 2);
+        }
+       
         var textDecoder = new TextDecoder();
         var textEncoder = new TextEncoder();
         var heartbeatInterval;
@@ -58,7 +58,7 @@
                         appendMsg("receive: auth reply");
                         // send a heartbeat to server
                         heartbeat();
-                        heartbeatInterval = setInterval(heartbeat, 30 * 1000);
+                        heartbeatInterval = setInterval(heartbeat, 27000);
                         break;
                     case 3:
                         // receive a heartbeat from server
@@ -89,10 +89,11 @@
                 }
             }
 
-            ws.onclose = function() {
+            ws.onclose = function(e) {
+                console.log("--close原因-->",e)
                 if (heartbeatInterval) clearInterval(heartbeatInterval);
                 setTimeout(reConnect, delay);
-
+       
                 document.getElementById("status").innerHTML =  "<color style='color:red'>failed<color>";
             }
 
@@ -150,11 +151,14 @@
                 return buf;
             }
         }
+        connect();
 
-        function reConnect() {
-            self.createConnect(--max, delay * 2);
-        }
     }
 
-    win['MyClient'] = Client;
+    win['MyClient'] = function(opt){
+        var c = new Client(opt)
+        var MAX_CONNECT_TIMES = 10; //最大重连次数
+        var DELAY = 15000;          //每隔30秒连一次
+        c.createConnect(MAX_CONNECT_TIMES, DELAY);
+    };
 })(window);

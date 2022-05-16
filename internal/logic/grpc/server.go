@@ -13,8 +13,25 @@ import (
 	"google.golang.org/grpc/keepalive"
 
 	// use gzip decoder
+	log "github.com/golang/glog"
 	_ "google.golang.org/grpc/encoding/gzip"
+	"google.golang.org/grpc/metadata" // grpc metadata包
 )
+
+// interceptor 拦截器
+func interceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		log.Infoln("---->", "无Token认证信息")
+	}
+
+	log.Infoln("--logic gateway ",
+		"    method:", info.FullMethod,
+		"    md:", md,
+		"    req:", req)
+	// 继续处理请求
+	return handler(ctx, req)
+}
 
 // New logic grpc server
 func New(c *conf.RPCServer, l *logic.Logic) *grpc.Server {
@@ -25,7 +42,7 @@ func New(c *conf.RPCServer, l *logic.Logic) *grpc.Server {
 		Timeout:               time.Duration(c.KeepAliveTimeout),
 		MaxConnectionAge:      time.Duration(c.MaxLifeTime),
 	})
-	srv := grpc.NewServer(keepParams)
+	srv := grpc.NewServer(grpc.UnaryInterceptor(interceptor), keepParams)
 	pb.RegisterLogicServer(srv, &server{l})
 	lis, err := net.Listen(c.Network, c.Addr)
 	if err != nil {

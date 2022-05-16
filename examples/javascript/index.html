@@ -29,7 +29,7 @@
             return alert("请输入 accepts")
         }
 
-        var client = new MyClient({
+        MyClient({
           notify: function(data) {
             console.log(data);
             // alert(JSON.stringify(data));
@@ -57,7 +57,7 @@
       <div> 
         <ul>
           <li> 
-              url: <input id="url" type="text" value="ws://192.168.3.222:3102/sub"/><br />  
+              url: <input id="url" type="text" value="ws://127.0.0.1:3102/sub"/><br />  
           </li>
           
           <li> 

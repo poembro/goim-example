@@ -120,13 +120,14 @@ func (s *Server) onlineproc() {
 			err           error
 		)
 		roomCount := make(map[string]int32)
-		//再次遍历s.buckets 数组
 		for _, bucket := range s.buckets {
-			//每个元素都是bucket结构   获取对应bucket下1024个房间是否有在线的
 			for roomID, count := range bucket.RoomsCount() {
-				roomCount[roomID] += count
+				if roomID != "" {
+					roomCount[roomID] += count
+				}
 			}
 		}
+		log.Infoln("在线房间:", roomCount) // map[live://1000:1]
 		// 上报 当前节点 -> 房间 -> 人数 至redis
 		if allRoomsCount, err = s.RenewOnline(context.Background(), s.serverID, roomCount); err != nil {
 			time.Sleep(time.Second)

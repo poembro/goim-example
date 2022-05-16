@@ -4,7 +4,7 @@
     redisEnable = true
 
 [discovery]
-    nodes = "http://127.0.0.1:2379,http://127.0.0.1:2479,http://127.0.0.1:2579"
+    nodes = "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579"
 
 [kafka]
     topic = "goim-push-topic"
@@ -13,7 +13,7 @@
 
 [redis]
     network = "tcp"
-    addr = "127.0.0.1:6379"
+    addr = "10.0.41.145:6379"
     active = 60000
     idle = 1024
     dialTimeout = "200ms"

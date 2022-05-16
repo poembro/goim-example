@@ -32,7 +32,6 @@ type Job struct {
 func New(c *conf.Config) *Job {
 	j := &Job{
 		c:           c,
-		consumer:    newKafkaSub(c.Kafka),
 		redis:       newRedis(c.Redis),
 		redisExpire: int32(time.Duration(c.Redis.Expire) / time.Second),
 		rooms:       make(map[string]*Room),
@@ -45,6 +44,7 @@ func New(c *conf.Config) *Job {
 
 func (j *Job) subscribe() {
 	if j.c.Consume.KafkaEnable {
+		j.consumer = newKafkaSub(j.c.Kafka)
 		go j.ConsumeKafka()
 	}
 

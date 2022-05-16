@@ -22,9 +22,13 @@ type Dao struct {
 func New(c *conf.Config) *Dao {
 	d := &Dao{
 		c:           c,
-		kafkaPub:    newKafkaPub(c.Kafka),
 		redis:       newRedis(c.Redis),
 		redisExpire: int32(time.Duration(c.Redis.Expire) / time.Second),
+	}
+
+	// 初始化 kafka 连接
+	if c.Consume.KafkaEnable {
+		d.kafkaPub = newKafkaPub(c.Kafka)
 	}
 	return d
 }
