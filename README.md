@@ -67,4 +67,6 @@ google.golang.org/protobuf v1.26.1-0.20210525005349-febffdd88e85 // indirect
 编译后 启动时加参数 
 export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/job
 
+
+
 ```

@@ -7,6 +7,7 @@ import (
 	comet "goim-demo/api/comet/grpc"
 	"goim-demo/internal/job/conf"
 	"goim-demo/pkg/bytes"
+
 	log "github.com/golang/glog"
 )
 
@@ -41,7 +42,7 @@ func NewRoom(job *Job, id string, c *conf.Room) (r *Room) {
 	return
 }
 
-// Push push msg to the room, if chan full discard it. /* ###推送流程 6.1 ###*/
+// Push push msg to the room, if chan full discard it.
 func (r *Room) Push(op int32, msg []byte) (err error) {
 	var p = &comet.Proto{
 		Ver:  1,
@@ -56,7 +57,7 @@ func (r *Room) Push(op int32, msg []byte) (err error) {
 	return
 }
 
-// pushproc merge proto and push msgs in batch. ###推送流程 6.2 ###*/
+// pushproc merge proto and push msgs in batch.
 func (r *Room) pushproc(batch int, sigTime time.Duration) {
 	var (
 		n    int
@@ -112,7 +113,7 @@ func (j *Job) delRoom(roomID string) {
 	delete(j.rooms, roomID)
 	j.roomsMutex.Unlock()
 }
- /* ###推送流程 6 ###*/
+
 func (j *Job) getRoom(roomID string) *Room {
 	j.roomsMutex.RLock()
 	room, ok := j.rooms[roomID]

@@ -12,6 +12,7 @@ import (
 	"goim-demo/pkg/bufio"
 	"goim-demo/pkg/bytes"
 	xtime "goim-demo/pkg/time"
+
 	log "github.com/golang/glog"
 )
 
@@ -241,7 +242,7 @@ func (s *Server) dispatchTCP(conn *net.TCPConn, wr *bufio.Writer, wp *bytes.Pool
 		if white { //判断白名单是否写入
 			whitelist.Printf("key: %s wait proto ready\n", ch.Key)
 		}
-		/* ###推送流程 12 ###*/
+
 		var p = ch.Ready() //等待数据从 通道过来 如 &Proto{Op: OpProtoFinish}
 		if white {
 			whitelist.Printf("key: %s proto ready\n", ch.Key)
@@ -291,7 +292,7 @@ func (s *Server) dispatchTCP(conn *net.TCPConn, wr *bufio.Writer, wp *bytes.Pool
 				whitelist.Printf("key: %s start write server proto%v\n", ch.Key, p)
 			}
 			// server send
-			if err = p.WriteTCP(wr); err != nil { /* ###推送流程 14 ###*/
+			if err = p.WriteTCP(wr); err != nil {
 				goto failed
 			}
 			if white {

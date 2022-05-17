@@ -63,7 +63,7 @@ func (c *Channel) NeedPush(op int32) bool {
 	return false
 }
 
-// Push server push message. /* ###推送流程 11 ###*/
+// Push server push message.
 func (c *Channel) Push(p *grpc.Proto) (err error) {
 	select {
 	case c.signal <- p:

@@ -3,15 +3,21 @@
 
 package grpc
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import _ "github.com/gogo/protobuf/gogoproto"
+import (
+	fmt "fmt"
 
-import context "golang.org/x/net/context"
-import grpc "google.golang.org/grpc"
+	proto "github.com/golang/protobuf/proto"
 
-import io "io"
+	math "math"
+
+	_ "github.com/gogo/protobuf/gogoproto"
+
+	context "golang.org/x/net/context"
+
+	grpc "google.golang.org/grpc"
+
+	io "io"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -593,7 +599,7 @@ func (c *cometClient) PushMsg(ctx context.Context, in *PushMsgReq, opts ...grpc.
 	}
 	return out, nil
 }
- /* ###推送流程 8.1 ###*/
+
 func (c *cometClient) Broadcast(ctx context.Context, in *BroadcastReq, opts ...grpc.CallOption) (*BroadcastReply, error) {
 	out := new(BroadcastReply)
 	err := c.cc.Invoke(ctx, "/goim.comet.Comet/Broadcast", in, out, opts...)

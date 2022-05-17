@@ -93,21 +93,21 @@ func NewComet(grpcAddr string, c *conf.Comet) (*Comet, error) {
 	return cmt, nil
 }
 
-// Push push a user message. 推送给某个用户的消息 process协程一直在等这个通道是否过来消息
+// Push push a user message. 推送给某个用户的消息
 func (c *Comet) Push(arg *comet.PushMsgReq) (err error) {
 	idx := atomic.AddUint64(&c.pushChanNum, 1) % c.routineSize
 	c.pushChan[idx] <- arg
 	return
 }
 
-// BroadcastRoom broadcast a room message.广播给某房间 process协程一直在等这个通道是否过来消息
+// BroadcastRoom broadcast a room message.广播给某房间
 func (c *Comet) BroadcastRoom(arg *comet.BroadcastRoomReq) (err error) {
 	idx := atomic.AddUint64(&c.roomChanNum, 1) % c.routineSize
 	c.roomChan[idx] <- arg
 	return
 }
 
-// Broadcast broadcast a message. 广播给所有人 process协程一直在等这个通道是否过来消息  /* ###推送流程 6.6 ###*/
+// Broadcast broadcast a message. 广播给所有订阅过1000的房间
 func (c *Comet) Broadcast(arg *comet.BroadcastReq) (err error) {
 	c.broadcastChan <- arg
 	return
