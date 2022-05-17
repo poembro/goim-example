@@ -70,3 +70,124 @@ export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
 
 
 ```
+
+
+### 文档
+```
+
+#### 推送至user_id它订阅的房间
+> POST /goim/push/mids?operation=1001&mids=123 HTTP/1.1
+> Host: 127.0.0.1:3111
+> User-Agent: insomnia/2021.6.0-alpha.7
+> Accept: */*
+> Content-Length: 34
+
+| 推送至user_id它订阅的房间
+
+* upload completely sent off: 34 out of 34 bytes
+* Mark bundle as not supporting multiuse
+
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=utf-8
+< Date: Tue, 17 May 2022 06:51:47 GMT
+< Content-Length: 23
+
+
+#### 推送至device_id它订阅的房间
+> POST /goim/push/keys?operation=1001&keys=123456123 HTTP/1.1
+> Host: 127.0.0.1:3111
+> User-Agent: insomnia/2021.6.0-alpha.7
+> Accept: */*
+> Content-Length: 23
+
+| 11111111111111111111111
+
+* upload completely sent off: 23 out of 23 bytes
+* Mark bundle as not supporting multiuse
+
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=utf-8
+< Date: Tue, 17 May 2022 06:52:22 GMT
+< Content-Length: 23
+
+
+
+#### 推送至room_id它订阅的房间
+
+> POST /goim/push/room?operation=1001&type=live&room=1000 HTTP/1.1
+> Host: 127.0.0.1:3111
+> User-Agent: insomnia/2021.6.0-alpha.7
+> Accept: */*
+> Content-Length: 37
+
+| 推送至room_id它订阅的房间444
+
+* upload completely sent off: 37 out of 37 bytes
+* Mark bundle as not supporting multiuse
+
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=utf-8
+< Date: Tue, 17 May 2022 06:52:55 GMT
+< Content-Length: 23
+
+
+
+
+#### 推送至房间
+> POST /goim/push/all?operation=1001&speed=1 HTTP/1.1
+> Host: 127.0.0.1:3111
+> User-Agent: insomnia/2021.6.0-alpha.7
+> Accept: */*
+> Content-Length: 22
+
+|  1116666
+
+* upload completely sent off: 22 out of 22 bytes
+* Mark bundle as not supporting multiuse
+
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=utf-8
+< Date: Tue, 17 May 2022 06:54:27 GMT
+< Content-Length: 23
+
+
+
+
+#### 统计多少房间多少人
+> GET /goim/online/top?type=live&limit=10 HTTP/1.1
+> Host: 127.0.0.1:3111
+> User-Agent: insomnia/2021.6.0-alpha.7
+> Accept: */*
+> Content-Length: 12
+
+| hello world 
+
+* upload completely sent off: 12 out of 12 bytes
+* Mark bundle as not supporting multiuse
+
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=utf-8
+< Date: Tue, 17 May 2022 06:55:09 GMT
+< Content-Length: 33
+.
+
+
+
+#### 某单个房间多少人 
+> GET /goim/online/room?type=live&rooms=1000 HTTP/1.1
+> Host: 127.0.0.1:3111
+> User-Agent: insomnia/2021.6.0-alpha.7
+> Accept: */*
+> Content-Length: 12
+
+| hello world 
+
+* upload completely sent off: 12 out of 12 bytes
+* Mark bundle as not supporting multiuse
+
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=utf-8
+< Date: Tue, 17 May 2022 06:55:49 GMT
+< Content-Length: 41
+
+```
