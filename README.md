@@ -11,7 +11,7 @@
  * 支持安全验证（未授权用户不能订阅）
  * 多协议支持（websocket，tcp）
  * 可拓扑的架构（comet、job、logic模块可动态无限扩展）
- * 基于redis 、 kafka 发布订阅做异步消息推送(目前demo代码通过配置文件中consume.kafkaEnable、consume.redisEnable设置)
+ * 支持redis、kafka两种消息中间件切换 (目前demo代码通过配置文件中consume.kafkaEnable、consume.redisEnable设置)
 
 
 ## 更改介绍
@@ -82,7 +82,7 @@ export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
 > Accept: */*
 > Content-Length: 34
 
-| 推送至user_id它订阅的房间
+22222222222222
 
 * upload completely sent off: 34 out of 34 bytes
 * Mark bundle as not supporting multiuse
@@ -120,7 +120,7 @@ export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
 > Accept: */*
 > Content-Length: 37
 
-| 推送至room_id它订阅的房间444
+| 333333333333333333333
 
 * upload completely sent off: 37 out of 37 bytes
 * Mark bundle as not supporting multiuse
@@ -133,7 +133,7 @@ export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
 
 
 
-#### 推送至房间
+#### 推送至订阅的房间
 > POST /goim/push/all?operation=1001&speed=1 HTTP/1.1
 > Host: 127.0.0.1:3111
 > User-Agent: insomnia/2021.6.0-alpha.7
@@ -160,7 +160,7 @@ export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
 > Accept: */*
 > Content-Length: 12
 
-| hello world 
+| 7777777777777777777
 
 * upload completely sent off: 12 out of 12 bytes
 * Mark bundle as not supporting multiuse
@@ -180,7 +180,7 @@ export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
 > Accept: */*
 > Content-Length: 12
 
-| hello world 
+| 8888888888888888
 
 * upload completely sent off: 12 out of 12 bytes
 * Mark bundle as not supporting multiuse
