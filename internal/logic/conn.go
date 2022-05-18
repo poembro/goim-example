@@ -4,14 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"goim-demo/api/comet/grpc"
+	"goim-demo/api/protocol"
 	"goim-demo/internal/logic/model"
 	"time"
 
 	log "github.com/golang/glog"
-
-	//"github.com/google/uuid"
-	"crypto/md5"
+	"github.com/google/uuid"
 )
 
 // Connect connected a conn.
@@ -39,19 +37,8 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 		err = fmt.Errorf("mid is err !!")
 		return
 	}
-	if key == "" {
-		err = fmt.Errorf("key is err !!")
-		return
-	}
-
-	fomatKey := fmt.Sprintf("%d-%s-%s", mid, params.Platform, roomID)
-	byteFomatKey := []byte(fomatKey)
-	has := md5.Sum(byteFomatKey)
-	md5key := fmt.Sprintf("%x", has) //将[]byte转成16进制
-	//fmt.Printf("fomatKey:%s  ==>   key:%s    md5key:%s \r\n",fomatKey, key, md5key)
-	if key != md5key {
-		//err = fmt.Errorf("auth key is err !!")
-		//return
+	if key = params.Key; key == "" {
+		key = uuid.New().String()
 	}
 
 	//验证是否已经在线
@@ -117,7 +104,7 @@ func (l *Logic) RenewOnline(c context.Context, server string, roomCount map[stri
 }
 
 // Receive receive a message.
-func (l *Logic) Receive(c context.Context, mid int64, proto *grpc.Proto) (err error) {
+func (l *Logic) Receive(c context.Context, mid int64, proto *protocol.Proto) (err error) {
 	log.Infof("receive mid:%d message:%+v", mid, proto)
 	return
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	pb "goim-demo/api/logic/grpc"
+	pb "goim-demo/api/logic"
 	"goim-demo/internal/job/conf"
 
 	"github.com/gogo/protobuf/proto"

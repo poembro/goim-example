@@ -7,7 +7,7 @@ import (
 	"net"
 	"time"
 
-	logic "goim-demo/api/logic/grpc"
+	"goim-demo/api/logic"
 	"goim-demo/internal/comet/conf"
 
 	log "github.com/golang/glog"

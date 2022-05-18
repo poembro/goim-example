@@ -3,7 +3,7 @@ package job
 import (
 	"context"
 
-	pb "goim-demo/api/logic/grpc"
+	pb "goim-demo/api/logic"
 	"goim-demo/internal/job/conf"
 
 	cluster "github.com/bsm/sarama-cluster"

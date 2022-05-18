@@ -40,19 +40,18 @@ func NewRound(c *conf.Config) (r *Round) {
 			Timer:        c.Protocol.Timer,     //32
 			TimerSize:    c.Protocol.TimerSize, //2048
 		}}
-	// reader (注意 bytes.Pool 在goim/pkg/bytes/buffer.go)
+	// reader
 	r.readers = make([]bytes.Pool, r.options.Reader) //r.options.Reader 为32
 	for i = 0; i < r.options.Reader; i++ {
 		//为每一个结构体 进行初始化内存buffer    r.options.ReadBuf为1024  r.options.ReadBufSize为1024
 		r.readers[i].Init(r.options.ReadBuf, r.options.ReadBufSize)
 	}
-	// writer  (注意 bytes.Pool 在goim/pkg/bytes/buffer.go)
+	// writer
 	r.writers = make([]bytes.Pool, r.options.Writer) //r.options.Writer 为32
 	for i = 0; i < r.options.Writer; i++ {
-		//同上
 		r.writers[i].Init(r.options.WriteBuf, r.options.WriteBufSize)
 	}
-	// timer   (注意 time.Timer 在goim/pkg/time/timer.go)
+	// timer
 	r.timers = make([]time.Timer, r.options.Timer)
 	for i = 0; i < r.options.Timer; i++ {
 		r.timers[i].Init(r.options.TimerSize)

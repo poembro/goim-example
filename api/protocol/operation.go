@@ -1,4 +1,4 @@
-package grpc
+package protocol
 
 const (
 	// OpHandshake handshake
@@ -24,8 +24,8 @@ const (
 	// OpAuthReply auth connect reply
 	OpAuthReply = int32(8)
 
-	// OpRaw raw message  原始消息 
-	OpRaw = int32(9) 
+	// OpRaw raw message
+	OpRaw = int32(9)
 
 	// OpProtoReady proto ready
 	OpProtoReady = int32(10)

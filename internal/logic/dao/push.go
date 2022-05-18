@@ -2,7 +2,7 @@ package dao
 
 import (
 	"context"
-	pb "goim-demo/api/logic/grpc"
+	pb "goim-demo/api/logic"
 	"strconv"
 
 	"github.com/gogo/protobuf/proto"

@@ -26,18 +26,15 @@ type Logic struct {
 	totalIPs   int64
 	totalConns int64
 	roomCount  map[string]int32
-	// load balancer
-	//nodes        []*naming.Instance
-	//loadBalancer *LoadBalancer
+
 	regions map[string]string // province -> region
 }
 
 // New init
 func New(c *conf.Config) (l *Logic) {
 	l = &Logic{
-		c:   c,
-		dao: dao.New(c),
-		//loadBalancer: NewLoadBalancer(),
+		c:       c,
+		dao:     dao.New(c),
 		regions: make(map[string]string),
 	}
 	l.initRegions() //初始化regions属性 l.regions[上海] = sh

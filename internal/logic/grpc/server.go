@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	pb "goim-demo/api/logic/grpc"
+	pb "goim-demo/api/logic"
 	"goim-demo/internal/logic"
 	"goim-demo/internal/logic/conf"
 
@@ -61,16 +61,6 @@ type server struct {
 }
 
 var _ pb.LogicServer = &server{}
-
-// Ping Service
-func (s *server) Ping(ctx context.Context, req *pb.PingReq) (*pb.PingReply, error) {
-	return &pb.PingReply{}, nil
-}
-
-// Close Service
-func (s *server) Close(ctx context.Context, req *pb.CloseReq) (*pb.CloseReply, error) {
-	return &pb.CloseReply{}, nil
-}
 
 // Connect connect a conn.
 func (s *server) Connect(ctx context.Context, req *pb.ConnectReq) (*pb.ConnectReply, error) {

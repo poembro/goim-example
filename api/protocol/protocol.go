@@ -1,4 +1,4 @@
-package grpc
+package protocol
 
 import (
 	"errors"
@@ -76,9 +76,9 @@ func (p *Proto) ReadTCP(rr *bufio.Reader) (err error) {
 	}
 	packLen = binary.BigEndian.Int32(buf[_packOffset:_headerOffset])
 	headerLen = binary.BigEndian.Int16(buf[_headerOffset:_verOffset])
-	p.Ver = int32(binary.BigEndian.Int16(buf[_verOffset:_opOffset])) //协议版本号
-	p.Op = binary.BigEndian.Int32(buf[_opOffset:_seqOffset]) //指令
-	p.Seq = binary.BigEndian.Int32(buf[_seqOffset:]) //序列号（服务端返回和客户端发送一一对应）
+	p.Ver = int32(binary.BigEndian.Int16(buf[_verOffset:_opOffset]))
+	p.Op = binary.BigEndian.Int32(buf[_opOffset:_seqOffset])
+	p.Seq = binary.BigEndian.Int32(buf[_seqOffset:])
 	if packLen > _maxPackSize {
 		return ErrProtoPackLen
 	}
@@ -86,11 +86,11 @@ func (p *Proto) ReadTCP(rr *bufio.Reader) (err error) {
 		return ErrProtoHeaderLen
 	}
 	if bodyLen = int(packLen - int32(headerLen)); bodyLen > 0 {
-		p.Body, err = rr.Pop(bodyLen)  //内容
+		p.Body, err = rr.Pop(bodyLen)
 	} else {
 		p.Body = nil
 	}
-	return    
+	return
 }
 
 // WriteTCP write a proto to TCP writer.
@@ -159,7 +159,7 @@ func (p *Proto) ReadWebsocket(ws *websocket.Conn) (err error) {
 	p.Ver = int32(binary.BigEndian.Int16(buf[_verOffset:_opOffset]))
 	p.Op = binary.BigEndian.Int32(buf[_opOffset:_seqOffset])
 	p.Seq = binary.BigEndian.Int32(buf[_seqOffset:])
-	if packLen > _maxPackSize {
+	if packLen < 0 || packLen > _maxPackSize {
 		return ErrProtoPackLen
 	}
 	if headerLen != _rawHeaderSize {

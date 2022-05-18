@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	comet "goim-demo/api/comet/grpc"
+	"goim-demo/api/comet"
 	"goim-demo/internal/job/conf"
 
 	log "github.com/golang/glog"

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"goim-demo/api/comet/grpc"
+	"goim-demo/api/protocol"
 	"goim-demo/internal/comet/conf"
 	"goim-demo/pkg/bufio"
 	"goim-demo/pkg/bytes"
@@ -106,7 +106,7 @@ func (s *Server) ServeTCP(conn *net.TCPConn, rp, wp *bytes.Pool, tr *xtime.Timer
 		accepts []int32
 		hb      time.Duration
 		white   bool
-		p       *grpc.Proto
+		p       *protocol.Proto
 		b       *Bucket
 		trd     *xtime.TimerData
 		lastHb  = time.Now()
@@ -177,9 +177,9 @@ func (s *Server) ServeTCP(conn *net.TCPConn, rp, wp *bytes.Pool, tr *xtime.Timer
 		if white {
 			whitelist.Printf("key: %s read proto:%v\n", ch.Key, p)
 		}
-		if p.Op == grpc.OpHeartbeat {
+		if p.Op == protocol.OpHeartbeat {
 			tr.Set(trd, hb)
-			p.Op = grpc.OpHeartbeatReply
+			p.Op = protocol.OpHeartbeatReply
 			p.Body = nil
 			// NOTE: send server heartbeat for a long time
 			if now := time.Now(); now.Sub(lastHb) > serverHeartbeat {
@@ -228,6 +228,9 @@ func (s *Server) ServeTCP(conn *net.TCPConn, rp, wp *bytes.Pool, tr *xtime.Timer
 }
 
 // 下发消息 (监听来自job服务 推过来的数据)
+// dispatch accepts connections on the listener and serves requests
+// for each incoming connection.  dispatch blocks; the caller typically
+// invokes it in a go statement.
 func (s *Server) dispatchTCP(conn *net.TCPConn, wr *bufio.Writer, wp *bytes.Pool, wb *bytes.Buffer, ch *Channel) {
 	var (
 		err    error
@@ -242,7 +245,6 @@ func (s *Server) dispatchTCP(conn *net.TCPConn, wr *bufio.Writer, wp *bytes.Pool
 		if white { //判断白名单是否写入
 			whitelist.Printf("key: %s wait proto ready\n", ch.Key)
 		}
-
 		var p = ch.Ready() //等待数据从 通道过来 如 &Proto{Op: OpProtoFinish}
 		if white {
 			whitelist.Printf("key: %s proto ready\n", ch.Key)
@@ -251,7 +253,7 @@ func (s *Server) dispatchTCP(conn *net.TCPConn, wr *bufio.Writer, wp *bytes.Pool
 			log.Infof("key:%s dispatch msg:%v", ch.Key, *p)
 		}
 		switch p {
-		case grpc.ProtoFinish: //grpc.ProtoFinish 协议值为11,表示proto值已经准备好
+		case protocol.ProtoFinish: //protocol.ProtoFinish 协议值为11,表示proto值已经准备好
 			if white {
 				whitelist.Printf("key: %s receive proto finish\n", ch.Key)
 			}
@@ -260,7 +262,7 @@ func (s *Server) dispatchTCP(conn *net.TCPConn, wr *bufio.Writer, wp *bytes.Pool
 			}
 			finish = true
 			goto failed
-		case grpc.ProtoReady: //grpc.ProtoReady 协议值为10 表示开始读取
+		case protocol.ProtoReady: //protocol.ProtoReady 协议值为10 表示开始读取
 			// fetch message from svrbox(client send)
 			for {
 				if p, err = ch.CliProto.Get(); err != nil {
@@ -269,7 +271,7 @@ func (s *Server) dispatchTCP(conn *net.TCPConn, wr *bufio.Writer, wp *bytes.Pool
 				if white {
 					whitelist.Printf("key: %s start write client proto%v\n", ch.Key, p)
 				}
-				if p.Op == grpc.OpHeartbeatReply { //心跳应答协议
+				if p.Op == protocol.OpHeartbeatReply { //心跳应答协议
 					if ch.Room != nil {
 						online = ch.Room.OnlineNum()
 					}
@@ -324,7 +326,7 @@ failed:
 	wp.Put(wb)
 	// must ensure all channel message discard, for reader won't blocking Signal
 	for !finish {
-		finish = (ch.Ready() == grpc.ProtoFinish)
+		finish = (ch.Ready() == protocol.ProtoFinish)
 	}
 	if conf.Conf.Debug {
 		log.Infof("key: %s dispatch goroutine exit", ch.Key)
@@ -332,15 +334,14 @@ failed:
 }
 
 // auth for goim handshake with client, use rsa & aes.
-func (s *Server) authTCP(ctx context.Context, rr *bufio.Reader, wr *bufio.Writer, p *grpc.Proto) (mid int64, key, rid string, accepts []int32, hb time.Duration, err error) {
+func (s *Server) authTCP(ctx context.Context, rr *bufio.Reader, wr *bufio.Writer, p *protocol.Proto) (mid int64, key, rid string, accepts []int32, hb time.Duration, err error) {
 	for {
-		//rr是pak/bufio/bifio.go Reader结构  p是api/comet/rpc/protocol.go 结构体
 		//读取后的数据赋值给了p结构的属性 如{Ver:,Op:,Seq:,Body}
 		if err = p.ReadTCP(rr); err != nil {
 			return
 		}
-		//grpc.OpAuth 是数字常量 7 即客户端发过来的协议编号7 需要对应的去如何处理
-		if p.Op == grpc.OpAuth {
+		//protocol.OpAuth 是数字常量 7 即客户端发过来的协议编号7 需要对应的去如何处理
+		if p.Op == protocol.OpAuth {
 			break
 		} else {
 			log.Errorf("tcp request operation(%d) not auth", p.Op)
@@ -350,8 +351,8 @@ func (s *Server) authTCP(ctx context.Context, rr *bufio.Reader, wr *bufio.Writer
 		log.Errorf("authTCP.Connect(key:%v).err(%v)", key, err)
 		return
 	}
-	//grpc.OpAuthReply 协议编号为8 即处理完auth认证协议7 回复协议就为8
-	p.Op = grpc.OpAuthReply
+	//protocol.OpAuthReply 协议编号为8 即处理完auth认证协议7 回复协议就为8
+	p.Op = protocol.OpAuthReply
 	p.Body = nil
 	if err = p.WriteTCP(wr); err != nil {
 		log.Errorf("authTCP.WriteTCP(key:%v).err(%v)", key, err)

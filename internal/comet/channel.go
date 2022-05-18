@@ -3,7 +3,7 @@ package comet
 import (
 	"sync"
 
-	"goim-demo/api/comet/grpc"
+	"goim-demo/api/protocol"
 	"goim-demo/internal/comet/errors"
 	"goim-demo/pkg/bufio"
 )
@@ -12,13 +12,13 @@ import (
 type Channel struct {
 	Room     *Room
 	CliProto Ring
-	signal   chan *grpc.Proto
+	signal   chan *protocol.Proto
 	Writer   bufio.Writer
 	Reader   bufio.Reader
 	Next     *Channel
 	Prev     *Channel
 
-	Mid      int64  //mid 就是 memberID
+	Mid      int64  //mid 就是用户id memberID
 	Key      string //uuid 用户与comet建立长连接key做标识  比如im信息要发给的某用户的多个端
 	IP       string
 	watchOps map[int32]struct{} //其中的 int32 是房间号. map 多个房间号, map 结构是用来查询房间号是否在 map 中存在. watchOps 是当前长连接用户用来监听当前客户端接收哪个房间的 im 消息推送, 换个方式说, 一个 goim 终端可以接收多个房间发送来的 im 消息
@@ -28,8 +28,8 @@ type Channel struct {
 // NewChannel 初始化是在 tcp / websocket ServeWebsocket方法 进行首次连接时处理的,
 func NewChannel(cli, svr int) *Channel {
 	c := new(Channel)
-	c.CliProto.Init(cli)                   //cli为 5
-	c.signal = make(chan *grpc.Proto, svr) //svr 为10
+	c.CliProto.Init(cli)                       //cli为 5
+	c.signal = make(chan *protocol.Proto, svr) //svr 为10
 	c.watchOps = make(map[int32]struct{})
 	return c
 }
@@ -64,7 +64,7 @@ func (c *Channel) NeedPush(op int32) bool {
 }
 
 // Push server push message.
-func (c *Channel) Push(p *grpc.Proto) (err error) {
+func (c *Channel) Push(p *protocol.Proto) (err error) {
 	select {
 	case c.signal <- p:
 	default:
@@ -74,16 +74,16 @@ func (c *Channel) Push(p *grpc.Proto) (err error) {
 }
 
 // Ready check the channel ready or close?
-func (c *Channel) Ready() *grpc.Proto {
+func (c *Channel) Ready() *protocol.Proto {
 	return <-c.signal
 }
 
 // Signal 对应server_tcp.go
 func (c *Channel) Signal() {
-	c.signal <- grpc.ProtoReady
+	c.signal <- protocol.ProtoReady
 }
 
 // Close close the channel.
 func (c *Channel) Close() {
-	c.signal <- grpc.ProtoFinish
+	c.signal <- protocol.ProtoFinish
 }

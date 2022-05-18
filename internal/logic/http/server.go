@@ -27,6 +27,7 @@ func New(c *conf.HTTPServer, l *logic.Logic) *Server {
 		logic:  l,
 	}
 	s.initRouter()
+
 	return s
 }
 
@@ -39,6 +40,7 @@ func (s *Server) initRouter() {
 	group.GET("/online/top", s.onlineTop)
 	group.GET("/online/room", s.onlineRoom)
 	group.GET("/online/total", s.onlineTotal)
+
 }
 
 // Close close the server.

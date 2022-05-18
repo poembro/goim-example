@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	pb "goim-demo/api/comet/grpc"
+	pb "goim-demo/api/comet"
 	"goim-demo/internal/comet"
 	"goim-demo/internal/comet/conf"
 	"goim-demo/internal/comet/errors"
@@ -63,22 +63,8 @@ type server struct {
 
 var _ pb.CometServer = &server{}
 
-// Ping Service
-func (s *server) Ping(ctx context.Context, req *pb.Empty) (*pb.Empty, error) {
-	log.Infoln("Ping:")
-	return &pb.Empty{}, nil
-}
-
-// Close Service
-func (s *server) Close(ctx context.Context, req *pb.Empty) (*pb.Empty, error) {
-	log.Infoln("Close:")
-	// TODO: some graceful close
-	return &pb.Empty{}, nil
-}
-
 // PushMsg push a message to specified sub keys.
 func (s *server) PushMsg(ctx context.Context, req *pb.PushMsgReq) (reply *pb.PushMsgReply, err error) {
-	log.Infoln("PushMsg:", req)
 	if len(req.Keys) == 0 || req.Proto == nil {
 		return nil, errors.ErrPushMsgArg
 	}
@@ -97,7 +83,6 @@ func (s *server) PushMsg(ctx context.Context, req *pb.PushMsgReq) (reply *pb.Pus
 
 // Broadcast broadcast msg to all user. /* 推送至 登录接口返回的 accept 房间号 */
 func (s *server) Broadcast(ctx context.Context, req *pb.BroadcastReq) (*pb.BroadcastReply, error) {
-	log.Infoln("Broadcast:", req)
 	if req.Proto == nil {
 		return nil, errors.ErrBroadCastArg
 	}
@@ -116,7 +101,6 @@ func (s *server) Broadcast(ctx context.Context, req *pb.BroadcastReq) (*pb.Broad
 
 // BroadcastRoom broadcast msg to specified room.  /* 推送至 登录接口返回的 room 房间号 即登录接口必须返回room_id */
 func (s *server) BroadcastRoom(ctx context.Context, req *pb.BroadcastRoomReq) (*pb.BroadcastRoomReply, error) {
-	log.Infoln("BroadcastRoom:", req)
 	if req.Proto == nil || req.RoomID == "" {
 		return nil, errors.ErrBroadCastRoomArg
 	}
@@ -128,7 +112,6 @@ func (s *server) BroadcastRoom(ctx context.Context, req *pb.BroadcastRoomReq) (*
 
 // Rooms gets all the room ids for the server. 获取服务器的所有房间id。
 func (s *server) Rooms(ctx context.Context, req *pb.RoomsReq) (*pb.RoomsReply, error) {
-	log.Infoln("Rooms:", req)
 	var (
 		roomIds = make(map[string]bool)
 	)

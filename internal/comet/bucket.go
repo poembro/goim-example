@@ -4,7 +4,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"goim-demo/api/comet/grpc"
+	pb "goim-demo/api/comet"
+	"goim-demo/api/protocol"
 	"goim-demo/internal/comet/conf"
 )
 
@@ -16,7 +17,7 @@ type Bucket struct {
 
 	// room
 	rooms       map[string]*Room // bucket room channels
-	routines    []chan *grpc.BroadcastRoomReq
+	routines    []chan *pb.BroadcastRoomReq
 	routinesNum uint64
 
 	ipCnts map[string]int32
@@ -28,10 +29,10 @@ func NewBucket(c *conf.Bucket) (b *Bucket) {
 	b.chs = make(map[string]*Channel, c.Channel) //c.Channel 通道1024个
 	b.ipCnts = make(map[string]int32)
 	b.c = c
-	b.rooms = make(map[string]*Room, c.Room)                          //c.Room 房间数1024
-	b.routines = make([]chan *grpc.BroadcastRoomReq, c.RoutineAmount) //创建一个长度为32数组 每个元素都是用来推送到指定房间的结构
+	b.rooms = make(map[string]*Room, c.Room)                        //c.Room 房间数1024
+	b.routines = make([]chan *pb.BroadcastRoomReq, c.RoutineAmount) //创建一个长度为32数组 每个元素都是用来推送到指定房间的结构
 	for i := uint64(0); i < c.RoutineAmount; i++ {
-		ch := make(chan *grpc.BroadcastRoomReq, c.RoutineSize) //创建一个通道 通道长度为1024
+		ch := make(chan *pb.BroadcastRoomReq, c.RoutineSize) //创建一个通道 通道长度为1024
 		b.routines[i] = ch
 		go b.roomproc(ch) //32个通道,每个通道用个协程监听
 	}
@@ -86,13 +87,14 @@ func (b *Bucket) ChangeRoom(nrid string, ch *Channel) (err error) {
 		b.rooms[nrid] = nroom
 	}
 	b.cLock.Unlock()
+	if oroom != nil && oroom.Del(ch) {
+		b.DelRoom(oroom)
+	}
+
 	if err = nroom.Put(ch); err != nil {
 		return
 	}
 	ch.Room = nroom
-	if oroom != nil && oroom.Del(ch) {
-		b.DelRoom(oroom)
-	}
 	return
 }
 
@@ -159,7 +161,7 @@ func (b *Bucket) Channel(key string) (ch *Channel) {
 }
 
 // Broadcast
-func (b *Bucket) Broadcast(p *grpc.Proto, op int32) {
+func (b *Bucket) Broadcast(p *protocol.Proto, op int32) {
 	var ch *Channel
 	b.cLock.RLock()
 	for _, ch = range b.chs {
@@ -189,7 +191,7 @@ func (b *Bucket) DelRoom(room *Room) {
 }
 
 // BroadcastRoom 广播一条消息到指定房间
-func (b *Bucket) BroadcastRoom(arg *grpc.BroadcastRoomReq) {
+func (b *Bucket) BroadcastRoom(arg *pb.BroadcastRoomReq) {
 	num := atomic.AddUint64(&b.routinesNum, 1) % b.c.RoutineAmount
 	b.routines[num] <- arg
 }
@@ -239,7 +241,7 @@ func (b *Bucket) UpRoomsCount(roomCountMap map[string]int32) {
 }
 
 // roomproc
-func (b *Bucket) roomproc(c chan *grpc.BroadcastRoomReq) {
+func (b *Bucket) roomproc(c chan *pb.BroadcastRoomReq) {
 	for {
 		arg := <-c //等待c chan *grpc.BroadcastRoomReq这个通道是否有数据过来
 		//一旦将拿到通过arg.RoomID 去 b.rooms下对应的*Room结构  并执行*Room结构的Push方法
