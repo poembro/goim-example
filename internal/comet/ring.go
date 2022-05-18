@@ -46,7 +46,7 @@ func (r *Ring) init(num uint64) {
 	r.mask = r.num - 1
 }
 
-// Get get a proto from ring.
+// Get get a proto from ring.   https://en.wikipedia.org/wiki/Circular_buffer
 func (r *Ring) Get() (proto *protocol.Proto, err error) {
 	if r.rp == r.wp {
 		return nil, errors.ErrRingEmpty

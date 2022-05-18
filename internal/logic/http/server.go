@@ -2,6 +2,7 @@ package http
 
 import (
 	"goim-demo/internal/logic"
+	"goim-demo/internal/logic/business/apihttp"
 	"goim-demo/internal/logic/conf"
 
 	"github.com/gin-gonic/gin"
@@ -27,7 +28,7 @@ func New(c *conf.HTTPServer, l *logic.Logic) *Server {
 		logic:  l,
 	}
 	s.initRouter()
-
+	s.initBusinessRouter() // 第三方业务
 	return s
 }
 
@@ -40,6 +41,28 @@ func (s *Server) initRouter() {
 	group.GET("/online/top", s.onlineTop)
 	group.GET("/online/room", s.onlineRoom)
 	group.GET("/online/total", s.onlineTotal)
+
+}
+
+// initBusinessRouter 第三方业务
+func (s *Server) initBusinessRouter() {
+	r := apihttp.New(s.logic.business)
+	group := s.engine.Group("/api")
+	{
+		group.POST("/user/create", r.UserCreate)
+		authorized := group.Group("")
+		authorized.Use(r.corsMiddleware, r.verifyMiddleware)
+		{
+
+		}
+	}
+
+	group.POST("/push/mids", r.pushMids)
+	group.POST("/push/room", r.pushRoom)
+	group.POST("/push/all", r.pushAll)
+	group.GET("/online/top", r.onlineTop)
+	group.GET("/online/room", r.onlineRoom)
+	group.GET("/online/total", r.onlineTotal)
 
 }
 
