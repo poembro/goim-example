@@ -90,7 +90,6 @@ func (l *Logic) Heartbeat(c context.Context, mid int64, key, server string) (err
 	return
 }
 
-// RenewOnline 将对应comet服务写入redis "HSET" "ol_192.168.3.222" "43" "{\"server\":\"192.168.3.222\",\"room_count\":{\"live://1000\":1},\"updated\":1577077540}"
 func (l *Logic) RenewOnline(c context.Context, server string, roomCount map[string]int32) (map[string]int32, error) {
 	online := &model.Online{
 		Server:    server,

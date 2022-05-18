@@ -211,6 +211,7 @@ func (d *Dao) AddServerOnline(c context.Context, server string, online *model.On
 	return
 }
 
+// addServerOnline 将对应comet服务写入redis "HSET" "ol_192.168.3.222" "43" "{\"server\":\"192.168.3.222\",\"room_count\":{\"live://1000\":1},\"updated\":1577077540}"
 func (d *Dao) addServerOnline(c context.Context, key string, hashKey string, online *model.Online) (err error) {
 	conn := d.redis.Get()
 	defer conn.Close()
@@ -238,12 +239,9 @@ func (d *Dao) addServerOnline(c context.Context, key string, hashKey string, onl
 }
 
 // ServerOnline get a server online.  logic服务初始化时每隔10秒调了这里
-// HGET "ol_192.168.3.100" 0
-// HGET "ol_192.168.3.100" 1
-// ...  64
 func (d *Dao) ServerOnline(c context.Context, server string) (online *model.Online, err error) {
 	online = &model.Online{RoomCount: map[string]int32{}}
-	key := keyServerOnline(server)
+	key := keyServerOnline(server) // HGET "ol_192.168.3.100" (hash(live://1000) % 64)
 	for i := 0; i < 64; i++ {
 		ol, err := d.serverOnline(c, key, strconv.FormatInt(int64(i), 10))
 		if err == nil && ol != nil {

@@ -6,13 +6,12 @@ package main
 // third parameter: comet server ip
 
 import (
-	"bufio"
+	"goim-demo/pkg/bufio"
 	"sync"
 
-	"encoding/binary"
 	"flag"
 	"fmt"
-	"goim-demo/test/protocol"
+	"goim-demo/api/protocol"
 	"math/rand"
 	"net"
 	"os"
@@ -29,14 +28,10 @@ const (
 	opHeartbeatReply = int32(3)
 	opAuth           = int32(7)
 	opAuthReply      = int32(8)
-)
 
-const (
 	rawHeaderLen = uint16(16)
 	heart        = 30 * time.Second
 )
-
-type Int64 int64
 
 var (
 	countDown  int64
@@ -116,7 +111,7 @@ func startClient(key int64) {
 		log.Errorf("tcpWriteProto() error(%v)", err)
 		return
 	}
-	if err = tcpReadProto(rd, proto); err != nil {
+	if err = proto.ReadTCP(rd); err != nil {
 		log.Errorf("tcpReadProto() error(%v)", err)
 		return
 	}
@@ -147,7 +142,7 @@ func startClient(key int64) {
 	// reader
 	for {
 		pr := new(protocol.Proto)
-		if err = tcpReadProto(rd, pr); err != nil {
+		if err = pr.ReadTCP(rd); err != nil {
 			log.Errorf("key:%d tcpReadProto() error(%v)", key, err)
 			quit <- true
 			return
@@ -175,67 +170,12 @@ func tcpWriteProto(wr *bufio.Writer, proto *protocol.Proto) (err error) {
 	defer FdMutex.Unlock()
 
 	// write
-	p, err := proto.Encode()
-
-	wr.Write(p)
+	err = proto.WriteTCP(wr)
 
 	//fmt.Printf("发送协议包: %#v 缓冲中已使用的字节数 %d \r\n", proto.Op, wr.Buffered())
 	//fmt.Println(p)
 	//fmt.Println("缓冲中还有多少字节未使用。:", wr.Available())         //3827
 
 	err = wr.Flush()
-	return
-}
-
-func tcpReadProto(rd *bufio.Reader, proto *protocol.Proto) (err error) {
-	//FdMutex.Lock()
-	//defer FdMutex.Unlock()
-
-	var (
-		packLen   int32
-		headerLen int16
-		Ver       int16  // protocol version
-		Operation int32  // operation for request
-		Seq       int32  // sequence number chosen by client
-		Body      []byte // body
-	)
-	// read
-	if err = binary.Read(rd, binary.BigEndian, &packLen); err != nil {
-		return
-	}
-	if err = binary.Read(rd, binary.BigEndian, &headerLen); err != nil {
-		return
-	}
-	if err = binary.Read(rd, binary.BigEndian, &Ver); err != nil {
-		return
-	}
-	if err = binary.Read(rd, binary.BigEndian, &Operation); err != nil {
-		return
-	}
-	if err = binary.Read(rd, binary.BigEndian, &Seq); err != nil {
-		return
-	}
-	var (
-		n, t    int
-		bodyLen = int(packLen - int32(headerLen))
-	)
-	if bodyLen > 0 {
-		Body = make([]byte, bodyLen)
-		for {
-			if t, err = rd.Read(Body[n:]); err != nil {
-				return
-			}
-			if n += t; n == bodyLen {
-				break
-			}
-		}
-	} else {
-		Body = nil
-	}
-
-	proto.Ver = int32(Ver)
-	proto.Op = int32(Operation)
-	proto.Seq = int32(Seq)
-	proto.Body = Body
 	return
 }
