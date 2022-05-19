@@ -1,67 +1,59 @@
 package apihttp
 
 import (
-	"net/http"
+	"context"
+
+	"github.com/gin-gonic/gin"
 )
 
-// addIpblack ip添加至黑名单
-func (s *Router) addIpblack(c *gin.Context) {
-	var (
-		shopId string
-		ip     string
-	)
-	if r.Method == "POST" {
-		ip = r.FormValue("ip")
-		shopId = r.FormValue("shop_id")
+// IpblackAdd ip添加至黑名单
+func (s *Router) IpblackAdd(c *gin.Context) {
+	var arg struct {
+		IP     string `form:"ip"`
+		ShopId string `form:"shop_id"`
 	}
-	if ip == "" || shopId == "" {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数ip不能为空"})
+	if err := c.BindQuery(&arg); err != nil {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
 		return
 	}
-	svc.AddIpblack(r.Context(), shopId, ip)
+
+	s.svc.AddIpblack(context.TODO(), arg.ShopId, arg.IP)
 	OutJson(c, OutData{Code: 200, Success: true, Result: nil})
 }
 
-// addIpblack ip从黑名单删除
-func (s *Router) delIpblack(c *gin.Context) {
-	var (
-		shopId string
-		ip     string
-	)
-	if r.Method == "POST" {
-		ip = r.FormValue("ip")
-		shopId = r.FormValue("shop_id")
+// IpblackDel ip从黑名单删除
+func (s *Router) IpblackDel(c *gin.Context) {
+	var arg struct {
+		IP     string `form:"ip"`
+		ShopId string `form:"shop_id"`
 	}
-	if ip == "" || shopId == "" {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数ip不能为空"})
+	if err := c.BindQuery(&arg); err != nil {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
 		return
 	}
-	svc.DelIpblack(r.Context(), shopId, ip)
+
+	s.svc.DelIpblack(context.TODO(), arg.ShopId, arg.IP)
 	OutJson(c, OutData{Code: 200, Success: true, Result: nil})
 }
 
 // listIpblack 查看所有ip
-func (s *Router) listIpblack(c *gin.Context) {
-	var (
-		shopId string
-	)
-
-	if r.Method == "POST" {
-		shopId = r.FormValue("shop_id")
+func (s *Router) IpblackList(c *gin.Context) {
+	var arg struct {
+		ShopId string `form:"shop_id"`
 	}
-	if shopId == "" {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数不能为空"})
+	if err := c.BindQuery(&arg); err != nil {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
 		return
 	}
 
 	// 查询在线人数
-	page := NewPage(r)
-	dst, total, err := svc.ListIpblack(shopId, "-inf", "+inf", int64(page.Page), int64(page.Limit))
+	page := NewPage(c)
+	dst, total, err := s.svc.ListIpblack(arg.ShopId, "-inf", "+inf", int64(page.Page), int64(page.Limit))
 	if err != nil {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
 		return
 	}
 	page.Total = total
 
-	OutPageJson(w, dst, page)
+	OutPageJson(c, dst, page)
 }

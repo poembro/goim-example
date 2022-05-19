@@ -23,7 +23,7 @@ const (
 type Logic struct {
 	c        *conf.Config
 	dao      *dao.Dao
-	business *business.Business
+	Business *business.Business
 	// online
 	totalIPs   int64
 	totalConns int64
@@ -37,7 +37,7 @@ func New(c *conf.Config) (l *Logic) {
 	l = &Logic{
 		c:        c,
 		dao:      dao.New(c),
-		business: business.New(c), // 第三方业务
+		Business: business.New(c), // 第三方业务
 		regions:  make(map[string]string),
 	}
 	l.initRegions() //初始化regions属性 l.regions[上海] = sh
@@ -53,6 +53,7 @@ func (l *Logic) Ping(c context.Context) (err error) {
 // Close close resources.
 func (l *Logic) Close() {
 	l.dao.Close()
+	l.Business.Close()
 }
 
 func (l *Logic) initRegions() {

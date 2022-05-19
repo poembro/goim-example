@@ -46,23 +46,25 @@ func (s *Server) initRouter() {
 
 // initBusinessRouter 第三方业务
 func (s *Server) initBusinessRouter() {
-	r := apihttp.New(s.logic.business)
+	r := apihttp.New(s.logic.Business)
 	group := s.engine.Group("/api")
 	{
+		group.POST("/user/login", r.Login)
+		group.POST("/user/register", r.Register)
 		group.POST("/user/create", r.UserCreate)
 		authorized := group.Group("")
-		authorized.Use(r.corsMiddleware, r.verifyMiddleware)
+		authorized.Use(r.CorsMiddleware, r.VerifyMiddleware)
 		{
+			authorized.POST("/user/list", r.UserList)
+
+			authorized.POST("/msg/list", r.MsgList)
+
+			authorized.POST("/ipblack/add", r.IpblackAdd)
+			authorized.POST("/ipblack/del", r.IpblackDel)
+			authorized.POST("/ipblack/list", r.IpblackList)
 
 		}
 	}
-
-	group.POST("/push/mids", r.pushMids)
-	group.POST("/push/room", r.pushRoom)
-	group.POST("/push/all", r.pushAll)
-	group.GET("/online/top", r.onlineTop)
-	group.GET("/online/room", r.onlineRoom)
-	group.GET("/online/total", r.onlineTotal)
 
 }
 

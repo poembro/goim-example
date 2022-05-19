@@ -27,12 +27,12 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 		log.Errorf("json.Unmarshal(%s) error(%v)", token, err)
 		return
 	}
-	roomID = params.RoomId
+	roomID = params.RoomID
 	accepts = params.Accepts
 	key = params.Key
 	hb = int64(l.c.Node.Heartbeat) * int64(l.c.Node.HeartbeatMax)
 
-	if mid = params.Mid; mid == 0 {
+	if mid = int64(params.Mid); mid == 0 {
 		err = fmt.Errorf("mid is err !!")
 		return
 	}
@@ -47,7 +47,7 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 	}
 
 	// 框架之外,第三方业务 逻辑扩展
-	if err = l.business.SignIn(c, params, token, server) err != nil {
+	if err = l.Business.SignIn(c, params, token, server); err != nil {
 		return
 	}
 
@@ -59,6 +59,11 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 func (l *Logic) Disconnect(c context.Context, mid int64, key, server string) (has bool, err error) {
 	if has, err = l.dao.DelMapping(c, mid, key, server); err != nil {
 		log.Errorf("l.dao.DelMapping(%d,%s) error(%v)", mid, key, server)
+		return
+	}
+
+	// 框架之外,第三方业务 逻辑扩展
+	if err = l.Business.Offline(c, mid, key, server); err != nil {
 		return
 	}
 	log.Infof("conn disconnected key:%s server:%s mid:%d", key, server, mid)

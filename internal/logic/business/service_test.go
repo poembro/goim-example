@@ -3,8 +3,7 @@ package business
 import (
 	"context"
 	"fmt"
-	"goim-demo/conf"
-	"goim-demo/pkg/logger"
+	"goim-demo/internal/logic/conf"
 	"testing"
 	"time"
 
@@ -14,7 +13,6 @@ import (
 var svr *Business
 
 func init() {
-	logger.Init()
 	svr = New(conf.Conf)
 	time.Sleep(time.Second)
 }

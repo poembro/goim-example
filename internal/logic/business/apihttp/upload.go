@@ -1,54 +1,20 @@
 package apihttp
 
 import (
-	"fmt"
-	"goim-demo/pkg/logger"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"time"
+	"path"
 
-	"go.uber.org/zap"
+	"github.com/gin-gonic/gin"
 )
 
-func (s *Router) apiUpload(c *gin.Context) {
-	var (
-		newPath string // 暂时只处理1个文件上传
-	)
-	if r.Method != "POST" {
-		return
-	}
-	reader, err := r.MultipartReader()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	basedir, _ := os.Getwd() //获取当前目录路径 /webser/go_wepapp/goim-demo
-	for {
-		part, err := reader.NextPart()
-		if err == io.EOF {
-			break
-		}
-
-		logger.Logger.Debug("apiUpload", zap.String("FileName", part.FileName()),
-			zap.String("FormName", part.FormName()))
-
-		if part.FileName() == "" { // this is FormData
-			data, _ := ioutil.ReadAll(part)
-			logger.Logger.Debug("apiUpload", zap.String("data", string(data)))
-		} else { // This is FileData
-			newPath = fmt.Sprintf("%s/dist/upload/%d_%s", basedir, time.Now().Unix(), part.FileName())
-			dst, _ := os.Create(newPath) // 写入时需要dist 访问路径上不能带有 /dist
-			defer dst.Close()
-			io.Copy(dst, part)
-		}
-	}
-
-	if newPath == "" {
+func (s *Router) Upload(c *gin.Context) {
+	//从请求中读取文件
+	file, err := c.FormFile("f1") //请求中获取携带的参数,就是html文件中的name="f1"
+	if err != nil {               //读取失败，将错误报出来
 		OutJson(c, OutData{Code: -1, Success: false, Msg: "上传失败"})
 		return
+	} else { //读取成功，就保存到服务端本地
+		fileDest := path.Join("./", file.Filename)
+		c.SaveUploadedFile(file, fileDest)
+		OutJson(c, OutData{Code: 200, Success: true, Result: fileDest})
 	}
-	OutJson(c, OutData{Code: 200, Success: true, Result: newPath})
 }

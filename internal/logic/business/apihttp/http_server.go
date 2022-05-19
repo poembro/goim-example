@@ -3,7 +3,7 @@ package apihttp
 import (
 	"goim-demo/internal/logic/business"
 	"goim-demo/internal/logic/business/util"
-	 
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +18,7 @@ func New(s *business.Business) *Router {
 	return r
 }
 
-func (s *Router) corsMiddleware(c *gin.Context) {
+func (s *Router) CorsMiddleware(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "*")
 	c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, PATCH, DELETE")
@@ -26,16 +26,12 @@ func (s *Router) corsMiddleware(c *gin.Context) {
 	c.Header("Access-Control-Expose-Headers", "*")
 	c.Header("Access-Control-Allow-Credentials", "true")
 	if c.Request.Method == "OPTIONS" {
-		c.AbortWithStatus(http.StatusNoContent)
+		c.AbortWithStatus(200)
 	}
 	c.Next()
 }
- 
 
-func (s *Router) verifyMiddleware(c *gin.Context) {
-	if r.Method == "OPTIONS" {
-		return
-	}
+func (s *Router) VerifyMiddleware(c *gin.Context) {
 	// 解析token
 	var token string
 	token = c.Query("token")
@@ -54,9 +50,4 @@ func (s *Router) verifyMiddleware(c *gin.Context) {
 
 	// 去执行后续handler逻辑
 	c.Next()
-}
-
-// Close close the server.
-func (s *Router) Close() {
-	h.svc.Close()
 }

@@ -1,48 +1,15 @@
 package business
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"goim-demo/internal/logic/model"
+	"goim-demo/internal/logic/business/model"
 	"goim-demo/internal/logic/business/util"
 )
 
-// Heartbeat 心跳
-func (s *Business) Heartbeat(ctx context.Context, userId int64, deviceId, connAddr string) error {
-	s.dao.ExpireMapping(userId, deviceId)
-	return nil
-}
-
-// Offline 离线
-func (s *Business) Offline(ctx context.Context, userId int64, deviceId, connAddr string) error {
-	s.dao.DelMapping(userId, deviceId)
-	return nil
-}
-
-// KeysByUserIds 通过userId 获取用户信息
-func (s *Business) KeysByUserIds(userIds []int64) (map[string]string, error) {
-	return s.dao.KeysByUserIds(userIds)
-}
-
-// GetShopByUsers 查询在线人数
-func (s *Business) GetShopByUsers(shopId, min, max string, page, limit int64) ([]string, int64, error) {
-	return s.dao.GetShopByUsers(shopId, min, max, page, limit)
-}
-
-// GetMessageAckMapping 读取某个用户的已读偏移
-func (s *Business) GetMessageAckMapping(deviceId, roomId string) (string, error) {
-	return s.dao.GetMessageAckMapping(deviceId, roomId)
-}
-
-// IsOnline 是否在线
-func (s *Business) IsOnline(deviceId string) bool {
-	return s.dao.IsOnline(deviceId)
-}
-
 // GetShop 获取后台商户
-func (s *Business) GetShop(mobile string) (*model.Shop, error) {
-	body, err := s.dao.GetShop(mobile)
+func (s *Business) GetShop(nickname string) (*model.Shop, error) {
+	body, err := s.dao.GetShop(nickname)
 	if err != nil {
 		return nil, err
 	}
@@ -55,9 +22,9 @@ func (s *Business) GetShop(mobile string) (*model.Shop, error) {
 }
 
 // AddShop 添加后台商户
-func (s *Business) AddShop(userId, nickname, face, password string) error {
+func (s *Business) AddShop(mid, nickname, face, password string) error {
 	dst := model.Shop{
-		UserId:   userId,
+		Mid:      mid,
 		Nickname: nickname,
 		Face:     face,
 		Password: password,

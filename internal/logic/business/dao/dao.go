@@ -35,7 +35,7 @@ func newRedis(c *conf.Redis) *redis.Client {
 func New(c *conf.Config) *Dao {
 	d := &Dao{
 		c:      c,
-		RdsCli: newRedis(c),
+		RdsCli: newRedis(c.Redis),
 		expire: time.Duration(time.Second * 60), //75 * time.Second
 	}
 

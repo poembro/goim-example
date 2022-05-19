@@ -1,52 +1,79 @@
 package apihttp
 
 import (
-	"fmt"
+	"encoding/json"
+	"goim-demo/internal/logic/business/model"
 	"goim-demo/internal/logic/business/util"
-	"net"
-	"net/http"
+
+	//"goim-demo/pkg/logger"
 	"strconv"
-	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
-
-func buildUserMap(r *http.Request, userId, shopId, shopName, shopFace string) map[string]string {
-	platform := "web"
-
-	// 客服聊天场景
-	l := len(userId)
-	nickname := fmt.Sprintf("user%s", userId[l-6:l])
-	deviceId := svc.BuildDeviceId(platform, userId)
-	token, err := util.GetToken(userId, deviceId, nickname)
+// Login 登录 (后台)
+func (s *Router) Login(c *gin.Context) {
+	var arg struct {
+		Nickname string `form:"nickname"`
+		Password string `form:"password"`
+	}
+	if err := c.BindQuery(&arg); err != nil {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
+		return
+	}
+	if arg.Nickname == "" || arg.Password == "" {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数nickname or password不能为空"})
+		return
+	}
+	shop, err := s.svc.GetShop(arg.Nickname)
 	if err != nil {
-		return nil
+		OutJson(c, OutData{Code: -1, Success: false, Msg: "未注册"})
+		return
 	}
-	dst := map[string]string{
-		"user_id":     userId,                                        // 用户大多是临时过来咨询,所以这里采用随机唯一
-		"nickname":    nickname,                                      // 随机昵称
-		"face":        "http://img.touxiangwu.com/2020/3/uq6Bja.jpg", // 随机头像
-		"device_id":   deviceId,                                      // 多个平台达到的效果不一样
-		"room_id":     svc.BuildDeviceId(userId, deviceId),           //房间号唯一否则消息串房间(暂时以用户id为房间号)
-		"shop_id":     shopId,                                        // 登录该后台的手机号
-		"shop_name":   shopName,                                      // 客服昵称
-		"shop_face":   shopFace,                                      // 客服头像
-		"platform":    platform,
-		"suburl":      "ws://localhost:7923/ws",                                // 订阅地址
-		"pushurl":     "http://localhost:8090/open/push?&platform=" + platform, // 发布地址
-		"remote_addr": GetAddr(r),
-		"referer":     r.Referer(),
-		"user_agent":  r.UserAgent(),
-		"created_at":  util.FormatTime(time.Now()),
-		"token":       token,
+
+	if shop.Password != arg.Password {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: "密码错误"})
+		return
 	}
-	return dst
+	dst := s.svc.ShopCreate(
+		shop.Mid,
+		shop.Nickname,
+		shop.Face,
+		c.ClientIP(),
+		c.GetHeader("referer"),
+		c.GetHeader("user-agent"))
+	OutJson(c, OutData{Code: 200, Success: true, Result: dst})
+}
+
+// Register 注册 (后台) 为了演示,临时采用redis存储
+func (s *Router) Register(c *gin.Context) {
+	var arg struct {
+		Nickname string `form:"nickname"`
+		Password string `form:"password"`
+	}
+	if err := c.BindQuery(&arg); err != nil {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
+		return
+	}
+	shop, _ := s.svc.GetShop(arg.Nickname)
+	if shop != nil {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: "已经被注册"})
+		return
+	}
+
+	face := "https://img.wxcha.com/m00/86/59/7c6242363084072b82b6957cacc335c7.jpg"
+	_, mid := s.svc.BuildMid()
+	s.svc.AddShop(mid, arg.Nickname, face, arg.Password)
+
+	OutJson(c, OutData{Code: 200, Success: true, Msg: "success", Result: "xxx"})
+	return
 }
 
 // UserCreate 创建用户
 func (s *Router) UserCreate(c *gin.Context) {
 	var arg struct {
-		ShopId   int32    `form:"shop_id"` 
+		ShopId string `form:"shop_id"`
 	}
 	if err := c.BindQuery(&arg); err != nil {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
@@ -56,67 +83,108 @@ func (s *Router) UserCreate(c *gin.Context) {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数不能为空"})
 		return
 	}
-	dst, err := s.svc.UserCreate(arg.ShopId)
+	//判断客服是否存在
+	shop, err := s.svc.GetShop(arg.ShopId) // ShopId 就是商户昵称
+	if shop == nil || err != nil {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数错误"})
+	}
+	dst := s.svc.UserCreate(
+		shop.Mid,
+		shop.Nickname,
+		shop.Face,
+		c.ClientIP(),
+		c.GetHeader("referer"),
+		c.GetHeader("user-agent"))
+
 	// 客服聊天场景
 	OutJson(c, OutData{Code: 200, Success: true, Msg: "success", Result: dst})
 }
 
-// apiLogin 登录 (后台)
-func (s *Router) apiLogin(c *gin.Context) {
-	var (
-		nickname string
-		password string
-	)
-
-	if r.Method == "POST" {
-		nickname = r.FormValue("nickname")
-		password = r.FormValue("password")
+// UserList 查看所有与自己聊天的用户
+func (s *Router) UserList(c *gin.Context) {
+	var arg struct {
+		ShopId string `form:"shop_id"`
+		Typ    string `form:"typ"`
 	}
-
-	if nickname == "" || password == "" {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数nickname or password不能为空"})
-		return
-	}
-
-	shop, err := svc.GetShop(nickname)
-	if err != nil {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "未注册"})
-		return
-	}
-
-	if shop.Password != password {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "密码错误"})
-		return
-	}
-	dst := buildUserMap(r, shop.UserId, shop.UserId, shop.Nickname, shop.Face)
-	OutJson(c, OutData{Code: 200, Success: true, Result: dst})
-}
-
-// apiRegister 注册 (后台) 为了演示,临时采用redis存储
-func (s *Router) apiRegister(c *gin.Context) {
-	var (
-		nickname string
-		password string
-	)
-
-	if r.Method == "POST" {
-		nickname = r.FormValue("nickname")
-		password = r.FormValue("password")
-	}
-	if nickname == "" || password == "" {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数nickname or password不能为空"})
-		return
-	}
-
-	sID, err := util.SFlake.GetID()
-	if err != nil {
+	if err := c.BindQuery(&arg); err != nil {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
 		return
 	}
 
-	face := "https://img.wxcha.com/m00/86/59/7c6242363084072b82b6957cacc335c7.jpg"
-	svc.AddShop(strconv.FormatUint(sID, 10), nickname, face, password)
+	var (
+		idsTmp []string
+		total  int64
+		err    error
+	)
 
-	OutJson(c, OutData{Code: 200, Success: true, Msg: "success", Result: "xxx"})
-	return
+	ids := make([]int64, 0)
+	// 查询在线人数
+	page := NewPage(c)
+
+	if arg.Typ == "offline" {
+		idsTmp, total, err = s.svc.GetShopByUsers(arg.ShopId,
+			"-inf", "+inf", int64(page.Page), int64(page.Limit))
+	} else {
+		max := strconv.FormatInt(time.Now().UnixNano(), 10)
+		min := strconv.FormatInt(time.Now().Add(-time.Hour*1).UnixNano(), 10)
+
+		idsTmp, total, err = s.svc.GetShopByUsers(arg.ShopId,
+			min, max, int64(page.Page), int64(page.Limit))
+	}
+	if err != nil {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
+		return
+	}
+	page.Total = total
+
+	for _, v := range idsTmp {
+		id, _ := strconv.ParseInt(v, 10, 64)
+		ids = append(ids, id)
+	}
+	userIds, err := s.svc.KeysByUserIds(ids)
+
+	// 查询已读/未读
+	onlineTmp := make([]*model.User, 0)
+	offlineTmp := make([]*model.User, 0)
+	for deviceId, v := range userIds {
+		if v == "" {
+			continue
+		}
+		user := new(model.User)
+		json.Unmarshal(util.S2B(v), user)
+		//logger.Logger.Debug("apiFindUserList", zap.Any("userJson", user))
+		tmpUid := strconv.FormatInt(int64(user.UserId), 10)
+		if arg.ShopId == tmpUid {
+			continue // 不要展示商户自己
+		}
+		// 获取消息已读偏移
+		index, _ := s.svc.GetMessageAckMapping(deviceId, user.RoomID) // 获取消息已读偏移
+
+		count, err := s.svc.GetMessageCount(user.RoomID, index, "+inf") // 拿到偏移去统计未读
+		if err != nil {
+			//logger.Logger.Debug("apiFindUserList", zap.String("desc", "拿到偏移去统计未读"), zap.String("err", err.Error()))
+			continue
+		}
+
+		lastMessage, err := s.svc.GetMessageList(user.RoomID, 0, 0) // 取回消息
+		if err != nil {
+			//logger.Logger.Debug("apiFindUserList", zap.String("desc", "取回最后一条消息"), zap.String("err", err.Error()))
+			continue
+		}
+
+		user.Unread = model.Int64(count)
+		user.LastMessage = lastMessage
+
+		user.IsOnline = s.svc.IsOnline(deviceId)
+		// 在线的用户先暂存起来
+		if user.IsOnline {
+			onlineTmp = append(onlineTmp, user)
+			continue
+		}
+
+		offlineTmp = append(offlineTmp, user)
+	}
+
+	onlineTmp = append(onlineTmp, offlineTmp...) //合并离线与在线
+	OutPageJson(c, onlineTmp, page)
 }
