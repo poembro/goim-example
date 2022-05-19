@@ -1,0 +1,190 @@
+<html lang="cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="author" content="客服系统">
+    <title>客服系统</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/element-ui/2.15.1/theme-chalk/index.min.css">
+    <script src="https://cdn.staticfile.org/vue/2.6.9/vue.min.js"></script>
+    <script src="https://cdn.staticfile.org/element-ui/2.15.1/index.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="/static/css/common.css?v=0.3.8">
+    <script src="/static/js/functions.js"></script>
+    <script src="/static/js/reconnecting-websocket.min.js"></script>
+</head>
+<body>
+<div id="app" class="chatMainPage">
+    <template>
+        <el-row :gutter="2">
+            <!--  左侧 -->
+            <el-col :span="6">
+                <div class="chatBg chatLeft">
+                    <el-tabs v-model="leftTabActive" @tab-click="handleTabClick">
+                        <el-tab-pane label="在线用户" name="first">
+                            <el-row  v-for="item in onlineUsers" :key="item.mid" class="">
+                                <div :title="item.last_message" style="cursor:pointer" class="onlineUsers hasLastMsg" v-bind:class="{'cur': item.mid==user.mid }" v-on:click="talkTo(item)">
+                                    <el-col :span="4">
+                                        <el-badge value="new" :hidden="item.hidden_new_message" class="item">
+                                            <el-avatar shape="square" :size="40" :src="item.face"></el-avatar>
+                                        </el-badge>
+                                    </el-col>
+                                    <el-col :span="16">
+                                        <div v-bind:class="{'onlineUsersitem': item.is_online==true}" style="height:20px;overflow: hidden"><{item.nickname}></div>
+                                        <div v-bind:class="{'onlineUsersitem': item.is_online==true}" class="lastNewMsg"><{item.last_message}></div>
+                                    </el-col>
+                                </div>
+                            </el-row>
+                        </el-tab-pane>
+
+                        <el-tab-pane label="离线用户" name="second">
+                            <el-row  v-for="item in offlineUsers" :key="item.mid" class="">
+                                <div style="cursor:pointer" class="onlineUsers" v-bind:class="{'cur': item.mid==user.mid }" v-on:click="talkTo(item)">
+                                    <el-col :span="4">
+                                        <el-avatar shape="square"  :size="40" :src="item.face"></el-avatar>
+                                    </el-col>
+                                    <el-col style="height:40px;overflow: hidden"  :span="16" >
+                                        <div style="height:20px; line-height: 20px;overflow: hidden"><{item.nickname}></div>
+                                        <div style="height:20px; line-height: 20px;overflow: hidden" class="lastNewMsg"><{item.last_message}></div>
+                                    </el-col>
+                                </div>
+                            </el-row>
+                            <el-pagination
+                                    v-show="userCount>userPageSize"
+                                    background
+                                    @current-change="getOfflineUser"
+                                    :current-page="userCurrentPage"
+                                    layout="prev,pager, next"
+                                    :page-size="userPageSize"
+                                    :total="userCount">
+                            </el-pagination>
+                        </el-tab-pane>
+                    </el-tabs>
+                </div>
+            </el-col>
+
+            <!--  中间 -->
+            <el-col :span="12">
+                <div class="kefuMainBg chatBgContext">
+                    <el-alert
+                            :closable="false"
+                            :type="chatTitleType"
+                            show-icon
+                            :title="chatTitle"
+                            >
+                    </el-alert>
+                    <!--
+                    <div class="kefuFuncBtns" v-if="user.mid">
+                        <el-button v-on:click="getMesssagesByUserId(user.mid,true)" size="small" type="success" plain icon="el-icon-user">加载全部</el-button>
+                        <el-button v-on:click="transKefu" size="small" type="success" plain icon="el-icon-position">转接</el-button>
+                        <el-button v-on:click="closeUser(user.mid)" size="small" type="success" plain icon="el-icon-close">结束</el-button>
+                    </div>
+                    -->
+                    <div class="chatBox">
+                        <el-row :gutter="2" v-for="v in msgList" v-bind:class="{'chatBoxMe': v.is_shop==true}">
+                            <div class="chatTime"><{v.dateline}></div>
+                            <el-col :span="3"><el-avatar shape="square" :size="48" :src="v.face"></el-avatar></el-col>
+                            <el-col :span="21">
+                                <div class="chatUser"><{v.name}></div>
+                                <div class="chatContent" v-html="v.msg"></div>
+                            </el-col>
+                        </el-row>
+                    </div>
+
+                    <div class="kefuFuncBox">
+                        <el-input type="textarea" class="chatArea" v-model="messageContent"  v-on:keyup.enter.native="sendMsg"  placeholder="请输入内容"></el-input>
+
+                        <div class="iconBtnsBox"> 
+                            <el-button class="kefuSendBtn" :disabled="sendDisabled" size="small" type="primary" v-on:click="sendMsg">发送</el-button>
+                        </div>
+                    </div>
+                </div>
+            </el-col>
+
+            <!--  右侧 -->
+            <el-col :span="6" class="chatRight">
+                <div class="chatBg">
+                    <el-tabs v-model="rightTabActive" @tab-click="handleTabClick">
+                       
+                        <el-tab-pane label="访客信息" name="userInfo">
+                            <el-menu class="userInfo" v-show="user.mid">
+                                <el-tooltip content="点击加入黑名单" placement="left">
+                                    <el-menu-item v-on:click="addIpblack(user.remote_addr)" title="点击加入黑名单" style="padding-left:2px;color: #666;">
+                                        <i class="el-icon-user"></i>
+                                        <span slot="title">IP地址:<{user.remote_addr}></span>
+                                    </el-menu-item>
+                                </el-tooltip>
+
+                                <el-menu-item style="padding-left:2px;color: #666;">
+                                    <i class="el-icon-time"></i>
+                                    <span slot="title">用户ID<{user.mid}></span>
+                                </el-menu-item>
+                                <el-menu-item style="padding-left:2px;color: #666;">
+                                    <i class="el-icon-time"></i>
+                                    <span slot="title">昵称:<{user.nickname}></span>
+                                </el-menu-item>
+                                <el-menu-item v-on:click="openUrl('https://www.baidu.com/s?wd='+user.remote_addr)" style="padding-left:2px;color: #666;">
+                                    <i class="el-icon-map-location"></i>
+                                    <span slot="title">城市:武汉</span>
+                                </el-menu-item>
+                                <el-menu-item style="padding-left:2px;color: #666;">
+                                    <i class="el-icon-time"></i>
+                                    <span slot="title">首次访问:<{user.created_at}></span>
+                                </el-menu-item>
+                                
+                                <el-tooltip :content="user.user_agent" placement="left">
+                                    <el-menu-item  style="padding-left:2px;color: #666;">
+                                        <i class="el-icon-guide"></i>
+                                        <span slot="title" >设备:<{user.user_agent}></span>
+                                    </el-menu-item>
+                                </el-tooltip>
+
+                                <el-tooltip :content="user.referer" placement="left">
+                                    <el-menu-item  style="padding-left:2px;color: #666;">
+                                        <i class="el-icon-guide"></i>
+                                        <span slot="title" >来源地址:<{user.referer}></span>
+                                    </el-menu-item>
+                                </el-tooltip>
+                            </el-menu>
+                        </el-tab-pane>
+
+                        <el-tab-pane label="黑名单" name="blackList">
+                            <el-row  v-for="item in ipBlacks" :key="item.id" class="">
+                                <el-tooltip content="点击删除黑名单" placement="left">
+                                <div v-on:click="delIpblack(item.remote_addr)" style="cursor:pointer" class="onlineUsers imgGray">
+                                        <{item.remote_addr}>
+                                </div>
+                                </el-tooltip>
+                            </el-row>
+                        </el-tab-pane>
+                    </el-tabs>
+                </div>
+                
+            </el-col>
+        </el-row>
+    
+        
+        <!--转接-->
+        <!-- 
+        <el-dialog title="转移客服" :visible.sync="transKefuDialog" width="30%" top="0">
+            <el-table :data="otherKefus" style="width: 100%">
+                <el-table-column prop="nickname" label="客服"> </el-table-column>
+
+                <el-table-column prop="status" label="操作">
+                    <template slot-scope="scope">
+                        <el-tag v-show="scope.row.status=='offline'" disable-transitions>离线</el-tag>
+                        <el-button v-show="scope.row.status=='online'" type="primary" @click="transKefuUser(scope.row.name,user.mid)">转移</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="transKefuDialog = false">取 消</el-button>
+              </span>
+        </el-dialog>
+        -->
+        <!--//转接-->
+    </template>
+</div>
+</body>
+<script src="/static/js/chat-main.js?v=1"></script>
+</html>

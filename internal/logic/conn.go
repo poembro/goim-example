@@ -22,8 +22,8 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 			Platform string  `json:"platform"`
 			Accepts  []int32 `json:"accepts"`
 		}*/
-	var params *user.User
-	if err = json.Unmarshal(token, params); err != nil {
+	var params user.User
+	if err = json.Unmarshal(token, &params); err != nil {
 		log.Errorf("json.Unmarshal(%s) error(%v)", token, err)
 		return
 	}
@@ -47,7 +47,7 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 	}
 
 	// 框架之外,第三方业务 逻辑扩展
-	if err = l.Business.SignIn(c, params, token, server); err != nil {
+	if err = l.Business.SignIn(c, &params, token, server); err != nil {
 		return
 	}
 
@@ -99,8 +99,16 @@ func (l *Logic) RenewOnline(c context.Context, server string, roomCount map[stri
 	return l.roomCount, nil
 }
 
-// Receive receive a message.
+// Receive receive a message. 框架之外,第三方业务 逻辑扩展
 func (l *Logic) Receive(c context.Context, mid int64, proto *protocol.Proto) (err error) {
-	log.Infof("receive mid:%d message:%+v", mid, proto)
+	//receive mid:408376581082316810 message:ver:1 op:20 seq:1 body:"1652959818004587000"
+	switch proto.Op {
+	case protocol.OpSync:
+		l.Business.Sync(c, proto.Body)
+	case protocol.OpMessageAck:
+		l.Business.MessageACK(c, proto.Body)
+	default:
+		log.Infof("receive mid:%d message:%+v", mid, proto)
+	}
 	return
 }

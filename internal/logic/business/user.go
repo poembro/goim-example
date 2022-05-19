@@ -67,8 +67,8 @@ func (s *Business) UserCreate(shopId, shopName, shopFace, remoteAddr, referer, u
 		ShopId:     shopId,
 		ShopName:   shopName,
 		ShopFace:   shopFace,
-		Suburl:     "ws://localhost:7923/ws",                                // 订阅地址
-		Pushurl:    "http://localhost:8090/open/push?&platform=" + platform, // 发布地址
+		Suburl:     "ws://192.168.84.168:3102/sub",            // 订阅地址
+		Pushurl:    "http://192.168.84.168:3111/api/msg/push", // 发布地址
 		RemoteAddr: remoteAddr,
 		Referer:    referer,
 		UserAgent:  userAgent,
@@ -101,8 +101,8 @@ func (s *Business) ShopCreate(shopId, shopName, shopFace, remoteAddr, referer, u
 		ShopId:     shopId,
 		ShopName:   shopName,
 		ShopFace:   shopFace,
-		Suburl:     "ws://localhost:7923/ws",                                // 订阅地址
-		Pushurl:    "http://localhost:8090/open/push?&platform=" + platform, // 发布地址
+		Suburl:     "ws://192.168.84.168:3102/sub",                                  // 订阅地址
+		Pushurl:    "http://192.168.84.168:3111/api/msg/push?&platform=" + platform, // 发布地址
 		RemoteAddr: remoteAddr,
 		Referer:    referer,
 		UserAgent:  userAgent,

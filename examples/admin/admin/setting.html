@@ -1,0 +1,597 @@
+<html lang="cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="客服系统">
+    <title>客服系统</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/element-ui/2.15.1/theme-chalk/index.min.css">
+    <script src="https://cdn.staticfile.org/vue/2.6.9/vue.min.js"></script>
+    <script src="https://cdn.staticfile.org/element-ui/2.15.1/index.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="/static/css/common.css">
+    <style>
+        html,
+        body {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        body {
+            overflow: hidden;
+            background-color: #f5f5f5;
+        }
+        .el-aside .el-menu{
+            border-right: none;
+        }
+        .mainMain{
+            background: #fff;
+            /*margin-left: 10px;*/
+            margin-bottom: 60px;
+        }
+        .mainIframe{
+            width: 100%;
+            height: 100%;
+        }
+        .el-card__body{
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+<body class="text-center"> 
+<div id="app" style="width:100%">
+    <template>
+        <el-container v-loading.fullscreen.lock="fullscreenLoading">
+
+            <el-aside style="width:200px; background-color:#222d32;" >
+                <el-menu
+                        background-color="#222d32"
+                        text-color="#b8c7ce"
+                        active-text-color="#fff"
+                        default-active="{{.tab_index}}" :default-openeds="openIndex"
+                        :unique-opened=true>
+                    <el-submenu index="1">
+                        <template slot="title">
+                            <i class="el-icon-s-custom"></i>
+                            <span>账户设置</span>
+                        </template>
+                        <el-menu-item-group>
+                            <el-menu-item index="1-1" v-on:click="openUrl('/admin/setting_statistics.html')">统计信息</el-menu-item>
+                            <el-menu-item index="1-2" v-on:click="openUrl('/setting_welcome')">自动欢迎</el-menu-item>
+                            <el-menu-item index="1-3" v-on:click="openUrl('/setting_modifypass')">修改密码</el-menu-item>
+                            <el-menu-item index="1-4" v-on:click="openUrl('/setting_avator')">修改头像</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="3">
+                        <template slot="title">
+                            <i class="el-icon-s-cooperation"></i>
+                            <span>权限设置</span>
+                        </template>
+                        <el-menu-item-group>
+                            <el-menu-item index="3-2"  v-on:click="openUrl('/setting_kefu_list')">用户管理</el-menu-item>
+                            <el-menu-item index="3-1"  v-on:click="openUrl('/roles_list')">角色管理</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="2">
+                        <template slot="title">
+                            <i class="el-icon-s-tools"></i>
+                            <span>系统设置</span>
+                        </template>
+                        <el-menu-item-group>
+                            <el-menu-item index="4-7"  v-on:click="openUrl('/setting_indexpage')">编辑首页</el-menu-item>
+                            <el-menu-item index="4-7"  v-on:click="openUrl('/setting_indexpages')">单页列表</el-menu-item>
+                            <el-menu-item index="4-6"  v-on:click="openUrl('/setting_config')">配置参数</el-menu-item>
+                            <el-menu-item index="4-5"  v-on:click="openUrl('/setting_ipblack')">IP黑名单</el-menu-item>
+                            <el-menu-item index="2-5"  v-on:click="openUrl('/setting_deploy')">网页部署</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                </el-menu>
+                </el-aside>
+
+                
+            <iframe  class="mainIframe"  v-bind:src="iframeUrl" frameborder="0"></iframe>
+        </el-container>
+    </template>
+
+</div>
+</body>
+
+<script>
+    var ACTION="setting_statistics";
+</script>
+<script>
+    var app=new Vue({
+        el: '#app',
+        delimiters:["<{","}>"],
+        data: {
+            iframeUrl:"/admin/setting_statistics.html",
+            fullscreenLoading:false,
+            openIndex:[1],
+            account: {
+                username: "",
+                password: "",
+            },
+            mysql: {
+                server: "",
+                port: "",
+                database: "",
+                username: "",
+                password: "",
+            },
+            rules: {
+                server: [
+                    { required: true, message: '请输入服务地址', trigger: 'blur' },
+                ],
+                port: [
+                    { required: true, message: '请输入端口号', trigger: 'blur' },
+                ],
+                database: [
+                    { required: true, message: '请输入数据库名', trigger: 'blur' },
+                ],
+                username: [
+                    { required: true, message: '请输入用户名', trigger: 'blur' },
+                ],
+                name: [
+                    { required: true, message: '请输入用户名', trigger: 'blur' },
+                ],
+                avator: [
+                    { required: true, message: '请选择头像', trigger: 'blur' },
+                ],
+                role_id: [
+                    { required: true, message: '请选择角色', trigger: 'blur' },
+                ],
+                password: [
+                    { required: true, message: '请输入密码', trigger: 'blur' },
+                ],
+                nickname: [
+                    { required: true, message: '请输入昵称', trigger: 'blur' },
+                ],
+                method: [
+                    { required: true, message: '请输入允许的方法', trigger: 'blur' },
+                ],
+                path: [
+                    { required: true, message: '请输入允许的路径', trigger: 'blur' },
+                ],
+            },
+            kefuList:[],
+            kefuDialog:false,
+            kefuForm:{
+                id:"",
+                name:"",
+                password:"",
+                avator:"",
+                nickname:"",
+                role_name:"",
+                role_id:"",
+            },
+            roleList:[],
+            configList:[],
+            roleDialog:false,
+            noticeList:[],
+            welcomeDialog:false,
+            ipblackList:[],
+            welcomeForm: {
+                content: "",
+            },
+            roleForm:{
+                id:"",
+                name:"",
+                method:"",
+                path:"",
+            },
+            statistics:{},
+            pageindex: {
+                title_cn: "",
+                title_en: "",
+                keywords_cn: "",
+                keywords_en: "",
+                desc_cn: "",
+                desc_en: "",
+                css_js: "",
+                html_cn: "",
+                html_en: "",
+            },
+            aboutpages:[],
+            modifyPass:{
+                old_pass:"",
+                new_pass:"",
+                confirm_new_pass:""
+            },
+            avatarUrl:"",
+        },
+
+        methods: {
+            //提交表单
+            setAccount(formName){
+                let _this=this;
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        $.post("/setting_account",_this.account,function(data){
+                            if(data.code==200){
+                                _this.$message({
+                                    message: data.msg,
+                                    type: 'success'
+                                });
+                            }else{
+                                _this.$message({
+                                    message: data.msg,
+                                    type: 'error'
+                                });
+                            }
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            //设置mysql
+            setMysql(formName){
+                let _this=this;
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        $.ajax({
+                            type:"POST",
+                            url:"/mysql",
+                            data:_this.mysql,
+                            headers:{
+                                "token":localStorage.getItem("token")
+                            },
+                            success: function(data) {
+                                if(data.code==200){
+                                    _this.$message({
+                                        message: data.msg,
+                                        type: 'success'
+                                    });
+                                }else{
+                                    _this.$message({
+                                        message: data.msg,
+                                        type: 'error'
+                                    });
+                                }
+                            }
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            //重置表单
+            resetForm(formName) {
+                this.loading=false;
+                this.$refs[formName].resetFields();
+            },
+            //跳转
+            openUrl(url){
+                //window.location.href=url;
+                this.iframeUrl=url;
+            },
+            //展示提示
+            showNotice(){
+                this.fullscreenLoading=false;
+                this.$message({
+                    message: '配置信息写入同级config目录，目录不存在会自动创建！',
+                    type: 'warning',
+                    duration:'8000',
+                    showClose:true,
+                });
+            },
+            addWelcome(){
+                this.welcomeForm.content="";
+                this.welcomeDialog=true;
+            },
+            //初始化数据
+            initInfo(){
+                let _this=this;
+                if(ACTION=="setting_mysql"){
+                    this.sendAjax("/mysql","get",{},function(result){
+                        _this.mysql.username=result.Username;
+                        _this.mysql.password=result.Password;
+                        _this.mysql.database=result.Database;
+                        _this.mysql.server=result.Server;
+                        _this.mysql.port=result.Port;
+                    });
+                }
+                if(ACTION=="setting_kefu_list"){
+                    this.sendAjax("/kefulist","get",{},function(result){
+                        _this.kefuList=result;
+                    });
+                    this.sendAjax("/roles","get",{},function(result){
+                        _this.roleList=result;
+                    });
+                }
+                if(ACTION=="roles_list"){
+                    this.sendAjax("/roles","get",{},function(result){
+                        _this.roleList=result;
+                    });
+                }
+                if(ACTION=="setting_statistics"){
+                    _this.statistics =  {"code":200,"msg":"ok","result":{"message":217,"session":0,"visitors":19}}
+                    //this.sendAjax("/statistics","get",{},function(result) { 
+                    //    _this.statistics = result;
+                    //});
+                }
+                if(ACTION=="setting_welcome"){
+                    this.sendAjax("/notices","get",{},function(result){
+                        _this.noticeList=result;
+                    });
+                }
+                if(ACTION=="setting_ipblack"){
+                    this.sendAjax("/ipblacks_all","get",{},function(result){
+                        _this.ipblackList=result.list;
+                    });
+                }
+                if(ACTION=="setting_config"){
+                    this.sendAjax("/configs","get",{},function(result){
+                        _this.configList=result;
+                    });
+                }
+                if(ACTION=="setting_pageindex"){
+                    this.sendAjax("/about","get",{},function(result){
+                        _this.pageindex=result;
+                    });
+                }
+                if(ACTION=="setting_indexpages"){
+                    this.sendAjax("/aboutpages","get",{},function(result){
+                        _this.aboutpages=result;
+                    });
+                }
+                if(ACTION=="setting_avator"){
+                    this.sendAjax("/kefuinfo","get",{},function(result){
+                        _this.avatarUrl=result.avator;
+                    });
+                }
+            },
+            sendAjax(url,method,params,callback){
+                let _this=this;
+                $.ajax({
+                    type: method,
+                    url: url,
+                    data:params,
+                    headers: {
+                        "token": localStorage.getItem("token")
+                    },
+                    success: function(data) {
+                        if(data.code!=200){
+                            _this.$message({
+                                message: data.msg,
+                                type: 'error'
+                            });
+                        }else if(data.result!=null){
+                            callback(data.result);
+                        }else{
+                            callback(data);
+                        }
+                        _this.fullscreenLoading=false
+
+                    }
+                });
+            },
+            //添加客服的dialog
+            addKefu(){
+                this.kefuForm={
+                    id:"",
+                    name:"",
+                    password:"",
+                    avator:"",
+                };
+                this.kefuDialog=true;
+            },
+            //提交客服表单
+            submitKefuForm(formName){
+                let _this=this;
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.sendAjax("/kefuinfo","POST",_this.kefuForm,function(result){
+                            _this.kefuDialog=false;
+                            _this.$message({
+                                message: "修改后台账户名后,后台需重新登录",
+                                type: 'success'
+                            });
+                            _this.sendAjax("/kefulist","get",{},function(result){
+                                _this.kefuList=result;
+                            });
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            //提交欢迎表单
+            submitWelcomeForm(formName){
+                let _this=this;
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.sendAjax("/notice","POST",_this.welcomeForm,function(result){
+                            _this.welcomeDialog=false;
+                            _this.sendAjax("/notices","get",{},function(result){
+                                _this.noticeList=result;
+                            });
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            //编辑客服表单
+            editKefuForm(formName){
+                let _this=this;
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                            _this.sendAjax("/kefulist","PUT",_this.kefuForm,function(result){
+                                _this.kefuList=result;
+                            });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            //获取客服
+            getKefu(kefuId){
+                let _this=this;
+                this.sendAjax("/kefuinfo_setting","GET",{kefu_id:kefuId},function(result){
+                    _this.kefuDialog=true;
+                    _this.kefuForm=result;
+                    _this.kefuForm.password="";
+                });
+            },
+            //删除客服
+            deleteKefu(kefuId){
+                let _this=this;
+                this.sendAjax("/kefuinfo?id="+kefuId,"DELETE",{id:kefuId},function(result){
+                    _this.kefuDialog=false;
+                    _this.sendAjax("/kefulist","get",{},function(result){
+                        _this.kefuList=result;
+                    });
+                });
+            },
+            //删除欢迎
+            deleteWelcome(id){
+                let _this=this;
+                this.sendAjax("/notice?id="+id,"DELETE",{id:id},function(result){
+                    _this.kefuDialog=false;
+                    _this.sendAjax("/notices","get",{},function(result){
+                        _this.noticeList=result;
+                    });
+                });
+            },
+            //删除ip
+            deleteIpblack(ip){
+                let _this=this;
+                this.sendAjax("/ipblack?ip="+ip,"DELETE",{ip:ip},function(result){
+                    _this.sendAjax("/ipblacks_all","get",{},function(result){
+                        _this.ipblackList=result.list;
+                    });
+                });
+            },
+            //配置角色权限
+            showAuthDialog(id,name,method,path){
+                this.roleForm.id=id
+                this.roleForm.name=name
+                this.roleForm.method=method
+                this.roleForm.path=path
+                this.roleDialog=true;
+            },
+            //设置配置项
+            setConfigItem(key,value){
+                let _this=this;
+                this.sendAjax("/config","POST",{key:key,value:value},function(result){
+                    _this.sendAjax("/configs","get",{},function(result){
+                        _this.configList=result;
+                    });
+                });
+            },
+            //设置配置项
+            setWelcomeItem(id,content){
+                let _this=this;
+                this.sendAjax("/notice_save","POST",{id:id,content:content},function(result){
+                    _this.sendAjax("/notices","get",{},function(result){
+                        _this.noticeList=result;
+                    });
+                });
+            },
+            //提交角色表单
+            submitRoleForm(formName){
+                let _this=this;
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.sendAjax("/role","POST",_this.roleForm,function(result){
+                            _this.roleDialog=false;
+                            _this.sendAjax("/roles","get",{},function(result){
+                                _this.roleList=result;
+                            });
+                            _this.$message({
+                                message: result.msg,
+                                type: 'success'
+                            });
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            //提交首页表单
+            setPageIndex(){
+                let _this=this;
+                this.sendAjax("/about","POST",this.pageindex,function(result){
+                    _this.$message({
+                        message: "编辑成功",
+                        type: 'success'
+                    });
+                });
+            },
+            //修改密码
+            setModifyPass(){
+                let _this=this;
+                this.sendAjax("/modifypass","POST",_this.modifyPass,function(result){
+                    _this.$message({
+                        message: "修改成功",
+                        type: 'success'
+                    });
+                    _this.modifyPass.new_pass=_this.modifyPass.old_pass=_this.modifyPass.confirm_new_pass=""
+                });
+            },
+            //修改密码
+            setModifyAvatar(){
+                let _this=this;
+                this.sendAjax("/modifyavator","POST",{avator:_this.avatarUrl},function(result){
+                    _this.$message({
+                        message: "修改成功",
+                        type: 'success'
+                    });
+                });
+            },
+            handleAvatarSuccess(res, file) {
+                console.log(res,file);
+                if(res.code!=200){
+                    _this.$message({
+                        message: res.msg,
+                        type: 'error'
+                    });
+                    return;
+                }
+                this.avatarUrl = '/'+res.result.path;
+            },
+            beforeAvatarUpload(file) {
+                var isLt2M = file.size / 1024 / 1024 < 1;
+                if (!isLt2M) {
+                    this.$message.error('上传头像图片大小不能超过 1MB!');
+                }
+                return isLt2M;
+            },
+            //生成部署js
+            createDeployJs(){
+                let domain=window.location.host;
+                this.$alert('    <script type="text/javascript">\n' +
+                    '    var GOFLY_KEFU_ID="'+this.kefuForm.name+'";\n' +
+                    '    <\/script>\n'+
+                    ' <script type="text/javascript" src="http://'+domain+'/webjs"><\/script>', '网页部署');
+            },
+            GetRequest() {
+                var str = location.href
+                var num = str.indexOf("#");
+                if(num <0){
+                    return "";
+                }
+                str = str.substr(num + 1);
+                return str;
+            },
+        },
+
+        mounted:function(){
+            var urlParam=this.GetRequest();
+            if(urlParam!=""){
+                this.iframeUrl=urlParam;
+            }
+        },
+        created: function () {
+            // if(ACTION=="setting"){
+            //     this.showNotice();
+            // }
+            this.initInfo();
+        }
+    })
+
+</script>
+</html>

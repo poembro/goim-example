@@ -15,6 +15,7 @@ type OutData struct {
 }
 
 func OutJson(c *gin.Context, dst OutData) {
+	c.Header("Content-Type", "application/json; charset=utf-8")
 	c.JSON(200, dst)
 	c.Abort()
 	return
@@ -54,6 +55,7 @@ func NewPage(c *gin.Context) *Pages {
 }
 
 func OutPageJson(c *gin.Context, data interface{}, p *Pages) {
+	c.Header("Content-Type", "application/json; charset=utf-8")
 	p.List = data
 	dst := &OutData{
 		Success: true,

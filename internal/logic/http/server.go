@@ -45,14 +45,15 @@ func (s *Server) initRouter() {
 
 // initBusinessRouter 第三方业务
 func (s *Server) initBusinessRouter() {
-	r := apihttp.New(s.logic.Business)
+	r := apihttp.New(s.logic, s.logic.Business)
+	s.engine.Use(r.CorsMiddleware)
 	group := s.engine.Group("/api")
 	{
 		group.POST("/user/login", r.Login)
 		group.POST("/user/register", r.Register)
 		group.GET("/user/create", r.UserCreate)
 		authorized := group.Group("")
-		authorized.Use(r.CorsMiddleware, r.VerifyMiddleware)
+		authorized.Use(r.VerifyMiddleware)
 		{
 			authorized.POST("/user/list", r.UserList)
 

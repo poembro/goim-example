@@ -5,7 +5,8 @@ import (
 )
 
 // Sync 消息同步
-func (s *Business) Sync(ctx context.Context, roomId string, seq int64) (string, error) {
+func (s *Business) Sync(ctx context.Context, , body []byte) (string, error) {
+	/*
 	dst, err := s.dao.GetMessageList(roomId, 0, 50) // 取回最近50条消息
 	if err != nil {
 		return "", err
@@ -24,11 +25,13 @@ func (s *Business) Sync(ctx context.Context, roomId string, seq int64) (string, 
 	jsonStr = jsonStr + "]"
 
 	return jsonStr, nil
+	*/
 }
 
 // MessageACK 消息确认机制
-func (s *Business) MessageACK(ctx context.Context, deviceId, roomId string, userId, deviceAck, receiveTime int64) error {
-	s.dao.AddMessageACKMapping(deviceId, roomId, deviceAck)
+func (s *Business) MessageACK(ctx context.Context, body []byte) error {
+    
+	//s.dao.AddMessageACKMapping(deviceId, roomId, deviceAck)
 	return nil
 }
 

@@ -3,8 +3,11 @@ package apihttp
 import (
 	"context"
 	"fmt"
+	"goim-demo/internal/logic/business/util"
 	"strings"
 	"time"
+
+	"goim-demo/internal/logic/model"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,36 +41,40 @@ func (s *Router) MsgClear(c *gin.Context) {
 
 // apiPush 数据推送
 func (s *Router) MsgPush(c *gin.Context) {
-	var (
-		msg   string
-		msgId int64
-	)
 	var arg struct {
 		RoomId string `json:"room_id"`
-		Typ    string `json:"typ"`
+		Typ    string `json:"type"`
 		Msg    string `json:"msg"`
-		UserId string `json:"user_id"`
+		Mid    string `json:"mid"`
 		ShopId string `json:"shop_id"`
 	}
 	if err := c.BindJSON(&arg); err != nil {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
 		return
 	}
-	if arg.RoomId == "" || arg.Typ == "" || arg.Msg == "" || arg.UserId == "" || arg.ShopId == "" {
+	if arg.RoomId == "" || arg.Typ == "" || arg.Msg == "" || arg.Mid == "" || arg.ShopId == "" {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数room_id type msg user_id shop_id不能为空"})
 		return
 	}
-
-	msg = strings.Replace(arg.Msg, "\r\n", "\\r\\n", -1)
+	// 处理特殊字符
+	msg := strings.Replace(arg.Msg, "\r\n", "\\r\\n", -1)
 	msg = strings.Replace(arg.Msg, "\r", "\\r", -1)
 	msg = strings.Replace(arg.Msg, "\n", "\\n", -1)
-	msgId = time.Now().UnixNano() // 消息唯一id 为了方便临时demo采用该方案， 后期线上可以用雪花算法
-	body := fmt.Sprintf(`{"user_id":%s, "shop_id":%s, "type":"%s", "msg":"%s", "room_id":"%s", "dateline":%d, "id":"%d"}`,
-		arg.UserId, arg.ShopId, arg.Typ, msg, arg.RoomId, time.Now().Unix(), msgId)
+
+	msgId := time.Now().UnixNano() // 消息唯一id 为了方便临时demo采用该方案， 后期线上可以用雪花算法
+	body := fmt.Sprintf(`{"mid":%s, "shop_id":%s, "type":"%s", "msg":"%s", "room_id":"%s", "dateline":%d, "id":"%d"}`,
+		arg.Mid, arg.ShopId, arg.Typ, msg, arg.RoomId, time.Now().Unix(), msgId)
 
 	// 消息持久化
 	err := s.svc.AddMessageList(arg.RoomId, msgId, body)
 	if err != nil {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
+		return
+	}
+
+	typ, room, _ := model.DecodeRoomKey(arg.RoomId)
+	// 推送
+	if err := s.logic.PushRoom(c, 8000, typ, room, util.S2B(body)); err != nil {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
 		return
 	}

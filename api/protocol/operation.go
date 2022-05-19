@@ -46,4 +46,12 @@ const (
 	OpUnsub = int32(16)
 	// OpUnsubReply unsubscribe operation reply
 	OpUnsubReply = int32(17)
+
+	// 同步历史消息
+	OpSync      = int32(18)
+	OpSyncReply = int32(19)
+
+	// 消息偏移
+	OpMessageAck      = int32(20)
+	OpMessageAckReply = int32(21)
 )

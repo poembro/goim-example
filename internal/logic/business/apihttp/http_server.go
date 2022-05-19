@@ -1,19 +1,23 @@
 package apihttp
 
 import (
+	"goim-demo/internal/logic"
 	"goim-demo/internal/logic/business"
+
 	"goim-demo/internal/logic/business/util"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Router struct {
-	svc *business.Business
+	svc   *business.Business
+	logic *logic.Logic
 }
 
-func New(s *business.Business) *Router {
+func New(l *logic.Logic, s *business.Business) *Router {
 	r := &Router{
-		svc: s,
+		svc:   s,
+		logic: l,
 	}
 	return r
 }

@@ -1,0 +1,150 @@
+<html lang="cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta name="description" content="">
+    <meta name="author" content="admin">
+    <title>客服系统</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/element-ui/2.15.1/theme-chalk/index.min.css">
+    <script src="https://cdn.staticfile.org/vue/2.6.9/vue.min.js"></script>
+    <script src="https://cdn.staticfile.org/element-ui/2.15.1/index.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="/static/css/common.css">
+    <script src="/static/js/functions.js"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        body {
+            overflow: hidden;
+            background-color: #f5f5f5;
+        }
+
+        .el-aside{
+            height: 100%;
+            background: #fff;
+            border: solid 1px #e6e6e6;
+        }
+        .el-aside .el-menu{
+            border-right: none;
+        }
+       
+        .mainMain{
+            background: #fff;
+            margin-left: 10px;
+            margin-bottom: 60px;
+        }
+        .mainIframe{
+            width: 100%;
+            height:  calc(100% - 60px);
+        }
+        .el-card__body{
+            cursor: pointer;
+        }
+
+    </style>
+
+</head>
+<body class="text-center">
+<div id="app">
+    <template>
+        <el-menu
+            class="el-menu-demo"
+            background-color="#000000"
+            text-color="#fff"
+            active-text-color="#fff"
+            default-active="1"
+            mode="horizontal">
+            <el-menu-item index="1" v-on:click="openIframeUrl('/admin/welcome.html')"> logo <span class="mainVersion">客服系统</span></el-menu-item>
+            <el-menu-item index="2" v-on:click="openIframeUrl('/admin/chat_main.html')">聊天</el-menu-item>
+            <el-menu-item style="display:none" index="3" v-on:click="openIframeUrl('/admin/setting.html')">设置</el-menu-item> 
+            <el-menu-item style="display:none" index="4" v-on:click="openIframeUrl('/list')">邮箱<el-badge class="mark" :value="mailTotal" style="margin-bottom: 20px;"/></el-menu-item>
+            <el-submenu style="float: right" index="10">
+                <template slot="title">
+                    <el-avatar :size="30" :src="adminAvator"></el-avatar>
+                    <span v-html="adminRole"></span>
+                </template>
+                <el-menu-item  v-on:click="logout()">
+                    退出
+                </el-menu-item>
+            </el-submenu>
+        </el-menu>
+
+        <iframe  class="mainIframe"  v-bind:src="iframeUrl" frameborder="0"></iframe>
+    </template>
+</div>
+</body>
+<script>
+    new Vue({
+        el: '#app',
+        delimiters:["<{","}>"],
+        data: {
+            window:window,
+            iframeUrl:"",
+            mailTotal:0,
+            adminAvator:"",
+            adminRole:"",
+        },
+        methods: {
+            focusWindow(){
+                var _this=this;
+                window.addEventListener('message',function(e){
+                    var redata=e.data;
+                    if(!redata.name||!redata.body){
+                        return;
+                    }
+                    notify(redata.name, {
+                        body: redata.body,
+                        icon: redata.icon
+                    }, function(notification) {
+                        //可直接打开通知notification相关联的tab窗口
+                        window.focus();
+                        notification.close();
+                        _this.openIframeUrl("/admin/welcome.html");
+                    });
+                });
+            },
+            openIframeUrl(url){
+                this.iframeUrl=url;
+            },
+            //退出
+            logout(){
+                localStorage.removeItem("token");
+                this.openIframeUrl('/admin/login.html');
+            },
+            //跳转
+            openUrl(url){
+                window.location.href=url;
+            },
+            GetQueryString(name){
+                var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+                var r = window.location.search.substr(1).match(reg);
+                if(r!=null)return  unescape(r[2]); return null;
+            },
+            checkAuth(){
+                let _this=this;
+
+                let token = localStorage.getItem("token")
+                console.log(token)
+                let data = {"code":200,"msg":"验证成功","result":{"avator":"/static/images/4.jpg","name":"kefu2","role_name":"管理员"}}
+                _this.adminAvator=data.result.avator;
+                _this.adminRole=data.result.role_name;
+                _this.iframeUrl = "/admin/welcome.html";
+            }
+        },
+        created: function () {
+            this.checkAuth();
+            this.focusWindow();
+        }
+    })
+    $(window).bind("focus",function(e){
+        //alert(1);
+    });
+</script>
+
+ 
+</html>
