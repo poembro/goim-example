@@ -9,10 +9,10 @@ import (
 // IpblackAdd ip添加至黑名单
 func (s *Router) IpblackAdd(c *gin.Context) {
 	var arg struct {
-		IP     string `form:"ip"`
-		ShopId string `form:"shop_id"`
+		IP     string `json:"ip"`
+		ShopId string `json:"shop_id"`
 	}
-	if err := c.BindQuery(&arg); err != nil {
+	if err := c.BindJSON(&arg); err != nil {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
 		return
 	}
@@ -24,10 +24,10 @@ func (s *Router) IpblackAdd(c *gin.Context) {
 // IpblackDel ip从黑名单删除
 func (s *Router) IpblackDel(c *gin.Context) {
 	var arg struct {
-		IP     string `form:"ip"`
-		ShopId string `form:"shop_id"`
+		IP     string `json:"ip"`
+		ShopId string `json:"shop_id"`
 	}
-	if err := c.BindQuery(&arg); err != nil {
+	if err := c.BindJSON(&arg); err != nil {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
 		return
 	}
@@ -39,9 +39,9 @@ func (s *Router) IpblackDel(c *gin.Context) {
 // listIpblack 查看所有ip
 func (s *Router) IpblackList(c *gin.Context) {
 	var arg struct {
-		ShopId string `form:"shop_id"`
+		ShopId string `json:"shop_id"`
 	}
-	if err := c.BindQuery(&arg); err != nil {
+	if err := c.BindJSON(&arg); err != nil {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
 		return
 	}

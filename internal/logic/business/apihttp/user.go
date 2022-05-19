@@ -12,64 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Login 登录 (后台)
-func (s *Router) Login(c *gin.Context) {
-	var arg struct {
-		Nickname string `form:"nickname"`
-		Password string `form:"password"`
-	}
-	if err := c.BindQuery(&arg); err != nil {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
-		return
-	}
-	if arg.Nickname == "" || arg.Password == "" {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数nickname or password不能为空"})
-		return
-	}
-	shop, err := s.svc.GetShop(arg.Nickname)
-	if err != nil {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "未注册"})
-		return
-	}
-
-	if shop.Password != arg.Password {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "密码错误"})
-		return
-	}
-	dst := s.svc.ShopCreate(
-		shop.Mid,
-		shop.Nickname,
-		shop.Face,
-		c.ClientIP(),
-		c.GetHeader("referer"),
-		c.GetHeader("user-agent"))
-	OutJson(c, OutData{Code: 200, Success: true, Result: dst})
-}
-
-// Register 注册 (后台) 为了演示,临时采用redis存储
-func (s *Router) Register(c *gin.Context) {
-	var arg struct {
-		Nickname string `form:"nickname"`
-		Password string `form:"password"`
-	}
-	if err := c.BindQuery(&arg); err != nil {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
-		return
-	}
-	shop, _ := s.svc.GetShop(arg.Nickname)
-	if shop != nil {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "已经被注册"})
-		return
-	}
-
-	face := "https://img.wxcha.com/m00/86/59/7c6242363084072b82b6957cacc335c7.jpg"
-	_, mid := s.svc.BuildMid()
-	s.svc.AddShop(mid, arg.Nickname, face, arg.Password)
-
-	OutJson(c, OutData{Code: 200, Success: true, Msg: "success", Result: "xxx"})
-	return
-}
-
 // UserCreate 创建用户
 func (s *Router) UserCreate(c *gin.Context) {
 	var arg struct {
@@ -85,28 +27,76 @@ func (s *Router) UserCreate(c *gin.Context) {
 	}
 	//判断客服是否存在
 	shop, err := s.svc.GetShop(arg.ShopId) // ShopId 就是商户昵称
-	if shop == nil || err != nil {
+	if err != nil || shop == nil || shop.Mid == "" {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数错误"})
+		return
 	}
-	dst := s.svc.UserCreate(
-		shop.Mid,
-		shop.Nickname,
-		shop.Face,
-		c.ClientIP(),
-		c.GetHeader("referer"),
-		c.GetHeader("user-agent"))
+	dst := s.svc.UserCreate(shop.Mid, shop.Nickname, shop.Face,
+		c.ClientIP(), c.GetHeader("referer"), c.GetHeader("user-agent"))
 
 	// 客服聊天场景
 	OutJson(c, OutData{Code: 200, Success: true, Msg: "success", Result: dst})
 }
 
+// Login 登录 (后台)
+func (s *Router) Login(c *gin.Context) {
+	var arg struct {
+		Nickname string `json:"nickname"`
+		Password string `json:"password"`
+	}
+	if err := c.BindJSON(&arg); err != nil {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
+		return
+	}
+	if arg.Nickname == "" || arg.Password == "" {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数nickname or password不能为空"})
+		return
+	}
+	shop, err := s.svc.GetShop(arg.Nickname)
+	if err != nil || shop == nil || shop.Mid == "" {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: "未注册"})
+		return
+	}
+
+	if shop.Password != arg.Password {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: "密码错误"})
+		return
+	}
+	dst := s.svc.ShopCreate(shop.Mid, shop.Nickname, shop.Face,
+		c.ClientIP(), c.GetHeader("referer"), c.GetHeader("user-agent"))
+	OutJson(c, OutData{Code: 200, Success: true, Result: dst})
+}
+
+// Register 注册 (后台) 为了演示,临时采用redis存储
+func (s *Router) Register(c *gin.Context) {
+	var arg struct {
+		Nickname string `json:"nickname"`
+		Password string `json:"password"`
+	}
+	if err := c.BindJSON(&arg); err != nil {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
+		return
+	}
+	shop, _ := s.svc.GetShop(arg.Nickname)
+	if shop != nil {
+		OutJson(c, OutData{Code: -1, Success: false, Msg: "已经被注册"})
+		return
+	}
+
+	face := "https://img.wxcha.com/m00/86/59/7c6242363084072b82b6957cacc335c7.jpg"
+	_, mid := s.svc.BuildMid()
+	s.svc.AddShop(mid, arg.Nickname, face, arg.Password)
+
+	OutJson(c, OutData{Code: 200, Success: true, Msg: "success", Result: "xxx"})
+}
+
 // UserList 查看所有与自己聊天的用户
 func (s *Router) UserList(c *gin.Context) {
 	var arg struct {
-		ShopId string `form:"shop_id"`
-		Typ    string `form:"typ"`
+		ShopId string `json:"shop_id"`
+		Typ    string `json:"typ"`
 	}
-	if err := c.BindQuery(&arg); err != nil {
+	if err := c.BindJSON(&arg); err != nil {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
 		return
 	}
@@ -152,8 +142,8 @@ func (s *Router) UserList(c *gin.Context) {
 		}
 		user := new(model.User)
 		json.Unmarshal(util.S2B(v), user)
-		//logger.Logger.Debug("apiFindUserList", zap.Any("userJson", user))
-		tmpUid := strconv.FormatInt(int64(user.UserId), 10)
+
+		tmpUid := strconv.FormatInt(int64(user.Mid), 10)
 		if arg.ShopId == tmpUid {
 			continue // 不要展示商户自己
 		}
@@ -162,13 +152,11 @@ func (s *Router) UserList(c *gin.Context) {
 
 		count, err := s.svc.GetMessageCount(user.RoomID, index, "+inf") // 拿到偏移去统计未读
 		if err != nil {
-			//logger.Logger.Debug("apiFindUserList", zap.String("desc", "拿到偏移去统计未读"), zap.String("err", err.Error()))
 			continue
 		}
 
 		lastMessage, err := s.svc.GetMessageList(user.RoomID, 0, 0) // 取回消息
 		if err != nil {
-			//logger.Logger.Debug("apiFindUserList", zap.String("desc", "取回最后一条消息"), zap.String("err", err.Error()))
 			continue
 		}
 

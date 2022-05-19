@@ -15,10 +15,10 @@ type User struct {
 	Platform string  `json:"platform"`
 	Accepts  []int32 `json:"accepts"`
 
-	UserId   Int64  `json:"user_id,string"` // 用户id
-	DeviceId string `json:"device_id"`      // 用户设备标识
-	Nickname string `json:"nickname"`       // 用户昵称
-	Face     string `json:"face"`           // 用户头像
+	//UserId   Int64  `json:"user_id,string"` // 用户id
+	//DeviceId string `json:"device_id"` // 用户设备标识
+	Nickname string `json:"nickname"` // 用户昵称
+	Face     string `json:"face"`     // 用户头像
 	//RoomID   string `json:"room_id"`        // 房间号
 	ShopId   string `json:"shop_id"`   // 商户id
 	ShopName string `json:"shop_name"` // 商户昵称
@@ -33,6 +33,7 @@ type User struct {
 	UserAgent   string   `json:"user_agent"`           // 用户标识
 	RemoteAddr  string   `json:"remote_addr"`          // 客户端ip
 	CreatedAt   string   `json:"created_at,omitempty"` // 用户创建时间
+	Token       string   `json:"token"`                // token
 }
 
 func (u *Int64) UnmarshalJSON(bs []byte) error {

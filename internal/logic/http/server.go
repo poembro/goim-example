@@ -41,7 +41,6 @@ func (s *Server) initRouter() {
 	group.GET("/online/top", s.onlineTop)
 	group.GET("/online/room", s.onlineRoom)
 	group.GET("/online/total", s.onlineTotal)
-
 }
 
 // initBusinessRouter 第三方业务
@@ -51,21 +50,21 @@ func (s *Server) initBusinessRouter() {
 	{
 		group.POST("/user/login", r.Login)
 		group.POST("/user/register", r.Register)
-		group.POST("/user/create", r.UserCreate)
+		group.GET("/user/create", r.UserCreate)
 		authorized := group.Group("")
 		authorized.Use(r.CorsMiddleware, r.VerifyMiddleware)
 		{
 			authorized.POST("/user/list", r.UserList)
 
+			authorized.POST("/msg/push", r.MsgPush)
 			authorized.POST("/msg/list", r.MsgList)
+			authorized.POST("/msg/clear", r.MsgClear)
 
 			authorized.POST("/ipblack/add", r.IpblackAdd)
 			authorized.POST("/ipblack/del", r.IpblackDel)
 			authorized.POST("/ipblack/list", r.IpblackList)
-
 		}
 	}
-
 }
 
 // Close close the server.

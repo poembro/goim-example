@@ -51,3 +51,9 @@ func (s *Business) GetMessagePageList(roomId, min, max string, page, limit int64
 func (s *Business) AddMessageList(roomId string, id int64, msg string) error {
 	return s.dao.AddMessageList(roomId, id, msg)
 }
+
+// MsgClear 清理数据
+func (s *Business) MsgClear(ctx context.Context) error {
+	s.dao.MsgClear()
+	return nil
+}

@@ -11,7 +11,6 @@ const (
 	_prefixMidServer    = "golang_im:userId_%d"
 	_prefixMidStrServer = "golang_im:userId_%s"           // userId -> DeviceId:userinfo
 	_prefixKeyServer    = "golang_im:deviceId_%s"         // deviceId -> server
-	_prefixServerOnline = "golang_im:ol_%s"               // server -> online
 	_prefixMessageAck   = "golang_im:deviceId_msg_ack_%s" // deviceId -> RoomID:ack
 )
 
@@ -25,10 +24,6 @@ func KeyUserIdStrServer(userId string) string {
 
 func KeyDeviceIdServer(deviceId string) string {
 	return fmt.Sprintf(_prefixKeyServer, deviceId)
-}
-
-func keyServerOnline(deviceId string) string {
-	return fmt.Sprintf(_prefixServerOnline, deviceId)
 }
 
 func keyMessageAck(deviceId string) string {

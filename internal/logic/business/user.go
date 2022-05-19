@@ -17,8 +17,8 @@ func (s *Business) SignIn(ctx context.Context, user *model.User, body []byte, co
 	userId := int64(user.Mid)
 	uidStr := strconv.FormatInt(userId, 10)
 	deviceId := s.BuildDeviceId(user.Platform, uidStr)
-	if user.DeviceId != deviceId {
-		return fmt.Errorf(uidStr + "应该是:" + deviceId + " 结果是:" + user.DeviceId + " 登录认证错误,设备编号对不上!")
+	if user.Key != deviceId {
+		return fmt.Errorf(uidStr + "应该是:" + deviceId + " 结果是:" + user.Key + " 登录认证错误,设备编号对不上!")
 	}
 
 	// 标记用户上线 并 存储用户信息
@@ -45,17 +45,21 @@ func (*Business) BuildMid() (uint64, string) {
 
 func (s *Business) UserCreate(shopId, shopName, shopFace, remoteAddr, referer, userAgent string) *model.User {
 	platform := "web"
-	sID, userId := s.BuildMid()
+	sID, smid := s.BuildMid()
 
-	deviceId := s.BuildDeviceId(platform, userId)
+	deviceId := s.BuildDeviceId(platform, smid)
 
-	l := len(userId)
-	nickname := fmt.Sprintf("user%s", userId[l-6:l])
+	l := len(smid)
+	nickname := fmt.Sprintf("user%s", smid[l-6:l])
 
+	token, err := util.GetToken(smid, deviceId, nickname)
+	if err != nil {
+		panic(err)
+	}
 	return &model.User{
 		Mid:        model.Int64(sID),
 		Key:        deviceId,
-		RoomID:     fmt.Sprintf("%s://%s-%s", "live", shopId, userId),
+		RoomID:     fmt.Sprintf("%s://%s", "live", smid),
 		Platform:   platform,
 		Accepts:    []int32{8000}, // 8000是类型/频道 如: 客服聊天类型 直播大厅类型  弹幕类型 与某人聊天房间类型
 		Nickname:   nickname,
@@ -69,6 +73,7 @@ func (s *Business) UserCreate(shopId, shopName, shopFace, remoteAddr, referer, u
 		Referer:    referer,
 		UserAgent:  userAgent,
 		CreatedAt:  util.FormatTime(time.Now()),
+		Token:      token,
 	}
 }
 
@@ -78,9 +83,13 @@ func (s *Business) ShopCreate(shopId, shopName, shopFace, remoteAddr, referer, u
 	sID, _ := strconv.ParseInt(shopId, 10, 64)
 
 	deviceId := s.BuildDeviceId(platform, userId)
-	l := len(userId)
-	nickname := fmt.Sprintf("user%s", userId[l-6:l])
+	//l := len(userId)   userId[l-6:l]
+	nickname := fmt.Sprintf("user%s", userId)
 
+	token, err := util.GetToken(userId, deviceId, nickname)
+	if err != nil {
+		panic(err)
+	}
 	return &model.User{
 		Mid:        model.Int64(sID),
 		Key:        deviceId,
@@ -98,5 +107,6 @@ func (s *Business) ShopCreate(shopId, shopName, shopFace, remoteAddr, referer, u
 		Referer:    referer,
 		UserAgent:  userAgent,
 		CreatedAt:  util.FormatTime(time.Now()),
+		Token:      token,
 	}
 }
