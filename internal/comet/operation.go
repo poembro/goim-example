@@ -83,12 +83,20 @@ func (s *Server) Operate(ctx context.Context, p *protocol.Proto, ch *Channel, b 
 			ch.UnWatch(ops...)
 		}
 		p.Op = protocol.OpUnsubReply
+	case protocol.OpSendMsg: // 第三方业务扩展，游戏中不存储，直接广播消息至该用户所在房间
+		p.Op = protocol.OpSendMsgReply
+		for _, bucket := range s.Buckets() {
+			if room := bucket.Room(ch.Room.ID); room != nil {
+				room.Push(p)
+			}
+		}
 	default:
 		// TODO ack ok&failed
 		if err := s.Receive(ctx, ch.Mid, p); err != nil {
 			log.Errorf("s.Report(%d) op:%d error(%v)", ch.Mid, p.Op, err)
 		}
 		p.Body = nil
+		p.Op++ // 第三方业务扩展，响应op比请求op加1
 	}
 	return nil
 }

@@ -278,7 +278,7 @@ var app=new Vue({
                     }
                 },
                 success: function(data) {
-                    console.log("-->",url,"--",method,"---", data)
+                    //console.log("-->",url,"--",method,"---", data)
                     if (!data.success) {
                         _this.$message({
                             message: data.msg,

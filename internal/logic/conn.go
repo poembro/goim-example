@@ -62,15 +62,11 @@ func (l *Logic) Disconnect(c context.Context, mid int64, key, server string) (ha
 		return
 	}
 
-	// 框架之外,第三方业务 逻辑扩展
-	if err = l.Business.Offline(c, mid, key, server); err != nil {
-		return
-	}
 	log.Infof("conn disconnected key:%s server:%s mid:%d", key, server, mid)
 	return
 }
 
-// Heartbeat heartbeat a conn. 对应 goim/internal/logic/dao/redis.go
+// Heartbeat heartbeat a conn.
 func (l *Logic) Heartbeat(c context.Context, mid int64, key, server string) (err error) {
 	has, err := l.dao.ExpireMapping(c, mid, key)
 	if err != nil {
@@ -101,12 +97,14 @@ func (l *Logic) RenewOnline(c context.Context, server string, roomCount map[stri
 
 // Receive receive a message. 框架之外,第三方业务 逻辑扩展
 func (l *Logic) Receive(c context.Context, mid int64, proto *protocol.Proto) (err error) {
-	//receive mid:408376581082316810 message:ver:1 op:20 seq:1 body:"1652959818004587000"
 	switch proto.Op {
 	case protocol.OpSync:
-		l.Business.Sync(c, proto.Body)
+		op, keys, msg, err := l.Business.Sync(c, mid, proto.Body)
+		if op != 0 && err == nil {
+			l.PushKeys(c, op, keys, msg)
+		}
 	case protocol.OpMessageAck:
-		l.Business.MessageACK(c, proto.Body)
+		l.Business.MessageACK(c, mid, proto.Body)
 	default:
 		log.Infof("receive mid:%d message:%+v", mid, proto)
 	}

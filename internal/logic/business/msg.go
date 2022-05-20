@@ -2,18 +2,34 @@ package business
 
 import (
 	"context"
+	"encoding/json"
+	"goim-demo/internal/logic/business/util"
+
+	log "github.com/golang/glog"
 )
 
 // Sync 消息同步
-func (s *Business) Sync(ctx context.Context, , body []byte) (string, error) {
-	/*
-	dst, err := s.dao.GetMessageList(roomId, 0, 50) // 取回最近50条消息
-	if err != nil {
-		return "", err
+func (s *Business) Sync(ctx context.Context, mid int64, body []byte) (int32, []string, []byte, error) {
+	var arg struct {
+		Op     int32  `json:"op"`
+		Page   int64  `json:"id"`
+		Key    string `json:"key"`
+		RoomID string `json:"room_id"`
+	}
+	if err := json.Unmarshal(body, &arg); err != nil {
+		log.Errorf("json.Unmarshal(%s) error(%v)", body, err)
+		return 0, nil, nil, err
+	}
+	idx := (arg.Page - 1) * 50
+	if idx < 0 {
+		idx = 0
+	}
+
+	dst, err := s.dao.GetMessageList(arg.RoomID, idx, idx+50) // 取回最近50条消息
+	if err != nil || len(dst) == 0 {
+		return 0, nil, nil, err
 	}
 	max := len(dst)
-	//sort.Sort(sort.Reverse(sort.StringSlice(dst))) //倒序失败
-
 	jsonStr := "["
 	for i := max - 1; i >= 0; i-- {
 		jsonStr += dst[i]
@@ -23,15 +39,21 @@ func (s *Business) Sync(ctx context.Context, , body []byte) (string, error) {
 		jsonStr += ","
 	}
 	jsonStr = jsonStr + "]"
-
-	return jsonStr, nil
-	*/
+	return arg.Op, []string{arg.Key}, util.S2B(jsonStr), nil
 }
 
 // MessageACK 消息确认机制
-func (s *Business) MessageACK(ctx context.Context, body []byte) error {
-    
-	//s.dao.AddMessageACKMapping(deviceId, roomId, deviceAck)
+func (s *Business) MessageACK(ctx context.Context, mid int64, body []byte) error {
+	var params struct {
+		ID     int64  `json:"id"`
+		Key    string `json:"key"`
+		RoomID string `json:"room_id"`
+	}
+	if err := json.Unmarshal(body, &params); err != nil {
+		log.Errorf("json.Unmarshal(%s) error(%v)", body, err)
+		return err
+	}
+	s.dao.AddMessageACKMapping(params.Key, params.RoomID, params.ID)
 	return nil
 }
 

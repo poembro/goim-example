@@ -133,7 +133,7 @@ func (s *Server) ServeTCP(conn *net.TCPConn, rp, wp *bytes.Pool, tr *xtime.Timer
 	if p, err = ch.CliProto.Set(); err == nil {
 		//mid:用户id   Key:uuid   rid:房间roomid   accepts:roomid数组标识接收这几个房间消息 hb：健康数值
 		if ch.Mid, ch.Key, rid, accepts, hb, err = s.authTCP(ctx, rr, wr, p); err == nil {
-			//ch是 /internal/comet/channel.go channel结构体  Watch方法则是初始化ch.watchOps map内容
+			//ch是  channel结构体指针  Watch方法则是初始化ch.watchOps map内容
 			ch.Watch(accepts...)
 			//Bucket方法是用 github.com/zhenjl/cityhash库 取key的hash值 并从s.buckets 中取对应value 返回值就是NewBucket 方法的返回值
 			b = s.Bucket(ch.Key)

@@ -9,12 +9,42 @@ import (
 )
 
 const (
-	_prefixMsgList = "golang_im:messagelist:%s"
+	_prefixMsgList    = "golang_im:messagelist:%s"
+	_prefixMessageAck = "golang_im:deviceId_msg_ack_%s" // deviceId -> RoomID:ack
 )
 
 func KeyMsgList(roomId string) string {
 	return fmt.Sprintf(_prefixMsgList, roomId)
 }
+
+func keyMessageAck(deviceId string) string {
+	return fmt.Sprintf(_prefixMessageAck, deviceId)
+}
+
+// AddMessageACKMapping add a msg ack mapping. 记录用户已读偏移
+//    HSET userId_123 8000 100000000
+func (d *Dao) AddMessageACKMapping(deviceId, roomId string, deviceAck int64) error {
+	// 一个用户有N个房间 每个房间都有个已读偏移位置
+	_, err := d.RdsCli.HSet(keyMessageAck(deviceId), roomId, deviceAck).Result()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GetMessageAckMapping 读取某个用户的已读偏移
+func (d *Dao) GetMessageAckMapping(deviceId, roomId string) (string, error) {
+	// 一个用户有N个房间 每个房间都有个已读偏移位置
+	dst, err := d.RdsCli.HGet(keyMessageAck(deviceId), roomId).Result()
+	if err != nil {
+		return dst, err
+	}
+
+	return dst, err
+}
+
+////////////////////////////////////////////////////////
 
 // AddMessageList 将消息添加到对应房间 roomId.
 // zadd  roomId  time() msg
@@ -75,6 +105,8 @@ func (d *Dao) GetMessagePageList(roomId, min, max string, page, limit int64) ([]
 
 	return ids, total, nil
 }
+
+/////////////////////清理///////////////////////
 
 // ClearData 前1个月的用户清理掉
 func (d *Dao) MsgClear() error {

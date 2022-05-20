@@ -78,7 +78,7 @@ func (c *Channel) Ready() *protocol.Proto {
 	return <-c.signal
 }
 
-// Signal 对应server_tcp.go
+// Signal
 func (c *Channel) Signal() {
 	c.signal <- protocol.ProtoReady
 }

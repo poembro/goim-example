@@ -163,7 +163,7 @@ func (s *Router) UserList(c *gin.Context) {
 		user.Unread = model.Int64(count)
 		user.LastMessage = lastMessage
 
-		user.IsOnline = s.svc.IsOnline(deviceId)
+		user.IsOnline = true //s.svc.IsOnline(deviceId)
 		// 在线的用户先暂存起来
 		if user.IsOnline {
 			onlineTmp = append(onlineTmp, user)

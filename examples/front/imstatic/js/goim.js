@@ -90,10 +90,10 @@
             }
             
             var shop_id = getQuery("shop_id")
-            _.sendAjax("http://192.168.84.168:3111/api/user/create", "GET", {shop_id:shop_id}, function(result){
-                self.options = result
-                //setLocalStorage(__KEY__, dst.result)
-                self.handleTitle(result.shop_name) 
+            _.sendAjax("http://192.168.84.168:3111/api/user/create", "GET", {shop_id:shop_id}, function(dst){
+                self.options = dst
+                setLocalStorage(__KEY__, dst)
+                self.handleTitle(dst.shop_name) 
                 return 
             }, false);
           
@@ -213,7 +213,7 @@
                 var ver = dataView.getInt16(verOffset)
                 var op = dataView.getInt32(opOffset)
                 var seq = dataView.getInt32(seqOffset) 
-                //console.log("receiveHeader: packetLen=" + packetLen, "headerLen=" + headerLen, "ver=" + ver, "op=" + op, "seq=" + seq)
+                console.log("receiveHeader: packetLen=" + packetLen, "headerLen=" + headerLen, "ver=" + ver, "op=" + op, "seq=" + seq)
                 switch(op) {
                     case 8: // 认证成功的结果
                         self.sub(ws, _.config.options.room_id)
@@ -236,9 +236,9 @@
                     case 17: // 取消订阅的结果 
                         break
                     case 19: //sync 同步历史消息
-                        var msgBody = self.textDecoder.decode(data.slice(headerLen, packetLen))
-                        //console.log("receive2: ver=" + ver + " op=" + op + " seq=" + seq + " message=" + msgBody)
-                        self.syncMsgReceived(ws, msgBody)
+                        //var msgBody = self.textDecoder.decode(data.slice(headerLen, packetLen))
+                        //console.log("receive 19 : 同步历史消息 ver=" + ver + " op=" + op + " seq=" + seq + " message=" + msgBody)
+                        //self.syncMsgReceived(ws, msgBody)
                         break
                     case 21: //消息偏移上报的结果
                         //console.log("receive: ack") 
@@ -261,7 +261,7 @@
                         break
                     case 5:
                         var msgBody = self.textDecoder.decode(data.slice(headerLen, packetLen))
-                        console.log("receive: ver=" + ver + " op=" + op + " seq=" + seq + " message=" + msgBody)
+                        console.log("receive 5: ver=" + ver + " op=" + op + " seq=" + seq + " message=" + msgBody)
                         self.messageReceived(ws, msgBody)
                         break
                     default:
@@ -292,11 +292,35 @@
             var flag = ws.send(self.mergeArrayBuffer(headerBuf, bodyBuf))
             return flag
         },
-        messageAck : function (ws, seq) {
+        sync : function (ws) {
             var self = this
+            var dst = {
+                page:1,
+                op : _.config.options.accepts[0],
+                key : _.config.options.key,
+                room_id : _.config.options.room_id  
+            }
+            var token = JSON.stringify(dst)
+
+            var headerBuf = new ArrayBuffer(rawHeaderLen)  
+            var headerView = new DataView(headerBuf, 0)  
+            var bodyBuf = self.textEncoder.encode(token)
+
+            headerView.setInt32(packetOffset, rawHeaderLen + bodyBuf.byteLength)  
+            headerView.setInt16(headerOffset, rawHeaderLen)  
+            headerView.setInt16(verOffset, 1)  
+            headerView.setInt32(opOffset, 18)
+            headerView.setInt32(seqOffset, 1)  
+         
+            return ws.send(self.mergeArrayBuffer(headerBuf, bodyBuf))
+        },
+        messageAck : function (ws, key, roomId, id) {
+            var self = this
+            var dst = {key :key, room_id :roomId, id:id}
+            var token = JSON.stringify(dst)
             var headerBuf = new ArrayBuffer(rawHeaderLen) //分配16个固定元素大小
             var headerView = new DataView(headerBuf, 0) //读写时手动设定字节序的类型
-            var bodyBuf = self.textEncoder.encode(seq)
+            var bodyBuf = self.textEncoder.encode(token)
             headerView.setInt32(packetOffset, rawHeaderLen + bodyBuf.byteLength) //写入从内存的第0个字节序开始  值为16
             headerView.setInt16(headerOffset, rawHeaderLen) //写入从内存的第4个字节序开始  值为16
             headerView.setInt16(verOffset, 1)  //写入从内存的6第个字节序开始，值为1     省去的第三个参数: true为小端字节序，false为大端字节序 不填为大端字节序
@@ -332,17 +356,7 @@
            
             return flag
         },
-        sync : function (ws) {
-            var headerBuf = new ArrayBuffer(rawHeaderLen)  
-            var headerView = new DataView(headerBuf, 0)  
-            headerView.setInt32(packetOffset, rawHeaderLen)  
-            headerView.setInt16(headerOffset, rawHeaderLen)  
-            headerView.setInt16(verOffset, 1)  
-            headerView.setInt32(opOffset, 18)
-            headerView.setInt32(seqOffset, 1)  
-            ws.send(headerBuf)
-        },
-    
+
         auth: function (ws) {
             var self = this 
             //var token = '{"mid":123, "room_id":"live://1000", "platform":"web", "accepts":[1000,1001,1002]}'
@@ -359,7 +373,7 @@
             var flag = ws.send(self.mergeArrayBuffer(headerBuf, bodyBuf))
             //console.log("send: auth token: " + token)
             return flag
-        }, 
+        },
         syncMsgReceived :  function (ws, body) {
             var shows = JSON.parse(body)
             if (shows) {
@@ -370,12 +384,19 @@
         },
         messageReceived :  function (ws, body) {
             var self = this
-            var show = JSON.parse(body)
-            if (show) { 
+            var key = _.config.options.key
+            var room_id = _.config.options.room_id
+            
+            var dst = JSON.parse(body)
+            if (dst instanceof Array) {
+                for(var i=0;i<dst.length; i++){
+                    _.render.show(dst[i])
+                }
+            } else{
+                _.render.show(dst)
+                self.messageAck(ws, key, room_id, dst.id) //上报 消息偏移
                 //console.log( "--上报 消息偏移 --show.id-->" + show.id + " ---self.msgSeq-->" + self.msgSeq )  
-                self.messageAck(ws, show.id) //上报 消息偏移
-                _.render.show(show)
-            }
+            } 
         },
         mergeArrayBuffer : function (ab1, ab2) {
             var u81 = new Uint8Array(ab1), u82 = new Uint8Array(ab2),
