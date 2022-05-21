@@ -106,11 +106,11 @@ func Default() *Config {
 			HandshakeTimeout: xtime.Duration(time.Second * 5),
 		},
 		Bucket: &Bucket{
-			Size:          32,
-			Channel:       1024,
-			Room:          1024,
-			RoutineAmount: 32,
-			RoutineSize:   1024,
+			Size:          32, //b 表示创建32个桶  Bucket切片长度  即：每个 设备id 哈希32 选择1个桶
+			Channel:       1024, //b.chs map[deviceId]*Channel 容量为 1024  即: 每个设备id 连接后创建的 Channel结构 会放入这个对应map
+			Room:          1024, //b.rooms map[roomId]*Room 容量为1024  即: 每个设备id 所在房间号 会放入这个对应map
+			RoutineAmount: 32,  // 开启32个groutine去等 广播至房间的 消息
+			RoutineSize:   1024, //b.routines[RoutineAmount] 广播至房间的 消息通道是有缓存通道 1024
 		},
 	}
 }
