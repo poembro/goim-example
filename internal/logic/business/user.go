@@ -46,7 +46,6 @@ func (*Business) BuildMid() (uint64, string) {
 func (s *Business) UserCreate(shopId, shopName, shopFace, remoteAddr, referer, userAgent string) *model.User {
 	platform := "web"
 	sID, smid := s.BuildMid()
-
 	deviceId := s.BuildDeviceId(platform, smid)
 
 	l := len(smid)
@@ -57,11 +56,14 @@ func (s *Business) UserCreate(shopId, shopName, shopFace, remoteAddr, referer, u
 		panic(err)
 	}
 	return &model.User{
-		Mid:        model.Int64(sID),
-		Key:        deviceId,
-		RoomID:     fmt.Sprintf("%s://%s", "live", smid),
-		Platform:   platform,
-		Accepts:    []int32{8000}, // 8000是类型/频道 如: 客服聊天类型 直播大厅类型  弹幕类型 与某人聊天房间类型
+		Mid:      model.Int64(sID),
+		Key:      deviceId,
+		RoomID:   fmt.Sprintf("%s://%s", "live", smid),
+		Platform: platform,
+		// 8000是频道 如: 客服聊天类型 弹幕信息类型 与某人聊天房间类型
+		// 游戏大厅的通知 游戏匹配成功的通知 游戏房间的聊天
+		// 如 在游戏房间刷怪、聊天的同时, 还能接收游戏大厅的广播通知消息)
+		Accepts:    []int32{1000, 8000},
 		Nickname:   nickname,
 		Face:       "http://img.touxiangwu.com/2020/3/uq6Bja.jpg", // 随机头像
 		ShopId:     shopId,
@@ -95,7 +97,7 @@ func (s *Business) ShopCreate(shopId, shopName, shopFace, remoteAddr, referer, u
 		Key:        deviceId,
 		RoomID:     fmt.Sprintf("%s://%s", "live", shopId),
 		Platform:   platform,
-		Accepts:    []int32{8000}, // 8000是类型/频道 如: 客服聊天类型 直播大厅类型  弹幕类型 与某人聊天房间类型
+		Accepts:    []int32{8000},
 		Nickname:   nickname,
 		Face:       "http://img.touxiangwu.com/2020/3/uq6Bja.jpg", // 随机头像
 		ShopId:     shopId,

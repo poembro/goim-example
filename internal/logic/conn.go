@@ -110,3 +110,16 @@ func (l *Logic) Receive(c context.Context, mid int64, proto *protocol.Proto) (er
 	}
 	return
 }
+
+// Keys is online   框架之外,第三方业务 逻辑扩展
+func (l *Logic) IsOnline(c context.Context, keys []string) bool {
+	servers, err := l.dao.ServersByKeys(c, keys)
+	if err != nil {
+		return false
+	}
+	if len(servers) > 0 && servers[0] == "" {
+		return false
+	}
+
+	return true
+}

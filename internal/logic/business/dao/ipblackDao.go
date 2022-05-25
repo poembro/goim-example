@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	// 存放黑名单数据
 	_prefixIpblackList = "golang_im:shop_ip_black_list:%s"
 )
 

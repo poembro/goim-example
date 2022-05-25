@@ -8,15 +8,16 @@ import (
 )
 
 const (
-	_prefixMidServer    = "golang_im:userId_%d"
-	_prefixMidStrServer = "golang_im:userId_%s"   // userId -> DeviceId:userinfo
-	_prefixKeyServer    = "golang_im:deviceId_%s" // deviceId -> server
+	// 存放用户详细
+	_prefixMidServer    = "golang_im:userId_%d" // hset userId deviceId  json
+	_prefixMidStrServer = "golang_im:userId_%s" // userId -> DeviceId:userinfo
 )
 
 func KeyUserIdServer(userId int64) string {
 	return fmt.Sprintf(_prefixMidServer, userId)
 }
 
+// msg 消息删除时用到了
 func KeyUserIdStrServer(userId string) string {
 	return fmt.Sprintf(_prefixMidStrServer, userId)
 }

@@ -9,7 +9,9 @@ import (
 )
 
 const (
-	_prefixMsgList    = "golang_im:messagelist:%s"
+	// 存放推送消息
+	_prefixMsgList = "golang_im:messagelist:%s"
+	// 存放 已读未读偏移
 	_prefixMessageAck = "golang_im:deviceId_msg_ack_%s" // deviceId -> RoomID:ack
 )
 

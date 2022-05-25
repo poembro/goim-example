@@ -96,7 +96,7 @@ func (s *Server) Operate(ctx context.Context, p *protocol.Proto, ch *Channel, b 
 			log.Errorf("s.Report(%d) op:%d error(%v)", ch.Mid, p.Op, err)
 		}
 		p.Body = nil
-		p.Op++ // 第三方业务扩展，响应op比请求op加1
+		p.Op++ // 第三方业务扩展，响应op比请求op大1
 	}
 	return nil
 }

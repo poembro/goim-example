@@ -1,6 +1,7 @@
 package apihttp
 
 import (
+	"context"
 	"encoding/json"
 	"goim-demo/internal/logic/business/model"
 	"goim-demo/internal/logic/business/util"
@@ -163,7 +164,7 @@ func (s *Router) UserList(c *gin.Context) {
 		user.Unread = model.Int64(count)
 		user.LastMessage = lastMessage
 
-		user.IsOnline = true //s.svc.IsOnline(deviceId)
+		user.IsOnline = s.logic.IsOnline(context.TODO(), []string{deviceId})
 		// 在线的用户先暂存起来
 		if user.IsOnline {
 			onlineTmp = append(onlineTmp, user)

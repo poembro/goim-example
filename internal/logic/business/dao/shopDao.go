@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	// 存后台用户登录数据
 	_prefixShopList      = "golang_im:shop_list" //商户列表
 	_prefixShopUsersList = "golang_im:shop_user_list:%s"
 )
