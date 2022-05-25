@@ -26,7 +26,8 @@
 
 
 ## 部署
-1.安装redis etcd golang1.17+ 略;
+- 方案一 选择redis作为消息中间件切换, 仅需要 redis etcd 即可;
+- 方案二 选择kafka作为消息中间件切换, 需要 redis kafka etcd 即可;
 ```sh 
 $ git clone git@github.com:poembro/goim-demo.git
 $ cd goim-demo
@@ -37,9 +38,10 @@ $ make runlogic   ##运行 logic 服务
 $ make runcomet   ##运行 comet 服务
 
 $ cd examples/javascript/ && go run main.go   ## 运行http静态页面
-$ cd test/ && go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运行100个并发测试脚本 
-
+$ cd test/ && go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运行100个并发测试脚本  
 ```
+
+
 
 
 ## 看源码过程中 各个结构图

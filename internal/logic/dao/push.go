@@ -11,7 +11,7 @@ import (
 	sarama "gopkg.in/Shopify/sarama.v1"
 )
 
-func (d *Dao) publish(pushMsg *pb.PushMsg) (err error) {
+func (d *Dao) handle(pushMsg *pb.PushMsg) (err error) {
 	b, err := proto.Marshal(pushMsg)
 	if err != nil {
 		return
@@ -61,7 +61,7 @@ func (d *Dao) PushMsg(c context.Context, op int32, server string, keys []string,
 	// 在这里增加即时消息存储扩展
 	// 如果需要只存储离线消息, 可以先检查当前用户是否在线, 依据用户在线情况处理存储
 
-	return d.publish(pushMsg)
+	return d.handle(pushMsg)
 }
 
 // BroadcastRoomMsg 针对房间的推送
@@ -72,7 +72,7 @@ func (d *Dao) BroadcastRoomMsg(c context.Context, op int32, room string, msg []b
 		Room:      room,
 		Msg:       msg,
 	}
-	return d.publish(pushMsg)
+	return d.handle(pushMsg)
 }
 
 // BroadcastMsg 针对所有房间的推送
@@ -84,5 +84,5 @@ func (d *Dao) BroadcastMsg(c context.Context, op, speed int32, msg []byte) error
 		Msg:       msg,
 	}
 
-	return d.publish(pushMsg)
+	return d.handle(pushMsg)
 }

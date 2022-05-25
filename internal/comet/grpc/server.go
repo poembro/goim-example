@@ -20,15 +20,14 @@ import (
 
 // interceptor 拦截器
 func interceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		//log.Infoln("---->", "无Token认证信息")
-	}
+	md, _ := metadata.FromIncomingContext(ctx)
 
 	log.Infoln("comet_grpc_gateway ",
 		"    method:", info.FullMethod,
 		"    md:", md,
 		"    req:", req)
+
+	// 鉴权 TODO
 
 	// 继续处理请求
 	return handler(ctx, req)
