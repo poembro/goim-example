@@ -116,11 +116,11 @@ func (s *Server) Close() (err error) {
 }
 
 func (s *Server) onlineproc() {
+	var (
+		allRoomsCount map[string]int32
+		err           error
+	)
 	for {
-		var (
-			allRoomsCount map[string]int32
-			err           error
-		)
 		roomCount := make(map[string]int32)
 		for _, bucket := range s.buckets {
 			for roomID, count := range bucket.RoomsCount() {
@@ -137,6 +137,7 @@ func (s *Server) onlineproc() {
 		for _, bucket := range s.buckets {
 			bucket.UpRoomsCount(allRoomsCount)
 		}
-		time.Sleep(time.Second * 10)
+		n := rand.Intn(20)
+		time.Sleep(time.Second * time.Duration(10+n))
 	}
 }

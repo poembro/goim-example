@@ -3,11 +3,11 @@ package apihttp
 import (
 	"context"
 	"fmt"
+	"goim-demo/internal/logic/business/model"
 	"goim-demo/internal/logic/business/util"
+	utilModel "goim-demo/internal/logic/model"
 	"strings"
 	"time"
-
-	"goim-demo/internal/logic/model"
 
 	"github.com/gin-gonic/gin"
 )
@@ -72,9 +72,10 @@ func (s *Router) MsgPush(c *gin.Context) {
 		return
 	}
 
-	typ, room, _ := model.DecodeRoomKey(arg.RoomId)
+	typ, room, _ := utilModel.DecodeRoomKey(arg.RoomId)
+
 	// 推送
-	if err := s.logic.PushRoom(c, 8000, typ, room, util.S2B(body)); err != nil {
+	if err := s.logic.PushRoom(c, model.OpMessage, typ, room, util.S2B(body)); err != nil {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
 		return
 	}

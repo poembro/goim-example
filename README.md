@@ -24,7 +24,6 @@
 ### kafka 改redis
 - 目前demo代码支持redis/kafka 做中间件
 
-
 ## 部署
 - 方案一 选择redis作为消息中间件切换, 仅需要 redis etcd 即可;
 - 方案二 选择kafka作为消息中间件切换, 需要 redis kafka etcd 即可;
@@ -42,21 +41,24 @@ $ cd test/ && go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运
 ```
 
 
-
-
-## 看源码过程中 各个结构图
-[![](./goim.png)](https://github.com/poembro/goim-demo)
-
-
 ### 问题
 ```
+问题一 : 房间号如果是 用户id  (目前采用该方式,缺点在可接受范围)
+1. 房间号太多 分散到redis 64个hset类型key, 每个key的value值有个 room_count 会非常大  
+ comet服务会上报房间号写入 redis "HSET" "ol_192.168.3.222" "43" "{\"server\":\"192.168.3.222\",\"room_count\":{\"live://1000\":1},\"updated\":1577077540}"
+
+2.单个节点如果有 10000人在线 则  1w / 64 = 156 个房间
+
+3.房间下线 room_count 会对应 减少
+
+
+
 遇到问题 一: 不同包路径下的 同名 api.proto 报错提示已经引入
 
 luoyuxiangdeMacBook-Pro:goim-demo luoyuxiang$ make runjob
 export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/job -conf=target/job.toml -region=sh -zone=sh001 -deploy.env=prod -host=192.168.84.168 -log_dir=./target 
 WARNING: proto: file "api.proto" is already registered
 See https://developers.google.com/protocol-buffers/docs/reference/go/faq#namespace-conflict
-
 
 
 解决
@@ -193,3 +195,10 @@ export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
 < Content-Length: 41
 
 ```
+
+
+
+
+## 看源码过程中 各个结构图
+[![](./goim.png)](https://github.com/poembro/goim-demo)
+
