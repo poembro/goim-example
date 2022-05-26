@@ -1,5 +1,5 @@
 # goim-demo
-一个goim的demo 改服务发现为etcd 改kafka为redis 
+一个 goim 的demo 改服务发现为etcd 改kafka为redis 
 
 ## 特性 
  * 高性能
@@ -53,7 +53,7 @@ $ cd test/ && go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运
 
 
 
-遇到问题 一: 不同包路径下的 同名 api.proto 报错提示已经引入
+问题 二: 不同包路径下的 同名 api.proto 报错提示已经引入
 
 luoyuxiangdeMacBook-Pro:goim-demo luoyuxiang$ make runjob
 export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/job -conf=target/job.toml -region=sh -zone=sh001 -deploy.env=prod -host=192.168.84.168 -log_dir=./target 
