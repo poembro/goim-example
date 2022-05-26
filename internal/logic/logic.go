@@ -86,7 +86,7 @@ func (l *Logic) loadOnline(ins map[string]string) (err error) {
 		online    *model.Online
 	)
 	for _, grpcAddr := range ins {
-		online, err = l.dao.ServerOnline(context.Background(), grpcAddr)
+		online, err = l.dao.GetServerOnline(context.Background(), grpcAddr)
 		if err != nil {
 			return
 		}

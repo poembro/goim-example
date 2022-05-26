@@ -239,11 +239,11 @@ func (d *Dao) addServerOnline(c context.Context, key string, hashKey string, onl
 }
 
 // ServerOnline get a server online.  logic服务初始化时每隔10秒调了这里
-func (d *Dao) ServerOnline(c context.Context, server string) (online *model.Online, err error) {
+func (d *Dao) GetServerOnline(c context.Context, server string) (online *model.Online, err error) {
 	online = &model.Online{RoomCount: map[string]int32{}}
 	key := keyServerOnline(server) // HGET "ol_192.168.3.100" (hash(live://1000) % 64)
 	for i := 0; i < 64; i++ {
-		ol, err := d.serverOnline(c, key, strconv.FormatInt(int64(i), 10))
+		ol, err := d.getServerOnline(c, key, strconv.FormatInt(int64(i), 10))
 		if err == nil && ol != nil {
 			online.Server = ol.Server
 			if ol.Updated > online.Updated {
@@ -257,7 +257,7 @@ func (d *Dao) ServerOnline(c context.Context, server string) (online *model.Onli
 	return
 }
 
-func (d *Dao) serverOnline(c context.Context, key string, hashKey string) (online *model.Online, err error) {
+func (d *Dao) getServerOnline(c context.Context, key string, hashKey string) (online *model.Online, err error) {
 	conn := d.redis.Get()
 	defer conn.Close()
 	b, err := redis.Bytes(conn.Do("HGET", key, hashKey))
