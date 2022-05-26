@@ -52,8 +52,18 @@ $ cd test/ && go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运
 3.房间下线 room_count 会对应 减少
 
 
+问题二 : 多台机器部署 kafka 的 group id 需要一致 
+    1.所有消费者都在"一个消费者组"里则是 队列模式  
+    2.所有消费者分布在"不同组"中则是 发布-订阅模式。
 
-问题 二: 不同包路径下的 同名 api.proto 报错提示已经引入
+    1.1 队列模式下，允许消费者组中多个消费者并行有序处理消息，组中的消费者数量最好不要大于 topic 的 partition（分区）数量。 
+    消费者数=分区数:每个消费者消费一个分区的消息； 
+    消费者数<分区数:某些消费者会处理多个分区的消息； 
+    消费者数>分区数:多余的消费者将空等，无法处理消息；
+
+
+
+问题三: 不同包路径下的 同名 api.proto 报错提示已经引入
 
 luoyuxiangdeMacBook-Pro:goim-demo luoyuxiang$ make runjob
 export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/job -conf=target/job.toml -region=sh -zone=sh001 -deploy.env=prod -host=192.168.84.168 -log_dir=./target 

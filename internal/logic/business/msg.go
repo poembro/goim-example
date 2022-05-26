@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"goim-demo/internal/logic/business/util"
+	"strconv"
 
 	log "github.com/golang/glog"
 )
@@ -45,7 +46,7 @@ func (s *Business) Sync(ctx context.Context, mid int64, body []byte) (int32, []s
 // MessageACK 消息确认机制
 func (s *Business) MessageACK(ctx context.Context, mid int64, body []byte) error {
 	var params struct {
-		ID     int64  `json:"id"`
+		ID     string `json:"id"`
 		Key    string `json:"key"`
 		RoomID string `json:"room_id"`
 	}
@@ -53,7 +54,8 @@ func (s *Business) MessageACK(ctx context.Context, mid int64, body []byte) error
 		log.Errorf("json.Unmarshal(%s) error(%v)", body, err)
 		return err
 	}
-	s.dao.AddMessageACKMapping(params.Key, params.RoomID, params.ID)
+	id, _ := strconv.ParseInt(params.ID, 10, 64)
+	s.dao.AddMessageACKMapping(params.Key, params.RoomID, id)
 	return nil
 }
 

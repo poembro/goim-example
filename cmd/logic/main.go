@@ -35,8 +35,9 @@ func main() {
 	httpSrv := http.New(conf.Conf.HTTPServer, srv)
 	rpcSrv := grpc.New(conf.Conf.RPCServer, srv)
 	//可以在此 追加业务代码  抄grpc目录 然后目录下做 业务认证逻辑
+	dis := etcdv3.New(conf.Conf.Discovery.Nodes)
+	register(dis, conf.Conf)
 
-	cancel, _ := register(conf.Conf)
 	// signal
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
@@ -45,9 +46,7 @@ func main() {
 		log.Infof("goim-logic get a signal %s", s.String())
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-			if cancel != nil {
-				cancel()
-			}
+			dis.Deregister() // 移除 etcd 中的节点
 			srv.Close()
 			httpSrv.Close()
 			rpcSrv.GracefulStop()
@@ -62,8 +61,7 @@ func main() {
 }
 
 // 服务注册
-func register(c *conf.Config) (func(), error) {
-	etcdAddr := c.Discovery.Nodes
+func register(dis *etcdv3.Registry, c *conf.Config) error {
 	// 当前grpc 服务的 外网ip 端口
 	_, port, _ := net.SplitHostPort(c.RPCServer.Addr)
 	ip := c.Env.Host
@@ -72,5 +70,5 @@ func register(c *conf.Config) (func(), error) {
 	env := c.Env.DeployEnv
 
 	// 服务注册至ETCD
-	return etcdv3.RegisterEtcd(etcdAddr, 5, env, appid, region, zone, ip, port)
+	return dis.Register(5, env, appid, region, zone, ip, port)
 }

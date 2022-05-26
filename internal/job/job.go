@@ -71,10 +71,10 @@ func (j *Job) watchComet() {
 	zone := j.c.Env.Zone
 	env := j.c.Env.DeployEnv
 	appid := "goim.comet"
-
+	dis := etcdv3.New(etcdAddr)
 	go func() {
 		for {
-			ins := etcdv3.DiscoveryEtcd(etcdAddr, env, appid, region, zone)
+			ins := dis.GetService(env, appid, region, zone)
 			err := j.newAddress(ins)
 			if err != nil {
 				return

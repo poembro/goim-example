@@ -6,24 +6,24 @@ import (
 	"sync"
 
 	log "github.com/golang/glog"
-	"go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/mvcc/mvccpb"
+	"go.etcd.io/etcd/api/v3/mvccpb"
+	clientv3 "go.etcd.io/etcd/client/v3"
 
 	"google.golang.org/grpc/resolver"
 )
 
 type Builder struct {
-	Client *clientv3.Client
+	client *clientv3.Client
 }
 
 func (b *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
 	prefix := fmt.Sprintf("/%s/", target.Endpoint)
 	r := &Resolver{
-		Client: b.Client,
+		client: b.client,
 		cc:     cc,
 		prefix: prefix,
 	}
-	log.Infof("etcdv3 grpc to find target:%s \r\n", prefix)
+	log.Infof("---> etcdv3 grpc to find target:%s \r\n", prefix)
 	go r.Watcher(prefix)
 	r.ResolveNow(resolver.ResolveNowOptions{})
 	return r, nil
@@ -37,10 +37,17 @@ func (r *Builder) Scheme() string {
 
 type Resolver struct {
 	sync.RWMutex
-	Client    *clientv3.Client
+
 	cc        resolver.ClientConn
 	prefix    string
 	addresses map[string]resolver.Address
+
+	//////////etcd//////////
+	client     *clientv3.Client
+	kvCli      clientv3.KV
+	watcherCli clientv3.Watcher
+	ctx        context.Context
+	cancel     context.CancelFunc
 }
 
 func (r *Resolver) ResolveNow(rn resolver.ResolveNowOptions) {
@@ -48,24 +55,36 @@ func (r *Resolver) ResolveNow(rn resolver.ResolveNowOptions) {
 }
 
 func (r *Resolver) Close() {
-	// todo
+	log.Infof("---> etcdv3 -------Stop()被调用了---------->")
+	r.cancel()
+	r.watcherCli.Close()
+	return
 }
 
 func (r *Resolver) Watcher(prefix string) {
-	r.addresses = make(map[string]resolver.Address)
-	response, err := r.Client.Get(context.Background(), r.prefix, clientv3.WithPrefix())
-	if err == nil {
-		for _, kv := range response.Kvs {
-			r.setAddress(string(kv.Key), string(kv.Value))
-		}
+	r.ctx, r.cancel = context.WithCancel(context.Background())
 
-		r.cc.UpdateState(resolver.State{
-			Addresses: r.getAddresses(),
-		})
+	r.addresses = make(map[string]resolver.Address)
+	r.watcherCli = clientv3.NewWatcher(r.client)
+	r.kvCli = clientv3.NewKV(r.client)
+
+	// 先获取一次
+	resp, err := r.kvCli.Get(r.ctx, r.prefix, clientv3.WithPrefix())
+	if err != nil {
+		log.Infof("---> etcdv3 err: %s", err.Error())
+		return
+	}
+	for _, kv := range resp.Kvs {
+		r.setAddress(string(kv.Key), string(kv.Value))
 	}
 
-	watch := r.Client.Watch(context.Background(), r.prefix, clientv3.WithPrefix())
-	for response := range watch {
+	r.cc.UpdateState(resolver.State{
+		Addresses: r.getAddresses(),
+	})
+
+	// 监听key
+	watchChan := r.watcherCli.Watch(r.ctx, r.prefix, clientv3.WithPrefix(), clientv3.WithRev(0)) // 监听的revision起点
+	for response := range watchChan {
 		for _, event := range response.Events {
 			switch event.Type {
 			case mvccpb.PUT:
@@ -79,6 +98,7 @@ func (r *Resolver) Watcher(prefix string) {
 			Addresses: r.getAddresses(),
 		})
 	}
+	log.Infof("---> etcdv3 -------func (r *Resolver) Watcher 被调用了---------->")
 }
 
 func (r *Resolver) setAddress(key, address string) {
