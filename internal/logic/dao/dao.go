@@ -6,8 +6,8 @@ import (
 
 	"goim-demo/internal/logic/conf"
 
+	kafka "github.com/Shopify/sarama"
 	"github.com/gomodule/redigo/redis"
-	kafka "gopkg.in/Shopify/sarama.v1"
 )
 
 // Dao dao.

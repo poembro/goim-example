@@ -99,6 +99,7 @@ func (r *Resolver) Watcher(prefix string) {
 		})
 	}
 	log.Infof("---> etcdv3 -------func (r *Resolver) Watcher 被调用了---------->")
+	r.Close()
 }
 
 func (r *Resolver) setAddress(key, address string) {

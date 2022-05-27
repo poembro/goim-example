@@ -57,8 +57,8 @@ func (j *Job) ConsumeRedis() error {
 		}
 
 		log.Infoln("Subscribe message:", pushMsg)
-		if err := j.push(context.Background(), pushMsg); err != nil {
-			log.Errorf("j.push(%v) error(%v)", pushMsg, err)
+		if err := j.Push(context.Background(), pushMsg); err != nil {
+			log.Errorf("j.Push(%v) error(%v)", pushMsg, err)
 			return err
 		}
 		return nil

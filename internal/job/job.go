@@ -6,7 +6,7 @@ import (
 
 	"goim-demo/internal/job/conf"
 
-	cluster "github.com/bsm/sarama-cluster"
+	"github.com/Shopify/sarama"
 	"github.com/gomodule/redigo/redis"
 
 	"goim-demo/pkg/etcdv3"
@@ -18,7 +18,7 @@ import (
 type Job struct {
 	c *conf.Config
 
-	consumer     *cluster.Consumer
+	consumer     sarama.ConsumerGroup
 	cometServers map[string]*Comet
 
 	rooms      map[string]*Room

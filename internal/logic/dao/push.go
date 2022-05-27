@@ -8,7 +8,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 	log "github.com/golang/glog"
 
-	sarama "gopkg.in/Shopify/sarama.v1"
+	"github.com/Shopify/sarama"
 )
 
 func (d *Dao) handle(pushMsg *pb.PushMsg) (err error) {
