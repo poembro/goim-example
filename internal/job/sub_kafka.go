@@ -70,12 +70,8 @@ func newKafkaSub(c *conf.Kafka) sarama.ConsumerGroup {
 
 	//一开始是哪个worker在处理就一直是它，后面加进来的worker不起作用 除非第一个挂了
 	//config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
-
-	//轮流
-	//config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
-
-	//默认  分区分配策略
-	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	//config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin //轮流
+	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange //默认  分区分配策略
 
 	//多个partition 自动计算, 设置选择分区的策略为Hash
 	// 生产消息时记得 &sarama.ProducerMessage{ Key: sarama.StringEncoder(strconv.Itoa(RecvID)),)

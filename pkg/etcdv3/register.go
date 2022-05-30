@@ -116,12 +116,8 @@ func (r *Registry) GetService(env, appid, region, zone string) map[string]string
 }
 
 func (r *Registry) ResolverEtcd() {
-	//cancelCtx, cancel := context.WithCancel(r.opts.ctx)
 	builder := &Builder{
 		client: r.client,
-		//watcher: clientv3.NewWatcher(client),
-		//kv:      clientv3.NewKV(client),
-		//first:   true,
 	}
 
 	resolver.Register(builder)
