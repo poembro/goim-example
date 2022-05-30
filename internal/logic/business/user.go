@@ -58,7 +58,7 @@ func (s *Business) UserCreate(shopId, shopName, shopFace, remoteAddr, referer, u
 	return &model.User{
 		Mid:      model.Int64(Mid),
 		Key:      deviceId,
-		RoomID:   fmt.Sprintf("%s://%s", "live", smid),
+		RoomID:   fmt.Sprintf("%s://%s", model.RoomTyp, smid),
 		Platform: platform,
 		// 8000是频道 如: 客服聊天类型 弹幕信息类型 与某人聊天房间类型
 		// 游戏大厅的通知 游戏匹配成功的通知 游戏房间的聊天
@@ -95,7 +95,7 @@ func (s *Business) ShopCreate(shopId, shopName, shopFace, remoteAddr, referer, u
 	return &model.User{
 		Mid:        model.Int64(sID),
 		Key:        deviceId,
-		RoomID:     fmt.Sprintf("%s://%s", "live", shopId),
+		RoomID:     fmt.Sprintf("%s://%s", model.RoomTyp, shopId),
 		Platform:   platform,
 		Accepts:    []int32{model.OpGlobal, model.OpMessage},
 		Nickname:   nickname,
