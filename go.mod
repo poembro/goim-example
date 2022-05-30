@@ -39,14 +39,11 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/grpc v1.38.0
 	google.golang.org/protobuf v1.26.1-0.20210525005349-febffdd88e85 // indirect
-	gopkg.in/Shopify/sarama.v1 v1.20.1
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
 require (
-	github.com/DataDog/zstd v1.5.2 // indirect
-	github.com/Shopify/toxiproxy v1.2.1 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
@@ -69,6 +66,6 @@ require (
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c // indirect
 )
 
-//replace github.com/Shopify/sarama => github.com/Shopify/sarama v1.24.1 // indirect
+replace github.com/Shopify/sarama => github.com/Shopify/sarama v1.33.0 // indirect
 
 replace google.golang.org/grpc => google.golang.org/grpc v1.29.1 // indirect

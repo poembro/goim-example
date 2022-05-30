@@ -64,7 +64,7 @@ func (consumer *AppConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, c
 
 func newKafkaSub(c *conf.Kafka) sarama.ConsumerGroup {
 	config := sarama.NewConfig()
-	config.Version = sarama.V1_1_1_0
+	config.Version = sarama.V2_5_0_0
 	config.ClientID = fmt.Sprintf("%d", time.Now().Unix())
 	config.ChannelBufferSize = 256 // channel长度默认256
 
@@ -72,10 +72,15 @@ func newKafkaSub(c *conf.Kafka) sarama.ConsumerGroup {
 	//config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
 
 	//轮流
-	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+	//config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
 
 	//默认  分区分配策略
-	//config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+
+	//多个partition 自动计算, 设置选择分区的策略为Hash
+	// 生产消息时记得 &sarama.ProducerMessage{ Key: sarama.StringEncoder(strconv.Itoa(RecvID)),)
+	// Kafka客户端会根据Key进行Hash，我们通过把接收用户ID作为Key，这样就能让所有发给某个人的消息落到同一个分区了，也就有序了。
+	//p.config.Producer.Partitioner = sarama.NewHashPartitioner  // 默认 hash
 
 	config.Consumer.Return.Errors = true
 

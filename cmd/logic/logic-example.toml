@@ -44,7 +44,7 @@
 
 [kafka]
     topic = "goim-push-topic"
-    brokers = ["10.0.41.145:9092"]
+    brokers = ["10.0.41.145:9093","10.0.41.145:9094","10.0.41.145:9095"]
 
 [redis]
     network = "tcp"

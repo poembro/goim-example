@@ -6,14 +6,14 @@ import (
 
 	"goim-demo/internal/logic/conf"
 
-	kafka "github.com/Shopify/sarama"
+	"github.com/Shopify/sarama"
 	"github.com/gomodule/redigo/redis"
 )
 
 // Dao dao.
 type Dao struct {
 	c           *conf.Config
-	kafkaPub    kafka.SyncProducer
+	kafkaPub    sarama.SyncProducer
 	redis       *redis.Pool
 	redisExpire int32
 }
@@ -33,13 +33,15 @@ func New(c *conf.Config) *Dao {
 	return d
 }
 
-func newKafkaPub(c *conf.Kafka) kafka.SyncProducer {
+func newKafkaPub(c *conf.Kafka) sarama.SyncProducer {
 	var err error
-	kc := kafka.NewConfig()
-	kc.Producer.RequiredAcks = kafka.WaitForAll // Wait for all in-sync replicas to ack the message
-	kc.Producer.Retry.Max = 10                  // Retry up to 10 times to produce the message
+	kc := sarama.NewConfig()
+	kc.Version = sarama.V2_5_0_0
+	kc.Producer.Partitioner = sarama.NewHashPartitioner
+	kc.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
+	kc.Producer.Retry.Max = 10                   // Retry up to 10 times to produce the message
 	kc.Producer.Return.Successes = true
-	pub, err := kafka.NewSyncProducer(c.Brokers, kc)
+	pub, err := sarama.NewSyncProducer(c.Brokers, kc)
 	if err != nil {
 		panic(err)
 	}
