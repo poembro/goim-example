@@ -37,6 +37,11 @@ func newKafkaPub(c *conf.Kafka) sarama.SyncProducer {
 	var err error
 	kc := sarama.NewConfig()
 	kc.Version = sarama.V2_8_1_0
+	// sarama.NewRandomPartitioner // 随机分配分区 partition
+	// sarama.NewRoundRobinPartitioner // 轮换选择分区
+	// sarama.NewHashPartitioner // 通过设置 hash-key 自动 hash 分区，如果没有设置key，则随机选取 msg.Key = sarama.StringEncoder("topic1key")
+	// sarama.NewManualPartitioner // 人工指定分区 msg.Partition = 0       // 人工指定分区
+
 	kc.Producer.Partitioner = sarama.NewHashPartitioner
 	kc.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
 	kc.Producer.Retry.Max = 10                   // Retry up to 10 times to produce the message

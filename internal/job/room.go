@@ -37,9 +37,9 @@ func NewRoom(job *Job, id string, c *conf.Room) (r *Room) {
 		c:     c,
 		id:    id,
 		job:   job,
-		proto: make(chan *protocol.Proto, c.Batch*2), //Batch 是 20
+		proto: make(chan *protocol.Proto, c.Batch*2), //Batch 20
 	}
-	go r.pushproc(c.Batch, time.Duration(c.Signal))
+	go r.pushproc(c.Batch, time.Duration(c.Signal)) // Signal 1s
 	return
 }
 
@@ -96,7 +96,7 @@ func (r *Room) pushproc(batch int, sigTime time.Duration) {
 		}
 		_ = r.job.broadcastRoomRawBytes(r.id, buf.Buffer())
 		// TODO use reset buffer
-		// after push to room channel, renew a buffer, let old buffer gc
+		// after push to room channel, renew a buffer, let old buffer gc //?????????????????????????
 		buf = bytes.NewWriterSize(buf.Size())
 		n = 0
 		if r.c.Idle != 0 {

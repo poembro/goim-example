@@ -10,9 +10,9 @@ import (
 	"strings"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/google/uuid"
 
 	"github.com/gogo/protobuf/proto"
 	log "github.com/golang/glog"
@@ -65,7 +65,7 @@ func (consumer *AppConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, c
 func newKafkaSub(c *conf.Kafka) sarama.ConsumerGroup {
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_8_1_0
-	config.ClientID = fmt.Sprintf("%d", time.Now().Unix())
+	config.ClientID = fmt.Sprintf("%s_%s", c.Group, uuid.New().String())
 	config.ChannelBufferSize = 256 // channel长度默认256
 
 	//一开始是哪个worker在处理就一直是它，后面加进来的worker不起作用 除非第一个挂了

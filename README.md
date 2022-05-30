@@ -1,5 +1,5 @@
 # goim-demo
-一个 goim 的demo 改服务发现为etcd 改kafka为redis 
+一个 goim 的demo 改服务发现为etcd 改 kafka 为 redis 
 
 ## 特性 
  * 高性能
@@ -11,7 +11,7 @@
  * 支持安全验证（未授权用户不能订阅）
  * 多协议支持（websocket，tcp）
  * 可拓扑的架构（comet、job、logic模块可动态无限扩展）
- * 支持redis、kafka两种消息中间件切换 (目前demo代码通过配置文件中consume.kafkaEnable、consume.redisEnable设置)
+ * 支持redis、kafka两种消息中间件切换 (目前可通过配置文件中consume.kafkaEnable、consume.redisEnable设置)
 
 
 ## 更改介绍
@@ -23,6 +23,7 @@
 
 ### kafka 改redis
 - 目前demo代码支持redis/kafka 做中间件
+- 移除已经弃用的库 github.com/bsm/sarama-cluster 
 
 ## 部署
 - 方案一 选择redis作为消息中间件切换, 仅需要 redis etcd 即可;
@@ -36,40 +37,53 @@ $ make runjob     ##运行 job 服务
 $ make runlogic   ##运行 logic 服务
 $ make runcomet   ##运行 comet 服务
 
-$ cd examples/javascript/ && go run main.go   ## 运行http静态页面
-$ cd test/ && go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运行100个并发测试脚本  
+$ go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运行100个并发测试脚本   
+$ cd examples/javascript/ && go run main.go   ## 运行http静态页面 
+$ curl "http://127.0.0.1:3111/goim/push/all?operation=1000&speed=0" -sv     ## 推送消息
+
 ```
 
 
-### 问题
+### 注意点
 ```
 问题一 : 房间号如果是 用户id  (目前采用该方式,缺点在可接受范围)
+
 1. 房间号太多 分散到redis 64个hset类型key, 每个key的value值有个 room_count 会非常大  
- comet服务会上报房间号写入 redis "HSET" "ol_192.168.3.222" "43" "{\"server\":\"192.168.3.222\",\"room_count\":{\"live://1000\":1},\"updated\":1577077540}"
-
-2.单个节点如果有 10000人在线 则  1w / 64 = 156 个房间
-
+ comet服务会上报房间号写入 redis "HSET" "ol_192.168.3.222" "43" "{\"server\":\"192.168.3.222\",\"room_count\":{\"live://1000\":1},\"updated\":1577077540}" 
+2.单个节点如果有 10000人在线 则1个key的value值中json room_count的长度为  1w / 64 = 156 个房间 
 3.房间下线 room_count 会对应 减少
 
 
 问题二 : 多台机器部署 kafka 的 group id 需要一致 
-    1.所有消费者都在"一个消费者组"里则是 队列模式  
-    2.所有消费者分布在"不同组"中则是 发布-订阅模式。
+1.所有消费者都在"一个消费者组"里则是 队列模式  
+2.所有消费者分布在"不同组"中则是 发布-订阅模式。
 
-    1.1 队列模式下，允许消费者组中多个消费者并行有序处理消息，组中的消费者数量最好不要大于 topic 的 partition（分区）数量。 
-    消费者数=分区数:每个消费者消费一个分区的消息； 
-    消费者数<分区数:某些消费者会处理多个分区的消息； 
-    消费者数>分区数:多余的消费者将空等，无法处理消息；
+1.1 队列模式下，允许消费者组中多个消费者并行有序处理消息，组中的消费者数量最好不要大于 topic 的 partition（分区）数量。 
+消费者数=分区数:每个消费者消费一个分区的消息； 
+消费者数<分区数:某些消费者会处理多个分区的消息； 
+消费者数>分区数:多余的消费者将空等，无法处理消息；
 
-    注意 查看kafka 代理版本   代码中 为 sarama.V2_8_1_0 与 kafka 代理版本对应
-    # docker exec -it 0a005e376003 bash
-    root@0a005e376003:/# find / -name \*kafka_\* | head -1 | grep -o '\kafka[^\n]*'
-    kafka_2.13-2.8.1    
-    
-
+注意 查看kafka 代理版本   代码中 为 sarama.V2_8_1_0 与 kafka 代理版本对应
+# docker exec -it 0a005e376003 bash
+root@0a005e376003:/# find / -name \*kafka_\* | head -1 | grep -o '\kafka[^\n]*'
+kafka_2.13-2.8.1    
 
 
-问题三: 不同包路径下的 同名 api.proto 报错提示已经引入
+
+问题三: 目前job消费端采用 hash key分区消息(即:hash房间号/operation:8000 让job消费节点发生rebalance 负载均衡,但前提是topic的Partitions数大于1才能触发)
+I0530 14:21:33.521813 1499866 sub_kafka.go:59] consume: goim-push-topic/Partition: 1/Offset: 1648	1000	type:BROADCAST operation:1000 msg:"111" 
+  
+I0530 14:35:11.114918 1499866 push.go:90] broadcast comets:1
+I0530 14:35:11.114999 1499866 sub_kafka.go:59] consume: goim-push-topic/Partition: 0/Offset: 0	1001	type:BROADCAST operation:1001 msg:"2222" 
+
+参考: https://zhuanlan.zhihu.com/p/412869212
+
+
+
+
+
+
+问题四: 不同包路径下的 同名 api.proto 报错提示已经引入
 
 luoyuxiangdeMacBook-Pro:goim-demo luoyuxiang$ make runjob
 export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/job -conf=target/job.toml -region=sh -zone=sh001 -deploy.env=prod -host=192.168.84.168 -log_dir=./target 

@@ -39,7 +39,7 @@ runcomet2:
 
 
 runjob:
-	export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/job -conf=target/job.toml -region=sh -zone=sh001 -deploy.env=prod -host=192.168.84.168 -log_dir=./target  -v=1 -alsologtostderr
+	export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/job -conf=target/job.toml -region=sh -zone=sh001 -deploy.env=prod -host=192.168.84.168 -log_dir=./target  -v=1 -alsologtostderr
 
 stop:
 	pkill -f target/comet
