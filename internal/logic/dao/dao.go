@@ -36,7 +36,7 @@ func New(c *conf.Config) *Dao {
 func newKafkaPub(c *conf.Kafka) sarama.SyncProducer {
 	var err error
 	kc := sarama.NewConfig()
-	kc.Version = sarama.V2_5_0_0
+	kc.Version = sarama.V2_8_1_0
 	kc.Producer.Partitioner = sarama.NewHashPartitioner
 	kc.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
 	kc.Producer.Retry.Max = 10                   // Retry up to 10 times to produce the message

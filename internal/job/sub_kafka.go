@@ -64,7 +64,7 @@ func (consumer *AppConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, c
 
 func newKafkaSub(c *conf.Kafka) sarama.ConsumerGroup {
 	config := sarama.NewConfig()
-	config.Version = sarama.V2_5_0_0
+	config.Version = sarama.V2_8_1_0
 	config.ClientID = fmt.Sprintf("%d", time.Now().Unix())
 	config.ChannelBufferSize = 256 // channel长度默认256
 

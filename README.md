@@ -61,6 +61,12 @@ $ cd test/ && go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运
     消费者数<分区数:某些消费者会处理多个分区的消息； 
     消费者数>分区数:多余的消费者将空等，无法处理消息；
 
+    注意 查看kafka 代理版本   代码中 为 sarama.V2_8_1_0 与 kafka 代理版本对应
+    # docker exec -it 0a005e376003 bash
+    root@0a005e376003:/# find / -name \*kafka_\* | head -1 | grep -o '\kafka[^\n]*'
+    kafka_2.13-2.8.1    
+    
+
 
 
 问题三: 不同包路径下的 同名 api.proto 报错提示已经引入
