@@ -1,0 +1,323 @@
+version: '3.7'
+
+## 新创建网络
+# networks:
+#   laradock_backend:
+#     driver: overlay
+#     attachable: true
+
+## 外部已有网络
+networks:
+  laradock_backend:
+    external: true
+
+services:
+  etcd1:
+    image: "quay.io/coreos/etcd:v3.3"
+    container_name: etcd1
+    command: etcd -name etcd1 -data-dir=/etcddata -advertise-client-urls http://0.0.0.0:2379 -listen-client-urls http://0.0.0.0:2379 -listen-peer-urls http://0.0.0.0:2380 -initial-cluster-token etcd-cluster -initial-cluster "etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380" -initial-cluster-state new
+    ports:
+      - "23791:2379"
+      - "23801:2380"
+    volumes:
+      - /root/.laradock/data/etcddata1/data:/etcddata 
+    networks:
+      - laradock_backend
+
+  etcd2:
+    image: "quay.io/coreos/etcd:v3.3"
+    container_name: etcd2
+    command: etcd -name etcd2 -data-dir=/etcddata -advertise-client-urls http://0.0.0.0:2379 -listen-client-urls http://0.0.0.0:2379 -listen-peer-urls http://0.0.0.0:2380 -initial-cluster-token etcd-cluster -initial-cluster "etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380" -initial-cluster-state new
+    ports:
+      - "23792:2379"
+      - "23802:2380"
+    volumes:
+      - /root/.laradock/data/etcddata2/data:/etcddata 
+    networks:
+      - laradock_backend
+
+  etcd3:
+    image: "quay.io/coreos/etcd:v3.3"
+    container_name: etcd3
+    command: etcd -name etcd3 -data-dir=/etcddata -advertise-client-urls http://0.0.0.0:2379 -listen-client-urls http://0.0.0.0:2379 -listen-peer-urls http://0.0.0.0:2380 -initial-cluster-token etcd-cluster -initial-cluster "etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380" -initial-cluster-state new
+    ports:
+      - "23793:2379"
+      - "23803:2380"
+    volumes:
+      - /root/.laradock/data/etcddata3/data:/etcddata 
+    networks:
+      - laradock_backend 
+
+  #######zookeeper######
+
+  zoo1:
+    image: zookeeper
+    restart: unless-stopped
+    hostname: zoo1
+    container_name: zoo1
+    ports:
+      - 2182:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+    volumes:
+      - /root/.laradock/data/zookeeper1/data:/data
+      - /root/.laradock/data/zookeeper1/datalog:/datalog
+    networks:
+      - laradock_backend
+
+  zoo2:
+    image: zookeeper
+    restart: unless-stopped
+    hostname: zoo2
+    container_name: zoo2
+    ports:
+      - 2183:2181
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=zoo3:2888:3888;2181
+    volumes:
+      - /root/.laradock/data/zookeeper2/data:/data
+      - /root/.laradock/data/zookeeper2/datalog:/datalog
+    networks:
+      - laradock_backend
+
+  zoo3:
+    image: zookeeper
+    restart: unless-stopped
+    hostname: zoo3
+    container_name: zoo3
+    ports:
+      - 2184:2181
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
+    volumes:
+      - /root/.laradock/data/zookeeper3/data:/data
+      - /root/.laradock/data/zookeeper3/datalog:/datalog
+    networks:
+      - laradock_backend
+
+  #######kafka#######
+
+  kafka1:
+    image: wurstmeister/kafka
+    restart: unless-stopped
+    container_name: kafka1
+    ports:
+      - "9093:9092"
+    external_links:
+      - zoo1
+      - zoo2
+      - zoo3
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_HOST_NAME: 10.0.41.145                     ## 修改:宿主机IP
+      KAFKA_ADVERTISED_PORT: 9093                                 ## 修改:宿主机映射port
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://10.0.41.145:9093    ## 绑定发布订阅的端口。修改:宿主机IP
+      KAFKA_ZOOKEEPER_CONNECT: "zoo1:2181,zoo2:2181,zoo3:2181"
+    volumes:
+      - "/root/.laradock/data/kafka1/docker.sock:/var/run/docker.sock"
+      - "/root/.laradock/data/kafka1/data/:/kafka"
+    networks:
+      - laradock_backend
+
+
+  kafka2:
+    image: wurstmeister/kafka
+    restart: unless-stopped
+    container_name: kafka2
+    ports:
+      - "9094:9092"
+    external_links:
+      - zoo1
+      - zoo2
+      - zoo3
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ADVERTISED_HOST_NAME: 10.0.41.145                 ## 修改:宿主机IP
+      KAFKA_ADVERTISED_PORT: 9094                               ## 修改:宿主机映射port
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://10.0.41.145:9094   ## 修改:宿主机IP
+      KAFKA_ZOOKEEPER_CONNECT: "zoo1:2181,zoo2:2181,zoo3:2181"
+    volumes:
+      - "/root/.laradock/data/kafka2/docker.sock:/var/run/docker.sock"
+      - "/root/.laradock/data/kafka2/data/:/kafka"
+    networks:
+      - laradock_backend
+
+  kafka3:
+    image: wurstmeister/kafka
+    restart: unless-stopped
+    container_name: kafka3
+    ports:
+      - "9095:9092"
+    external_links:
+      - zoo1
+      - zoo2
+      - zoo3
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ADVERTISED_HOST_NAME: 10.0.41.145                 ## 修改:宿主机IP
+      KAFKA_ADVERTISED_PORT: 9095                              ## 修改:宿主机映射port
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://10.0.41.145:9095   ## 修改:宿主机IP
+      KAFKA_ZOOKEEPER_CONNECT: "zoo1:2181,zoo2:2181,zoo3:2181"
+    volumes:
+      - "/root/.laradock/data/kafka3/docker.sock:/var/run/docker.sock"
+      - "/root/.laradock/data/kafka3/data/:/kafka"
+    networks:
+      - laradock_backend
+
+  kafka-manager:         #服务名称 可自定义如：elasticsearch，redis，mysql，abcd等
+    image: sheepkiller/kafka-manager:latest    #从指定的镜像中启动容器，可以是存储仓库、标签、镜像ID  如果镜像不存在，Compose 会自动拉去镜像
+    restart: unless-stopped  #指定容器退出后的重启策略为始终重启。该命令对保持服务始终运行十分有效，在生产环境中推荐配置为always或者unless-stopped。
+    privileged: true   #允许容器中运行一些特权命令。 
+    container_name: kafka-manager    #确定app容器的命名
+    hostname: kafka-manager  
+    #domainname: your_website.com  #指定容器中搜索域名
+    #hostname: test  #指定容器中 主机名
+    #mac_address: 08-00-27-00-0C-0A  #指定容器中 mac 地址
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+    ports:
+      - "19000:9000"
+    links:            # 连接本compose文件创建的container
+      - kafka1
+      - kafka2
+      - kafka3
+    external_links:   # 连接本compose文件以外的container 
+      - zoo1
+      - zoo2
+      - zoo3
+    environment:
+      ZK_HOSTS: zoo1:2181,zoo2:2181,zoo3:2181                 ## 修改:宿主机IP
+      TZ: CST-8
+    networks:
+      - laradock_backend
+
+  #####redis#####
+  redis:
+    image: redis
+    restart: always
+    command: --appendonly yes
+    ports:
+      - 6379:6379
+    volumes:
+      - "/root/.laradock/data/redis/data/:/data" 
+    networks:
+      - laradock_backend
+
+  #####goim-demo##### 
+  comet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: poembro/goim
+    restart: always
+    #env_file: .env   # 从指定文件中读取变量设置为容器中的环境变量, 可以是单个值或者一个文件列表, 如果多个文件中的变量重名则后面的变量覆盖前面的变量, environment 的值覆盖 env_file 的值
+    environment:
+      REGION: sh  # 区域
+      ZONE: sh001 # 机器编号
+      DEPLOY_ENV: prod # 生产环境 / dev 开发环境
+      WEIGHT: 10 # 权重 
+      ADDRS: 47.111.69.116,0.0.0.117
+      OFFLINE: true
+      DEBUG: true
+      GOLANG_PROTOBUF_REGISTRATION_CONFLICT: warn
+    ports:
+      - "3101:3101"
+      - "3102:3102"
+      - "3109:3009"
+    depends_on:  #定义容器启动顺序 (此选项解决了容器之间的依赖关系， 此选项在 v3 版本中 使用 swarm 部署时将忽略该选项)
+      - etcd1
+      - etcd2
+      - etcd3
+      - redis
+      - zoo1
+      - zoo2
+      - zoo3
+      - kafka1
+      - kafka2
+      - kafka3
+    # 容器启动时强制执行 comet命令  (等同于 docker run --entrypoint 的作用)
+    entrypoint: "/webser/go_wepapp/goim-demo/comet -conf=/webser/go_wepapp/goim-demo/comet.toml -log_dir=/webser/go_wepapp/goim-demo -v=1 -alsologtostderr" 
+    networks:
+      - laradock_backend
+
+  logic:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: poembro/goim
+    restart: always
+    #env_file: .env
+    environment:
+      REGION: sh  # 区域
+      ZONE: sh001 # 机器编号
+      DEPLOY_ENV: prod # 生产环境 / dev 开发环境
+      WEIGHT: 10 # 权重 
+      ADDRS: 47.111.69.116,0.0.0.117
+      OFFLINE: true
+      DEBUG: true
+      GOLANG_PROTOBUF_REGISTRATION_CONFLICT: warn
+    ports:
+      - "3111:3111"
+      - "3119:3119"
+    depends_on:
+      - etcd1
+      - etcd2
+      - etcd3
+      - redis
+      - zoo1
+      - zoo2
+      - zoo3
+      - kafka1
+      - kafka2
+      - kafka3
+    entrypoint: "/webser/go_wepapp/goim-demo/logic -conf=/webser/go_wepapp/goim-demo/logic.toml -log_dir=/webser/go_wepapp/goim-demo -v=1 -alsologtostderr" 
+    networks:
+      - laradock_backend
+
+  job:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: poembro/goim
+    restart: always
+    #env_file: .env
+    environment:
+      REGION: sh  # 区域
+      ZONE: sh001 # 机器编号
+      DEPLOY_ENV: prod # 生产环境 / dev 开发环境
+      WEIGHT: 10 # 权重 
+      ADDRS: 47.111.69.116,0.0.0.117
+      OFFLINE: true
+      DEBUG: true
+      GOLANG_PROTOBUF_REGISTRATION_CONFLICT: warn
+    depends_on:
+      - etcd1
+      - etcd2
+      - etcd3
+      - redis
+      - zoo1
+      - zoo2
+      - zoo3
+      - kafka1
+      - kafka2
+      - kafka3
+    entrypoint: "/webser/go_wepapp/goim-demo/job -conf=/webser/go_wepapp/goim-demo/job.toml -log_dir=/webser/go_wepapp/goim-demo -v=1 -alsologtostderr" 
+    networks:
+      - laradock_backend

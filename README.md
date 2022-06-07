@@ -39,7 +39,7 @@ $ make runcomet   ##运行 comet 服务
 
 $ go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运行100个并发测试脚本   
 $ cd examples/javascript/ && go run main.go   ## 运行http静态页面 
-$ curl "http://127.0.0.1:3111/goim/push/all?operation=1000&speed=0" -sv     ## 推送消息
+$ curl "http://127.0.0.1:3111/goim/push/all?operation=1000&speed=0" -sv  -d 'json'   ## 推送消息
 
 ```
 

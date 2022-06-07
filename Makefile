@@ -7,6 +7,7 @@ all: test build
 build:
 	rm -rf target/
 	mkdir target/
+	go mod tidy
 	cp cmd/comet/comet-example.toml target/comet.toml
 	cp cmd/logic/logic-example.toml target/logic.toml
 	cp cmd/job/job-example.toml target/job.toml
