@@ -1,15 +1,15 @@
 version: '3.7'
 
 ## 新创建网络
-# networks:
-#   laradock_backend:
-#     driver: overlay
-#     attachable: true
-
-## 外部已有网络
 networks:
   laradock_backend:
-    external: true
+    driver: bridge
+    attachable: true
+
+# ## 外部已有网络
+# networks:
+#   laradock_backend:
+#     external: true
 
 services:
   etcd1:
@@ -233,9 +233,9 @@ services:
       ZONE: sh001 # 机器编号
       DEPLOY_ENV: prod # 生产环境 / dev 开发环境
       WEIGHT: 10 # 权重 
-      ADDRS: 47.111.69.116,0.0.0.117
-      OFFLINE: true
-      DEBUG: true
+      ADDRS: 47.111.69.116,0.0.0.117 # 外网ip
+      OFFLINE: "true"
+      DEBUG: "true"
       GOLANG_PROTOBUF_REGISTRATION_CONFLICT: warn
     ports:
       - "3101:3101"
@@ -252,8 +252,21 @@ services:
       - kafka1
       - kafka2
       - kafka3
-    # 容器启动时强制执行 comet命令  (等同于 docker run --entrypoint 的作用)
-    entrypoint: "/webser/go_wepapp/goim-demo/comet -conf=/webser/go_wepapp/goim-demo/comet.toml -log_dir=/webser/go_wepapp/goim-demo -v=1 -alsologtostderr" 
+   
+    entrypoint:         # 容器启动时强制执行 comet命令  (等同于 docker run --entrypoint 的作用)
+      - /webser/go_wepapp/goim-demo/comet
+      - -conf=/webser/go_wepapp/goim-demo/comet.toml
+      - -region=sh 
+      - -zone=sh001 
+      - -deploy.env=prod 
+      - -host=10.0.41.145
+      - -addrs=47.98.236.219
+      - -weight=10
+      - -offline=true
+      - -debug=true
+      - -log_dir=/webser/go_wepapp/goim-demo
+      - -v=1
+      - -alsologtostderr
     networks:
       - laradock_backend
 
@@ -263,15 +276,11 @@ services:
       dockerfile: Dockerfile
     image: poembro/goim
     restart: always
-    #env_file: .env
-    environment:
+   
+    environment:    #env_file: .env
       REGION: sh  # 区域
       ZONE: sh001 # 机器编号
       DEPLOY_ENV: prod # 生产环境 / dev 开发环境
-      WEIGHT: 10 # 权重 
-      ADDRS: 47.111.69.116,0.0.0.117
-      OFFLINE: true
-      DEBUG: true
       GOLANG_PROTOBUF_REGISTRATION_CONFLICT: warn
     ports:
       - "3111:3111"
@@ -287,7 +296,17 @@ services:
       - kafka1
       - kafka2
       - kafka3
-    entrypoint: "/webser/go_wepapp/goim-demo/logic -conf=/webser/go_wepapp/goim-demo/logic.toml -log_dir=/webser/go_wepapp/goim-demo -v=1 -alsologtostderr" 
+    entrypoint:
+      - /webser/go_wepapp/goim-demo/logic
+      - -conf=/webser/go_wepapp/goim-demo/logic.toml
+      - -region=sh 
+      - -zone=sh001 
+      - -deploy.env=prod 
+      - -host=10.0.41.145
+      - -weight=10
+      - -log_dir=/webser/go_wepapp/goim-demo
+      - -v=1
+      - -alsologtostderr
     networks:
       - laradock_backend
 
@@ -301,11 +320,7 @@ services:
     environment:
       REGION: sh  # 区域
       ZONE: sh001 # 机器编号
-      DEPLOY_ENV: prod # 生产环境 / dev 开发环境
-      WEIGHT: 10 # 权重 
-      ADDRS: 47.111.69.116,0.0.0.117
-      OFFLINE: true
-      DEBUG: true
+      DEPLOY_ENV: prod # 生产环境 / dev 开发环境 
       GOLANG_PROTOBUF_REGISTRATION_CONFLICT: warn
     depends_on:
       - etcd1
@@ -318,6 +333,15 @@ services:
       - kafka1
       - kafka2
       - kafka3
-    entrypoint: "/webser/go_wepapp/goim-demo/job -conf=/webser/go_wepapp/goim-demo/job.toml -log_dir=/webser/go_wepapp/goim-demo -v=1 -alsologtostderr" 
+    entrypoint:
+      - /webser/go_wepapp/goim-demo/job
+      - -conf=/webser/go_wepapp/goim-demo/job.toml
+      - -region=sh 
+      - -zone=sh001 
+      - -deploy.env=prod 
+      - -host=10.0.41.145
+      - -log_dir=/webser/go_wepapp/goim-demo
+      - -v=1 
+      - -alsologtostderr
     networks:
       - laradock_backend

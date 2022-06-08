@@ -41,6 +41,28 @@ $ go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运行100个并
 $ cd examples/javascript/ && go run main.go   ## 运行http静态页面 
 $ curl "http://127.0.0.1:3111/goim/push/all?operation=1000&speed=0" -sv  -d 'json'   ## 推送消息
 
+- 方案三 docker-compose
+安装
+$ sudo curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+或者
+$ sudo curl -L https://get.daocloud.io/docker/compose/releases/download/1.25.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose 
+
+给权限 
+sudo chmod +x /usr/local/bin/docker-compose 
+验证安装成功
+docker-compose --version
+
+拉取项目
+$ git clone git@github.com:poembro/goim-demo.git
+$ cd goim-demo
+
+替换对应ip
+$ grep -rl 10.0.41.145 ./ | xargs sed -i "s/10.0.41.145/172.16.75.215/g"
+
+移除所有正在运行的docker实例
+$ docker ps -a | awk '{print $1}' | xargs docker rm -f   
+
+$ docker-compose up -d 
 ```
 
 
