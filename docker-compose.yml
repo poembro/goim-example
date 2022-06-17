@@ -252,7 +252,6 @@ services:
       - kafka1
       - kafka2
       - kafka3
-   
     entrypoint:         # 容器启动时强制执行 comet命令  (等同于 docker run --entrypoint 的作用)
       - /webser/go_wepapp/goim-demo/comet
       - -conf=/webser/go_wepapp/goim-demo/comet.toml
@@ -276,7 +275,6 @@ services:
       dockerfile: Dockerfile
     image: poembro/goim
     restart: always
-   
     environment:    #env_file: .env
       REGION: sh  # 区域
       ZONE: sh001 # 机器编号
