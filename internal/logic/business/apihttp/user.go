@@ -13,8 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// UserCreate 创建用户
-func (s *Router) UserCreate(c *gin.Context) {
+// CreateUser 创建用户
+func (s *Router) CreateUser(c *gin.Context) {
 	var arg struct {
 		ShopId string `form:"shop_id"`
 	}
@@ -32,7 +32,7 @@ func (s *Router) UserCreate(c *gin.Context) {
 		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数错误"})
 		return
 	}
-	dst := s.svc.UserCreate(shop.Mid, shop.Nickname, shop.Face,
+	dst := s.svc.CreateUser(shop.Mid, shop.Nickname, shop.Face,
 		c.ClientIP(), c.GetHeader("referer"), c.GetHeader("user-agent"))
 
 	// 客服聊天场景
@@ -91,8 +91,8 @@ func (s *Router) Register(c *gin.Context) {
 	OutJson(c, OutData{Code: 200, Success: true, Msg: "success", Result: "xxx"})
 }
 
-// UserList 查看所有与自己聊天的用户
-func (s *Router) UserList(c *gin.Context) {
+// ListUser 查看所有与自己聊天的用户
+func (s *Router) ListUser(c *gin.Context) {
 	var arg struct {
 		ShopId string `json:"shop_id"`
 		Typ    string `json:"typ"`

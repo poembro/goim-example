@@ -10,13 +10,13 @@ import (
 
 const (
 	// 存放推送消息
-	_prefixMsgList = "golang_im:messagelist:%s"
+	_prefixListMsg = "golang_im:messagelist:%s"
 	// 存放 已读未读偏移
 	_prefixMessageAck = "golang_im:deviceId_msg_ack_%s" // deviceId -> RoomID:ack
 )
 
-func KeyMsgList(roomId string) string {
-	return fmt.Sprintf(_prefixMsgList, roomId)
+func KeyListMsg(roomId string) string {
+	return fmt.Sprintf(_prefixListMsg, roomId)
 }
 
 func keyMessageAck(deviceId string) string {
@@ -55,7 +55,7 @@ func (d *Dao) AddMessageList(roomId string, id int64, msg string) error {
 	// XX: 仅仅更新存在的成员，不添加新成员
 	// CH: 更改的元素是新添加的成员，已经存在的成员更新分数
 	// INCR: 成员的操作就等同 ZINCRBY 命令，对成员的分数进行递增操作
-	err := d.RdsCli.ZAddNX(KeyMsgList(roomId), redis.Z{
+	err := d.RdsCli.ZAddNX(KeyListMsg(roomId), redis.Z{
 		Score:  float64(id),
 		Member: msg,
 	}).Err()
@@ -69,7 +69,7 @@ func (d *Dao) AddMessageList(roomId string, id int64, msg string) error {
 
 // GetMessageCount 统计未读
 func (d *Dao) GetMessageCount(roomId, start, stop string) (int64, error) {
-	dst, err := d.RdsCli.ZCount(KeyMsgList(roomId), start, stop).Result()
+	dst, err := d.RdsCli.ZCount(KeyListMsg(roomId), start, stop).Result()
 	if err != nil {
 		return dst, err
 	}
@@ -79,7 +79,7 @@ func (d *Dao) GetMessageCount(roomId, start, stop string) (int64, error) {
 
 // GetMessageList 取回消息 返回切片
 func (d *Dao) GetMessageList(roomId string, start, stop int64) ([]string, error) {
-	dst, err := d.RdsCli.ZRevRange(KeyMsgList(roomId), start, stop).Result()
+	dst, err := d.RdsCli.ZRevRange(KeyListMsg(roomId), start, stop).Result()
 	if err != nil {
 		return dst, err
 	}
@@ -91,7 +91,7 @@ func (d *Dao) GetMessageList(roomId string, start, stop int64) ([]string, error)
 func (d *Dao) GetMessagePageList(roomId, min, max string, page, limit int64) ([]string, int64, error) {
 	var total int64 // 条数
 	var err error
-	key := KeyMsgList(roomId)
+	key := KeyListMsg(roomId)
 	total, err = d.RdsCli.ZCount(key, min, max).Result()
 
 	ids, err := d.RdsCli.ZRevRangeByScore(key, redis.ZRangeBy{
@@ -111,7 +111,7 @@ func (d *Dao) GetMessagePageList(roomId, min, max string, page, limit int64) ([]
 /////////////////////清理///////////////////////
 
 // ClearData 前1个月的用户清理掉
-func (d *Dao) MsgClear() error {
+func (d *Dao) ClearMsg() error {
 	// 获取所有商户
 	shopUsers, err := d.RdsCli.HGetAll(keyShopList()).Result()
 	if err != nil {
@@ -170,7 +170,7 @@ func (d *Dao) deviceIdByRoomID(deviceId string) error {
 	//skey := fmt.Sprintf("messagelist:%s", roomId)
 	//d.RdsCli.ZRemRangeByScore(skey, "-", dateline)
 	for roomId, _ := range roomIds {
-		d.RdsCli.Del(KeyMsgList(roomId)).Result() // 总的删除消息
+		d.RdsCli.Del(KeyListMsg(roomId)).Result() // 总的删除消息
 		d.RdsCli.HDel(key, roomId).Result()       // 单个删除已读未读偏移
 	}
 

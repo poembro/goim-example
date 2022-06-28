@@ -12,8 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// MsgList 查历史消息
-func (s *Router) MsgList(c *gin.Context) {
+// ListMsg 查历史消息
+func (s *Router) ListMsg(c *gin.Context) {
 	var arg struct {
 		RoomId string `json:"room_id"`
 	}
@@ -34,13 +34,13 @@ func (s *Router) MsgList(c *gin.Context) {
 }
 
 // apiClearData 数据清理
-func (s *Router) MsgClear(c *gin.Context) {
-	s.svc.MsgClear(context.TODO())
+func (s *Router) ClearMsg(c *gin.Context) {
+	s.svc.ClearMsg(context.TODO())
 	OutJson(c, OutData{Code: 200, Success: true})
 }
 
 // apiPush 数据推送
-func (s *Router) MsgPush(c *gin.Context) {
+func (s *Router) PushMsg(c *gin.Context) {
 	var arg struct {
 		RoomId string `json:"room_id"`
 		Typ    string `json:"type"`

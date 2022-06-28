@@ -34,7 +34,7 @@ func (r *Ring) Init(num int) {
 }
 
 func (r *Ring) init(num uint64) {
-	// 2^N
+	// 任何数传进来都将变成 2^N 次方
 	if num&(num-1) != 0 {
 		for num&(num-1) != 0 {
 			num &= num - 1

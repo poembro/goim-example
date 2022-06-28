@@ -43,7 +43,7 @@ func (*Business) BuildMid() (uint64, string) {
 	return sID, strconv.FormatUint(sID, 10)
 }
 
-func (s *Business) UserCreate(shopId, shopName, shopFace, remoteAddr, referer, userAgent string) *model.User {
+func (s *Business) CreateUser(shopId, shopName, shopFace, remoteAddr, referer, userAgent string) *model.User {
 	platform := "web"
 	Mid, smid := s.BuildMid()
 	deviceId := s.BuildDeviceId(platform, smid)

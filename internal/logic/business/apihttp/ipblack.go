@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// IpblackAdd ip添加至黑名单
-func (s *Router) IpblackAdd(c *gin.Context) {
+// AddIpblack ip添加至黑名单
+func (s *Router) AddIpblack(c *gin.Context) {
 	var arg struct {
 		IP     string `json:"ip"`
 		ShopId string `json:"shop_id"`
@@ -21,8 +21,8 @@ func (s *Router) IpblackAdd(c *gin.Context) {
 	OutJson(c, OutData{Code: 200, Success: true, Result: nil})
 }
 
-// IpblackDel ip从黑名单删除
-func (s *Router) IpblackDel(c *gin.Context) {
+// DelIpblack ip从黑名单删除
+func (s *Router) DelIpblack(c *gin.Context) {
 	var arg struct {
 		IP     string `json:"ip"`
 		ShopId string `json:"shop_id"`
@@ -37,7 +37,7 @@ func (s *Router) IpblackDel(c *gin.Context) {
 }
 
 // listIpblack 查看所有ip
-func (s *Router) IpblackList(c *gin.Context) {
+func (s *Router) ListIpblack(c *gin.Context) {
 	var arg struct {
 		ShopId string `json:"shop_id"`
 	}

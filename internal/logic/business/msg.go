@@ -79,8 +79,8 @@ func (s *Business) AddMessageList(roomId string, id int64, msg string) error {
 	return s.dao.AddMessageList(roomId, id, msg)
 }
 
-// MsgClear 清理数据
-func (s *Business) MsgClear(ctx context.Context) error {
-	s.dao.MsgClear()
+// ClearMsg 清理数据
+func (s *Business) ClearMsg(ctx context.Context) error {
+	s.dao.ClearMsg()
 	return nil
 }

@@ -273,7 +273,7 @@ func (s *Server) dispatchTCP(conn *net.TCPConn, wr *bufio.Writer, wp *bytes.Pool
 				}
 				if p.Op == protocol.OpHeartbeatReply { //心跳应答协议
 					if ch.Room != nil {
-						online = ch.Room.OnlineNum()
+						online = ch.Room.OnlineNum() // 回心跳的时候将在线人数 下发给了客户端
 					}
 					if err = p.WriteTCPHeart(wr, online); err != nil {
 						goto failed

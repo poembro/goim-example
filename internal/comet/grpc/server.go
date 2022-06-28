@@ -62,7 +62,7 @@ type server struct {
 
 var _ pb.CometServer = &server{}
 
-// PushMsg push a message to specified sub keys.
+// PushMsg push a message to specified sub keys.  /* 推送至 登录接口返回的 keys 设备id */
 func (s *server) PushMsg(ctx context.Context, req *pb.PushMsgReq) (reply *pb.PushMsgReply, err error) {
 	if len(req.Keys) == 0 || req.Proto == nil {
 		return nil, errors.ErrPushMsgArg
@@ -84,7 +84,7 @@ func (s *server) PushMsg(ctx context.Context, req *pb.PushMsgReq) (reply *pb.Pus
 	return &pb.PushMsgReply{}, nil
 }
 
-// Broadcast broadcast msg to all user. /* 推送至 登录接口返回的 accept 房间号 */
+// Broadcast broadcast msg to all user. /* 推送至 登录接口返回的 accept 频道号 */
 func (s *server) Broadcast(ctx context.Context, req *pb.BroadcastReq) (*pb.BroadcastReply, error) {
 	if req.Proto == nil {
 		return nil, errors.ErrBroadCastArg

@@ -51,19 +51,19 @@ func (s *Server) initBusinessRouter() {
 	{
 		group.POST("/user/login", r.Login)
 		group.POST("/user/register", r.Register)
-		group.GET("/user/create", r.UserCreate)
+		group.GET("/user/create", r.CreateUser)
 		authorized := group.Group("")
 		authorized.Use(r.VerifyMiddleware)
 		{
-			authorized.POST("/user/list", r.UserList)
+			authorized.POST("/user/list", r.ListUser)
 
-			authorized.POST("/msg/push", r.MsgPush)
-			authorized.POST("/msg/list", r.MsgList)
-			authorized.POST("/msg/clear", r.MsgClear)
+			authorized.POST("/msg/push", r.PushMsg)
+			authorized.POST("/msg/list", r.ListMsg)
+			authorized.POST("/msg/clear", r.ClearMsg)
 
-			authorized.POST("/ipblack/add", r.IpblackAdd)
-			authorized.POST("/ipblack/del", r.IpblackDel)
-			authorized.POST("/ipblack/list", r.IpblackList)
+			authorized.POST("/ipblack/add", r.AddIpblack)
+			authorized.POST("/ipblack/del", r.DelIpblack)
+			authorized.POST("/ipblack/list", r.ListIpblack)
 		}
 	}
 }
