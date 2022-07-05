@@ -9,7 +9,7 @@ import (
 	log "github.com/golang/glog"
 )
 
-// Sync 消息同步
+// Sync 消息同步 (comet服务通过grpc发来的body参数)
 func (s *Business) Sync(ctx context.Context, mid int64, body []byte) (int32, []string, []byte, error) {
 	var arg struct {
 		Op     int32  `json:"op"`
@@ -43,19 +43,19 @@ func (s *Business) Sync(ctx context.Context, mid int64, body []byte) (int32, []s
 	return arg.Op, []string{arg.Key}, util.S2B(jsonStr), nil
 }
 
-// MessageACK 消息确认机制
+// MessageACK 消息确认机制 (comet服务通过grpc发来的body参数)
 func (s *Business) MessageACK(ctx context.Context, mid int64, body []byte) error {
-	var params struct {
+	var arg struct {
 		ID     string `json:"id"`
 		Key    string `json:"key"`
 		RoomID string `json:"room_id"`
 	}
-	if err := json.Unmarshal(body, &params); err != nil {
+	if err := json.Unmarshal(body, &arg); err != nil {
 		log.Errorf("json.Unmarshal(%s) error(%v)", body, err)
 		return err
 	}
-	id, _ := strconv.ParseInt(params.ID, 10, 64)
-	s.dao.AddMessageACKMapping(params.Key, params.RoomID, id)
+	id, _ := strconv.ParseInt(arg.ID, 10, 64)
+	s.dao.AddMessageACKMapping(arg.Key, arg.RoomID, id)
 	return nil
 }
 

@@ -74,7 +74,7 @@ func (j *Job) watchComet() {
 	dis := etcdv3.New(etcdAddr)
 	go func() {
 		for {
-			ins := dis.GetService(env, appid, region, zone)
+			ins := dis.AllService(env, appid, region, zone)
 			err := j.newAddress(ins)
 			if err != nil {
 				return

@@ -18,7 +18,7 @@ func (d *Dao) handle(pushMsg *pb.PushMsg) (err error) {
 	}
 
 	if d.c.Consume.KafkaEnable {
-		key := ""
+		var key string
 		if len(pushMsg.Keys) > 0 {
 			key = pushMsg.Keys[0]
 		} else if pushMsg.Room != "" {

@@ -19,8 +19,7 @@ import (
 )
 
 const (
-	ver   = "2.0.0"
-	appid = "goim.comet"
+	ver = "2.0.0"
 )
 
 func main() {
@@ -89,7 +88,7 @@ func register(dis *etcdv3.Registry, c *conf.Config) error {
 	region := c.Env.Region
 	zone := c.Env.Zone
 	env := c.Env.DeployEnv
-
+	appid := "goim.comet"
 	// 服务注册至ETCD
 	return dis.Register(5, env, appid, region, zone, ip, port)
 }

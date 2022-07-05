@@ -92,16 +92,13 @@ kafka_2.13-2.8.1
 
 
 
-问题三: 目前job消费端采用 hash key分区消息(即:hash房间号/operation:8000 让job消费节点发生rebalance 负载均衡,但前提是topic的Partitions数大于1才能触发)
+问题三: 目前job消费端采用 hash key分区消息(即:hash房间号/operation:8000 让job消费节点发生rebalance ,但前提是topic的Partitions数大于1才能触发)
 I0530 14:21:33.521813 1499866 sub_kafka.go:59] consume: goim-push-topic/Partition: 1/Offset: 1648	1000	type:BROADCAST operation:1000 msg:"111" 
   
 I0530 14:35:11.114918 1499866 push.go:90] broadcast comets:1
 I0530 14:35:11.114999 1499866 sub_kafka.go:59] consume: goim-push-topic/Partition: 0/Offset: 0	1001	type:BROADCAST operation:1001 msg:"2222" 
 
 参考: https://zhuanlan.zhihu.com/p/412869212
-
-
-
 
 
 

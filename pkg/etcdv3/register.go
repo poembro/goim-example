@@ -95,24 +95,24 @@ func (r *Registry) Deregister() error {
 	return err
 }
 
-// GetService return the service instances in memory according to the service name.
-func (r *Registry) GetService(env, appid, region, zone string) map[string]string {
-	items := make(map[string]string)
+// AllService return the service instances in memory according to the service name.
+func (r *Registry) AllService(env, appid, region, zone string) map[string]string {
+	dst := make(map[string]string)
 	key := fmt.Sprintf("/%s/%s/%s", env, appid, region) // 服务发现 上海所有节点
 	resp, err := r.kv.Get(r.opts.ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		log.Infof("---> etcdv3 err k:\"%s\"  v:\"%s\" ", key, err.Error())
-		return items
+		return dst
 	}
 
 	for _, kv := range resp.Kvs {
 		k := string(kv.Key)
 		v := string(kv.Value)
 
-		items[k] = v
+		dst[k] = v
 	}
 
-	return items
+	return dst
 }
 
 func (r *Registry) ResolverEtcd() {

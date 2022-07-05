@@ -16,6 +16,7 @@ type Server struct {
 
 // New new a http server.
 func New(c *conf.HTTPServer, l *logic.Logic) *Server {
+	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	engine.Use(loggerHandler, recoverHandler)
 	go func() {

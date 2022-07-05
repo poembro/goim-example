@@ -73,7 +73,7 @@ func (l *Logic) watchComet() {
 	dis := etcdv3.New(etcdAddr)
 	for {
 		time.Sleep(_onlineTick)
-		ins := dis.GetService(env, appid, region, zone)
+		ins := dis.AllService(env, appid, region, zone)
 		if err := l.loadOnline(ins); err != nil {
 			log.Errorf("watchComet error(%v)", err)
 		}

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// SignIn 长连接登录
+// SignIn 长连接登录 (comet服务通过grpc发来的body参数)
 // 方案一: body 是一个jwt token 值 去其他服务拿到对应的 头像昵称等信息
 // 方案二: demo 中 body 是一个json 已经包含了头像昵称等信息
 func (s *Business) SignIn(ctx context.Context, user *model.User, body []byte, connAddr string) error {
