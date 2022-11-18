@@ -115,11 +115,11 @@ func (r *Resolver) delAddress(key string) {
 }
 
 func (r *Resolver) getAddresses() []resolver.Address {
-	addresses := make([]resolver.Address, 0, len(r.addresses))
+	items := make([]resolver.Address, 0, len(r.addresses))
 
-	for _, address := range r.addresses {
-		addresses = append(addresses, address)
+	for _, v := range r.addresses {
+		items = append(items, v)
 	}
 
-	return addresses
+	return items
 }

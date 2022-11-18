@@ -6,8 +6,11 @@ GOTEST=$(GOCMD) test
 all: test build
 build:
 	rm -rf target/
-	mkdir target/
-	go mod tidy
+	mkdir target/ 
+	## make
+	go mod tidy -compat=1.17
+	go mod vendor
+	
 	cp cmd/comet/comet-example.toml target/comet.toml
 	cp cmd/logic/logic-example.toml target/logic.toml
 	cp cmd/job/job-example.toml target/job.toml

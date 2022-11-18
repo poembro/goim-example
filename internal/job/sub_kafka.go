@@ -24,19 +24,19 @@ type AppConsumer struct {
 }
 
 // Setup is run at the beginning of a new session, before ConsumeClaim
-func (consumer *AppConsumer) Setup(sarama.ConsumerGroupSession) error {
+func (c *AppConsumer) Setup(sarama.ConsumerGroupSession) error {
 	// Mark the consumer as ready
-	close(consumer.ready)
+	close(c.ready)
 	return nil
 }
 
 // Cleanup is run at the end of a session, once all ConsumeClaim goroutines have exited
-func (consumer *AppConsumer) Cleanup(sarama.ConsumerGroupSession) error {
+func (c *AppConsumer) Cleanup(sarama.ConsumerGroupSession) error {
 	return nil
 }
 
 // ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
-func (consumer *AppConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+func (c *AppConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	// NOTE:
 	//不要将下面的代码移动到goroutine
 	// The `ConsumeClaim` itself is called within a goroutine, see:
@@ -52,7 +52,7 @@ func (consumer *AppConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, c
 			continue
 		}
 		//获取kafka消息后 protobuff格式解析
-		if err := consumer.j.Push(context.Background(), pushMsg); err != nil {
+		if err := c.j.Push(context.Background(), pushMsg); err != nil {
 			log.Errorf("j.Push(%v) error(%v)", pushMsg, err)
 		}
 
@@ -80,7 +80,11 @@ func newKafkaSub(c *conf.Kafka) sarama.ConsumerGroup {
 
 	config.Consumer.Return.Errors = true
 
-	//config.Consumer.Offsets.Initial = sarama.OffsetOldest //从最老的位置开始消费   默认是从最新的位置开始消费
+	//consumerConfig.Consumer.Offsets.AutoCommit.Enable = true      // 禁用自动提交，改为手动
+	//consumerConfig.Consumer.Offsets.AutoCommit.Interval = time.Second * 1 // 测试3秒自动提交
+
+	//阿里云推荐 针对生产环境，请将位点重置策略设置为 Newest(latest)；针对测试环境，或者其他明确可以接收大量重复消息的场景，设置为Oldest(earliest)。
+	//config.Consumer.Offsets.Initial = sarama.OffsetOldest //  从最老的位置开始消费   默认是从最新的位置开始消费
 	//config.Consumer.Offsets.Initial = -2                    // 未找到组消费位移的时候从哪边开始消费
 
 	client, err := sarama.NewConsumerGroup(c.Brokers, c.Group, config)

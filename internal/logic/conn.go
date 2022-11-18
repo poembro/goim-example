@@ -21,7 +21,8 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 			RoomID   string  `json:"room_id"`
 			Platform string  `json:"platform"`
 			Accepts  []int32 `json:"accepts"`
-		}*/
+		}
+	*/
 	var params user.User
 	if err = json.Unmarshal(token, &params); err != nil {
 		log.Errorf("json.Unmarshal(%s) error(%v)", token, err)

@@ -90,5 +90,5 @@ func register(dis *etcdv3.Registry, c *conf.Config) error {
 	env := c.Env.DeployEnv
 	appid := "goim.comet"
 	// 服务注册至ETCD
-	return dis.Register(5, env, appid, region, zone, ip, port)
+	return dis.Register( env, appid, region, zone, ip, port)
 }

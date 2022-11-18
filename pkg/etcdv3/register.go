@@ -65,8 +65,16 @@ func New(etcdAddr string) (r *Registry) {
 	}
 }
 
+func (r *Registry) ResolverEtcd() {
+	builder := &Builder{
+		client: r.client,
+	}
+
+	resolver.Register(builder)
+}
+
 // Register the registration.
-func (r *Registry) Register(ttl int, env, appid, region, zone, ip, port string) error {
+func (r *Registry) Register(env, appid, region, zone, ip, port string) error {
 	key := fmt.Sprintf("/%s/%s/%s/%s/%s:%s", env, appid, region, zone, ip, port)
 	value := fmt.Sprintf("%s:%s", ip, port)
 	log.Infof("---> etcdv3 service register to etcd \"%s\" ", key)
@@ -113,14 +121,6 @@ func (r *Registry) AllService(env, appid, region, zone string) map[string]string
 	}
 
 	return dst
-}
-
-func (r *Registry) ResolverEtcd() {
-	builder := &Builder{
-		client: r.client,
-	}
-
-	resolver.Register(builder)
 }
 
 // registerWithKV create a new lease, return current leaseID

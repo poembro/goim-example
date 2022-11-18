@@ -42,9 +42,10 @@ func newKafkaPub(c *conf.Kafka) sarama.SyncProducer {
 	// sarama.NewHashPartitioner // 通过设置 hash-key 自动 hash 分区，如果没有设置key，则随机选取 msg.Key = sarama.StringEncoder("topic1key")
 	// sarama.NewManualPartitioner // 人工指定分区 msg.Partition = 0       // 人工指定分区
 
-	kc.Producer.Partitioner = sarama.NewHashPartitioner
-	kc.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
-	kc.Producer.Retry.Max = 10                   // Retry up to 10 times to produce the message
+	// Kafka客户端会根据Key进行Hash，我们通过把接收用户ID作为Key，这样就能让所有发给某个人的消息落到同一个分区了，也就有序了。
+	kc.Producer.Partitioner = sarama.NewHashPartitioner // 设置选择分区的策略为Hash
+	kc.Producer.RequiredAcks = sarama.WaitForAll        // 等待所有follower都回复ack，确保Kafka不会丢消息
+	kc.Producer.Retry.Max = 10                          // 最多重试10次以生成消息
 	kc.Producer.Return.Successes = true
 	pub, err := sarama.NewSyncProducer(c.Brokers, kc)
 	if err != nil {
@@ -75,7 +76,13 @@ func newRedis(c *conf.Redis) *redis.Pool {
 
 // Close close the resource.
 func (d *Dao) Close() error {
-	return d.redis.Close()
+	if d.c.Consume.KafkaEnable {
+		d.kafkaPub.Close()
+	}
+
+	d.redis.Close()
+
+	return nil
 }
 
 // Ping dao ping.
