@@ -38,11 +38,11 @@ func New(c *conf.Config) *Job {
 	}
 	j.watchComet()
 
-	j.subscribe()
+	j.Init() // 消费端初始化
 	return j
 }
 
-func (j *Job) subscribe() {
+func (j *Job) Init() {
 	if j.c.Consume.KafkaEnable {
 		j.consumer = newKafkaSub(j.c.Kafka)
 		go j.ConsumeKafka()
@@ -66,11 +66,12 @@ func (j *Job) Close() error {
 }
 
 func (j *Job) watchComet() {
-	etcdAddr := j.c.Discovery.Nodes
-	region := j.c.Env.Region
-	zone := j.c.Env.Zone
 	env := j.c.Env.DeployEnv
 	appid := "goim.comet"
+	region := j.c.Env.Region
+	zone := j.c.Env.Zone
+
+	etcdAddr := j.c.Discovery.Nodes
 	dis := etcdv3.New(etcdAddr)
 	go func() {
 		for {

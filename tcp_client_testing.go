@@ -83,7 +83,7 @@ func result() {
 	}
 }
 
-func startClient(key int64) {
+func startClient(mid int64) {
 	time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 	atomic.AddInt64(&aliveCount, 1)
 	quit := make(chan bool, 1)
@@ -101,8 +101,8 @@ func startClient(key int64) {
 	wr := bufio.NewWriter(conn)
 	rd := bufio.NewReader(conn)
 
-	deviceId := util.Md5(fmt.Sprintf("%s_%d", "web", key))
-	f := fmt.Sprintf(`{"mid":"%d","key":"%s", "room_id":"live://1000", "platform":"web", "accepts":[1000,1001,1002]}`, key, deviceId)
+	deviceId := util.Md5(fmt.Sprintf("%s_%d", "web", mid))
+	f := fmt.Sprintf(`{"mid":"%d","key":"%s", "room_id":"live://1000", "platform":"web", "accepts":[1000,1001,1002]}`, mid, deviceId)
 
 	proto := new(protocol.Proto)
 	proto.Ver = 1
@@ -117,7 +117,7 @@ func startClient(key int64) {
 		log.Errorf("tcpReadProto() error(%v)", err)
 		return
 	}
-	fmt.Printf("key:%d auth ok, proto: %v \r\n", key, proto)
+	fmt.Printf("mid:%d auth ok, proto: %v \r\n", mid, proto)
 
 	// writer
 	go func() {
@@ -127,10 +127,10 @@ func startClient(key int64) {
 			p.Op = 2
 			p.Seq = 111
 			if err = tcpWriteProto(wr, p); err != nil {
-				log.Errorf("key:%d tcpWriteProto() error(%v)", key, err)
+				log.Errorf("mid:%d tcpWriteProto() error(%v)", mid, err)
 				return
 			}
-			fmt.Printf("key:%d Write heartbeat \r\n", key)
+			fmt.Printf("mid:%d Write heartbeat \r\n", mid)
 			time.Sleep(heart)
 
 			select {
@@ -145,14 +145,14 @@ func startClient(key int64) {
 	for {
 		pr := new(protocol.Proto)
 		if err = pr.ReadTCP(rd); err != nil {
-			log.Errorf("key:%d tcpReadProto() error(%v)", key, err)
+			log.Errorf("mid:%d tcpReadProto() error(%v)", mid, err)
 			quit <- true
 			return
 		}
 		if pr.Op == opAuthReply {
-			fmt.Printf("key:%d auth success \r\n", key)
+			fmt.Printf("mid:%d auth success \r\n", mid)
 		} else if pr.Op == opHeartbeatReply {
-			fmt.Printf("key:%d receive heartbeat \r\n", key)
+			fmt.Printf("mid:%d receive heartbeat \r\n", mid)
 			// 设置读取超时
 			//golang的标准网络库是最后期限方式  (平常linux 是空闲超时)
 			if err = conn.SetReadDeadline(time.Now().Add(heart + 60*time.Second)); err != nil {
@@ -161,7 +161,7 @@ func startClient(key int64) {
 				return
 			}
 		} else {
-			fmt.Printf("key:%d op:%d msg: %s \r\n", key, pr.Op, string(pr.Body))
+			fmt.Printf("mid:%d op:%d msg: %s \r\n", mid, pr.Op, string(pr.Body))
 			atomic.AddInt64(&countDown, 1)
 		}
 	}

@@ -10,16 +10,13 @@ type Int64 int64
 
 type User struct {
 	Mid      Int64   `json:"mid,string"`
-	Key      string  `json:"key"`
-	RoomID   string  `json:"room_id"`
+	Key      string  `json:"key"`     // 用户设备标识
+	RoomID   string  `json:"room_id"` // 房间号
 	Platform string  `json:"platform"`
 	Accepts  []int32 `json:"accepts"`
 
-	//UserId   Int64  `json:"user_id,string"` // 用户id
-	//DeviceId string `json:"device_id"` // 用户设备标识
-	Nickname string `json:"nickname"` // 用户昵称
-	Face     string `json:"face"`     // 用户头像
-	//RoomID   string `json:"room_id"`        // 房间号
+	Nickname string `json:"nickname"`  // 用户昵称
+	Face     string `json:"face"`      // 用户头像
 	ShopId   string `json:"shop_id"`   // 商户id
 	ShopName string `json:"shop_name"` // 商户昵称
 	ShopFace string `json:"shop_face"` // 商户头像

@@ -21,6 +21,7 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 			RoomID   string  `json:"room_id"`
 			Platform string  `json:"platform"`
 			Accepts  []int32 `json:"accepts"`
+			Token string  `json:"token"` // 授权token 这里解析 调用第三方api
 		}
 	*/
 	var params user.User
@@ -41,6 +42,11 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 		err = fmt.Errorf("key is err !!")
 		return
 	}
+
+	// TODO
+	// 授权方案:
+	// 1.游客模式 本地cookie没有token 则调用http接口 得到token 带到这里调用第三方api 能解开表示授权成功
+	// 2.会员对接 有token 通过json参数 带到这里 调用第三方api 能解开表示授权成功
 
 	//如果验证通过, 则生成会话数据, 存入 redis 中; 否则返回认证失败
 	if err = l.dao.AddMapping(c, mid, key, server); err != nil {
