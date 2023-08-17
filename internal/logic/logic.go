@@ -69,11 +69,11 @@ func (l *Logic) watchComet() {
 	region := l.c.Env.Region
 	zone := l.c.Env.Zone
 	env := l.c.Env.DeployEnv
-	appid := "goim.comet"
+	appid := l.c.Env.TargetAppId // 直接访问目标服务
 	dis := etcdv3.New(etcdAddr)
 	for {
 		time.Sleep(_onlineTick)
-		ins := dis.AllService(env, appid, region, zone)
+		ins := dis.ServiceList(env, appid, region, zone)
 		if err := l.loadOnline(ins); err != nil {
 			log.Errorf("watchComet error(%v)", err)
 		}

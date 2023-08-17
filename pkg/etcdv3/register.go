@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 
 	log "github.com/golang/glog"
@@ -12,24 +13,28 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-var etcdCli *clientv3.Client = nil
+var (
+	once     sync.Once
+	etcdConn *clientv3.Client = nil
+)
 
 func newClient(etcdAddr string) (*clientv3.Client, error) {
-	if etcdCli != nil {
-		return etcdCli, nil
+	if etcdConn != nil {
+		return etcdConn, nil
 	}
-
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:          strings.Split(etcdAddr, ","),
-		DialTimeout:        time.Second * time.Duration(5),
-		MaxCallSendMsgSize: 2 * 1024 * 1024,
+	var err error
+	once.Do(func() {
+		etcdConn, err = clientv3.New(clientv3.Config{
+			Endpoints:          strings.Split(etcdAddr, ","),
+			DialTimeout:        time.Second * time.Duration(5),
+			MaxCallSendMsgSize: 2 * 1024 * 1024,
+		})
 	})
 
-	etcdCli = cli
-	return cli, err
+	return etcdConn, err
 }
 
-type options struct {
+type Options struct {
 	ctx       context.Context
 	namespace string
 	ttl       time.Duration
@@ -38,36 +43,36 @@ type options struct {
 
 // Registry is etcd registry.
 type Registry struct {
-	opts   *options
-	client *clientv3.Client
-	kv     clientv3.KV
-	lease  clientv3.Lease
+	Opts  *Options
+	Conn  *clientv3.Client
+	KV    clientv3.KV
+	lease clientv3.Lease
 }
 
 // New creates etcd registry
-func New(etcdAddr string) (r *Registry) {
-	op := &options{
+func New(nodes string) (r *Registry) {
+	op := &Options{
 		ctx:       context.Background(),
 		namespace: "",
 		ttl:       time.Second * 15,
 		maxRetry:  5, // 重试 5次
 	}
-	client, err := newClient(etcdAddr)
+	client, err := newClient(nodes)
 	if err != nil {
 		log.Infof("---> etcdv3  err: \"%s\" ", err.Error())
 		return nil
 	}
 
 	return &Registry{
-		opts:   op,
-		client: client,
-		kv:     clientv3.NewKV(client),
+		Opts: op,
+		Conn: client,
+		KV:   clientv3.NewKV(client),
 	}
 }
 
 func (r *Registry) ResolverEtcd() {
 	builder := &Builder{
-		client: r.client,
+		Conn: r.Conn,
 	}
 
 	resolver.Register(builder)
@@ -78,17 +83,17 @@ func (r *Registry) Register(env, appid, region, zone, ip, port string) error {
 	key := fmt.Sprintf("/%s/%s/%s/%s/%s:%s", env, appid, region, zone, ip, port)
 	value := fmt.Sprintf("%s:%s", ip, port)
 	log.Infof("---> etcdv3 service register to etcd \"%s\" ", key)
-	r.opts.namespace = key
+	r.Opts.namespace = key
 	if r.lease != nil {
 		r.lease.Close()
 	}
-	r.lease = clientv3.NewLease(r.client)
-	leaseID, err := r.registerWithKV(r.opts.ctx, key, value)
+	r.lease = clientv3.NewLease(r.Conn)
+	leaseID, err := r.registerWithKV(r.Opts.ctx, key, value)
 	if err != nil {
 		return err
 	}
 
-	go r.heartBeat(r.opts.ctx, leaseID, key, value)
+	go r.heartBeat(r.Opts.ctx, leaseID, key, value)
 	return nil
 }
 
@@ -99,15 +104,15 @@ func (r *Registry) Deregister() error {
 			r.lease.Close()
 		}
 	}()
-	_, err := r.client.Delete(r.opts.ctx, r.opts.namespace)
+	_, err := r.Conn.Delete(r.Opts.ctx, r.Opts.namespace)
 	return err
 }
 
 // AllService return the service instances in memory according to the service name.
-func (r *Registry) AllService(env, appid, region, zone string) map[string]string {
+func (r *Registry) ServiceList(env, appid, region, zone string) map[string]string {
 	dst := make(map[string]string)
 	key := fmt.Sprintf("/%s/%s/%s", env, appid, region) // 服务发现 上海所有节点
-	resp, err := r.kv.Get(r.opts.ctx, key, clientv3.WithPrefix())
+	resp, err := r.KV.Get(r.Opts.ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		log.Infof("---> etcdv3 err k:\"%s\"  v:\"%s\" ", key, err.Error())
 		return dst
@@ -116,7 +121,6 @@ func (r *Registry) AllService(env, appid, region, zone string) map[string]string
 	for _, kv := range resp.Kvs {
 		k := string(kv.Key)
 		v := string(kv.Value)
-
 		dst[k] = v
 	}
 
@@ -125,11 +129,11 @@ func (r *Registry) AllService(env, appid, region, zone string) map[string]string
 
 // registerWithKV create a new lease, return current leaseID
 func (r *Registry) registerWithKV(ctx context.Context, key string, value string) (clientv3.LeaseID, error) {
-	grant, err := r.lease.Grant(ctx, int64(r.opts.ttl.Seconds()))
+	grant, err := r.lease.Grant(ctx, int64(r.Opts.ttl.Seconds()))
 	if err != nil {
 		return 0, err
 	}
-	_, err = r.client.Put(ctx, key, value, clientv3.WithLease(grant.ID))
+	_, err = r.Conn.Put(ctx, key, value, clientv3.WithLease(grant.ID))
 	if err != nil {
 		return 0, err
 	}
@@ -138,7 +142,7 @@ func (r *Registry) registerWithKV(ctx context.Context, key string, value string)
 
 func (r *Registry) heartBeat(ctx context.Context, leaseID clientv3.LeaseID, key string, value string) {
 	curLeaseID := leaseID
-	kac, err := r.client.KeepAlive(ctx, leaseID)
+	kac, err := r.Conn.KeepAlive(ctx, leaseID)
 	if err != nil {
 		curLeaseID = 0
 	}
@@ -148,7 +152,7 @@ func (r *Registry) heartBeat(ctx context.Context, leaseID clientv3.LeaseID, key 
 		if curLeaseID == 0 {
 			// try to registerWithKV
 			retreat := []int{}
-			for retryCnt := 0; retryCnt < r.opts.maxRetry; retryCnt++ {
+			for retryCnt := 0; retryCnt < r.Opts.maxRetry; retryCnt++ {
 				if ctx.Err() != nil {
 					return
 				}
@@ -175,7 +179,7 @@ func (r *Registry) heartBeat(ctx context.Context, leaseID clientv3.LeaseID, key 
 				case curLeaseID = <-idChan:
 				}
 
-				kac, err = r.client.KeepAlive(ctx, curLeaseID)
+				kac, err = r.Conn.KeepAlive(ctx, curLeaseID)
 				if err == nil {
 					break
 				}
@@ -199,7 +203,7 @@ func (r *Registry) heartBeat(ctx context.Context, leaseID clientv3.LeaseID, key 
 				curLeaseID = 0
 				continue
 			}
-		case <-r.opts.ctx.Done():
+		case <-r.Opts.ctx.Done():
 			return
 		}
 	}

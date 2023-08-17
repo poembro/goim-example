@@ -10,6 +10,11 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+const (
+	appId       = "goim.job"
+	targetAppId = "goim.comet"
+)
+
 var (
 	confPath  string
 	region    string
@@ -42,7 +47,7 @@ func Init() (err error) {
 // Default new a config with specified defualt value.
 func Default() *Config {
 	return &Config{
-		Env: &Env{Region: region, Zone: zone, DeployEnv: deployEnv, Host: host},
+		Env: &Env{Region: region, AppId: appId, TargetAppId: targetAppId, Zone: zone, DeployEnv: deployEnv, Host: host},
 		Discovery: &Discovery{
 			Nodes: "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579",
 		},
@@ -106,10 +111,12 @@ type Kafka struct {
 
 // Env is env config.
 type Env struct {
-	Region    string
-	Zone      string
-	DeployEnv string
-	Host      string
+	AppId       string
+	TargetAppId string
+	Region      string
+	Zone        string
+	DeployEnv   string
+	Host        string
 }
 
 // Redis .

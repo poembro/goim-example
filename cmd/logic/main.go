@@ -34,8 +34,10 @@ func main() {
 	httpSrv := http.New(conf.Conf.HTTPServer, srv)
 	rpcSrv := grpc.New(conf.Conf.RPCServer, srv)
 	//可以在此 追加业务代码  抄grpc目录 然后目录下做 业务认证逻辑
+
+	// discovery
 	dis := etcdv3.New(conf.Conf.Discovery.Nodes)
-	register(dis, conf.Conf)
+	Register(dis, conf.Conf.RPCServer.Addr, conf.Conf.Env)
 
 	// signal
 	c := make(chan os.Signal, 1)
@@ -59,15 +61,15 @@ func main() {
 	}
 }
 
-// 服务注册
-func register(dis *etcdv3.Registry, c *conf.Config) error {
+// Register 服务注册
+func Register(dis *etcdv3.Registry, node string, c *conf.Env) error {
 	// 当前grpc 服务的 外网ip 端口
-	_, port, _ := net.SplitHostPort(c.RPCServer.Addr)
-	ip := c.Env.Host
-	region := c.Env.Region
-	zone := c.Env.Zone
-	env := c.Env.DeployEnv
-	appid := "goim.logic"
+	_, port, _ := net.SplitHostPort(node)
+	env := c.DeployEnv
+	appid := c.AppId
+	region := c.Region
+	zone := c.Zone
+	ip := c.Host
 	// 服务注册至ETCD
 	return dis.Register(env, appid, region, zone, ip, port)
 }

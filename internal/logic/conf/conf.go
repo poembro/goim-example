@@ -11,6 +11,11 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+const (
+	appId       = "goim.logic"
+	targetAppId = "goim.comet"
+)
+
 var (
 	confPath  string
 	region    string
@@ -46,7 +51,7 @@ func Init() (err error) {
 // Default new a config with specified defualt value.
 func Default() *Config {
 	return &Config{
-		Env: &Env{Region: region, Zone: zone, DeployEnv: deployEnv, Host: host, Weight: weight},
+		Env: &Env{Region: region, AppId: appId, TargetAppId: targetAppId, Zone: zone, DeployEnv: deployEnv, Host: host, Weight: weight},
 		Discovery: &Discovery{
 			Nodes: "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579",
 		},
@@ -96,11 +101,13 @@ type Config struct {
 
 // Env is env config.
 type Env struct {
-	Region    string
-	Zone      string
-	DeployEnv string
-	Host      string
-	Weight    int64
+	Region      string
+	AppId       string
+	TargetAppId string
+	Zone        string
+	DeployEnv   string
+	Host        string
+	Weight      int64
 }
 
 type Discovery struct {

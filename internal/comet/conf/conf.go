@@ -12,6 +12,11 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+const (
+	appId       = "goim.comet"
+	targetAppId = "goim.logic"
+)
+
 var (
 	confPath  string
 	region    string
@@ -58,13 +63,15 @@ func Default() *Config {
 	return &Config{
 		Debug: debug,
 		Env: &Env{
-			Region:    region,                    // 地区 如:sh
-			Zone:      zone,                      // 空间 如:sh001
-			DeployEnv: deployEnv,                 // 环境 如:dev/fat1/uat/pre/prod
-			Host:      host,                      // 主机名 如:localhost / sf
-			Weight:    weight,                    // 权重 如:10
-			Addrs:     strings.Split(addrs, ","), // 公网ip 如:192.168.84.168,192.168.84.169
-			Offline:   offline,                   // 在线状态 如:true/false
+			DeployEnv:   deployEnv, // 环境 如:dev/fat1/uat/pre/prod
+			TargetAppId: targetAppId,
+			AppId:       appId,
+			Region:      region,                    // 地区 如:sh
+			Zone:        zone,                      // 空间 如:sh001
+			Host:        host,                      // 主机名 如:localhost / sf
+			Weight:      weight,                    // 权重 如:10
+			Addrs:       strings.Split(addrs, ","), // 公网ip 如:192.168.84.168,192.168.84.169
+			Offline:     offline,                   // 在线状态 如:true/false
 		},
 		Discovery: &Discovery{
 			Nodes: "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579",
@@ -131,13 +138,15 @@ type Config struct {
 
 // Env is env config.
 type Env struct {
-	Region    string
-	Zone      string
-	DeployEnv string
-	Host      string
-	Weight    int64
-	Offline   bool
-	Addrs     []string
+	DeployEnv   string
+	AppId       string
+	TargetAppId string
+	Region      string
+	Zone        string
+	Host        string
+	Weight      int64
+	Offline     bool
+	Addrs       []string
 }
 
 type Discovery struct {

@@ -33,18 +33,18 @@ const (
 func newLogicClient(c *conf.Config) logic.LogicClient {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Second*3))
 	defer cancel()
+	env := c.Env.DeployEnv
+	appid := c.Env.TargetAppId // 目标服务
 	region := c.Env.Region
 	//zone := c.Env.Zone
-	env := c.Env.DeployEnv
-	appid := "goim.logic"
 
 	target := fmt.Sprintf("discovery:///%s/%s/%s", env, appid, region)
 
 	conn, err := grpc.DialContext(ctx, target,
 		[]grpc.DialOption{
-			grpc.WithInsecure(),
-			grpc.WithInitialWindowSize(grpcInitialWindowSize),
-			grpc.WithInitialConnWindowSize(grpcInitialConnWindowSize),
+			grpc.WithInsecure(), // 禁用安全连接TLS协议
+			grpc.WithInitialWindowSize(grpcInitialWindowSize),         // 流量传输速度控制限制。
+			grpc.WithInitialConnWindowSize(grpcInitialConnWindowSize), // 传输数据大小限制。
 			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(grpcMaxCallMsgSize)),
 			grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(grpcMaxSendMsgSize)),
 			grpc.WithBackoffMaxDelay(grpcBackoffMaxDelay),

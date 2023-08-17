@@ -13,18 +13,19 @@ import (
 )
 
 type Builder struct {
-	client *clientv3.Client
+	Conn *clientv3.Client
 }
 
 func (b *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
+	// 即:	target := fmt.Sprintf("discovery:///%s/%s/%s", env, appid, region)
 	prefix := fmt.Sprintf("/%s/", target.Endpoint)
 	r := &Resolver{
-		client: b.client,
+		Conn:   b.Conn,
 		cc:     cc,
 		prefix: prefix,
 	}
 	log.Infof("---> etcdv3 grpc to find target:%s \r\n", prefix)
-	go r.Watcher(prefix)
+	go r.watchers()
 	r.ResolveNow(resolver.ResolveNowOptions{})
 	return r, nil
 }
@@ -43,11 +44,11 @@ type Resolver struct {
 	addresses map[string]resolver.Address
 
 	//////////etcd//////////
-	client     *clientv3.Client
-	kvCli      clientv3.KV
-	watcherCli clientv3.Watcher
-	ctx        context.Context
-	cancel     context.CancelFunc
+	Conn    *clientv3.Client
+	KV      clientv3.KV
+	Watcher clientv3.Watcher
+	ctx     context.Context
+	cancel  context.CancelFunc
 }
 
 func (r *Resolver) ResolveNow(rn resolver.ResolveNowOptions) {
@@ -55,26 +56,26 @@ func (r *Resolver) ResolveNow(rn resolver.ResolveNowOptions) {
 }
 
 func (r *Resolver) Close() {
-	log.Infof("---> etcdv3 -------Stop()被调用了---------->")
+	log.Infof("---> etcdv3 -------Close()")
 	r.cancel()
-	r.watcherCli.Close()
+	r.Watcher.Close()
 	return
 }
 
-func (r *Resolver) Watcher(prefix string) {
+func (r *Resolver) watchers() {
 	r.ctx, r.cancel = context.WithCancel(context.Background())
 
 	r.addresses = make(map[string]resolver.Address)
-	r.watcherCli = clientv3.NewWatcher(r.client)
-	r.kvCli = clientv3.NewKV(r.client)
+	r.Watcher = clientv3.NewWatcher(r.Conn)
+	r.KV = clientv3.NewKV(r.Conn)
 
 	// 先获取一次
-	resp, err := r.kvCli.Get(r.ctx, r.prefix, clientv3.WithPrefix())
+	ins, err := r.KV.Get(r.ctx, r.prefix, clientv3.WithPrefix())
 	if err != nil {
 		log.Infof("---> etcdv3 err: %s", err.Error())
 		return
 	}
-	for _, kv := range resp.Kvs {
+	for _, kv := range ins.Kvs {
 		r.setAddress(string(kv.Key), string(kv.Value))
 	}
 
@@ -83,7 +84,7 @@ func (r *Resolver) Watcher(prefix string) {
 	})
 
 	// 监听key
-	watchChan := r.watcherCli.Watch(r.ctx, r.prefix, clientv3.WithPrefix(), clientv3.WithRev(0)) // 监听的revision起点
+	watchChan := r.Watcher.Watch(r.ctx, r.prefix, clientv3.WithPrefix(), clientv3.WithRev(0)) // 监听的revision起点
 	for response := range watchChan {
 		for _, event := range response.Events {
 			switch event.Type {
@@ -98,7 +99,7 @@ func (r *Resolver) Watcher(prefix string) {
 			Addresses: r.getAddresses(),
 		})
 	}
-	log.Infof("---> etcdv3 -------func (r *Resolver) Watcher 被调用了---------->")
+	// log.Infof("---> etcdv3 -------func (r *Resolver) Watcher ")
 	r.Close()
 }
 

@@ -67,15 +67,15 @@ func (j *Job) Close() error {
 
 func (j *Job) watchComet() {
 	env := j.c.Env.DeployEnv
-	appid := "goim.comet"
+	appid := j.c.Env.TargetAppId // 目标服务
 	region := j.c.Env.Region
 	zone := j.c.Env.Zone
 
-	etcdAddr := j.c.Discovery.Nodes
-	dis := etcdv3.New(etcdAddr)
+	nodes := j.c.Discovery.Nodes
+	dis := etcdv3.New(nodes)
 	go func() {
 		for {
-			ins := dis.AllService(env, appid, region, zone)
+			ins := dis.ServiceList(env, appid, region, zone)
 			err := j.newAddress(ins)
 			if err != nil {
 				return
