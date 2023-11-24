@@ -18,7 +18,7 @@ var (
 	etcdConn *clientv3.Client = nil
 )
 
-func newClient(etcdAddr string) (*clientv3.Client, error) {
+func newClient(etcdAddr, username, password string) (*clientv3.Client, error) {
 	if etcdConn != nil {
 		return etcdConn, nil
 	}
@@ -28,6 +28,8 @@ func newClient(etcdAddr string) (*clientv3.Client, error) {
 			Endpoints:          strings.Split(etcdAddr, ","),
 			DialTimeout:        time.Second * time.Duration(5),
 			MaxCallSendMsgSize: 2 * 1024 * 1024,
+			Username:           username,
+			Password:           password,
 		})
 	})
 
@@ -50,14 +52,14 @@ type Registry struct {
 }
 
 // New creates etcd registry
-func New(nodes string) (r *Registry) {
+func New(nodes string, username, password string) (r *Registry) {
 	op := &Options{
 		ctx:       context.Background(),
 		namespace: "",
 		ttl:       time.Second * 15,
 		maxRetry:  5, // 重试 5次
 	}
-	client, err := newClient(nodes)
+	client, err := newClient(nodes, username, password)
 	if err != nil {
 		log.Infof("---> etcdv3  err: \"%s\" ", err.Error())
 		return nil

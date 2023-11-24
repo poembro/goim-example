@@ -1,4 +1,4 @@
-package http
+package apihttp
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (s *Server) onlineTop(c *gin.Context) {
+func (s *Router) OnlineTop(c *gin.Context) {
 	var arg struct {
 		Type  string `form:"type" binding:"required"`
 		Limit int    `form:"limit" binding:"required"`
@@ -23,7 +23,7 @@ func (s *Server) onlineTop(c *gin.Context) {
 	result(c, res, OK)
 }
 
-func (s *Server) onlineRoom(c *gin.Context) {
+func (s *Router) OnlineRoom(c *gin.Context) {
 	var arg struct {
 		Type  string   `form:"type" binding:"required"`
 		Rooms []string `form:"rooms" binding:"required"`
@@ -40,7 +40,7 @@ func (s *Server) onlineRoom(c *gin.Context) {
 	result(c, res, OK)
 }
 
-func (s *Server) onlineTotal(c *gin.Context) {
+func (s *Router) OnlineTotal(c *gin.Context) {
 	ipCount, connCount := s.logic.OnlineTotal(context.TODO())
 	res := map[string]interface{}{
 		"ip_count":   ipCount,

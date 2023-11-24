@@ -8,9 +8,9 @@ import (
 	"syscall"
 
 	"goim-demo/internal/logic"
+	"goim-demo/internal/logic/business"
 	"goim-demo/internal/logic/conf"
 	"goim-demo/internal/logic/grpc"
-	"goim-demo/internal/logic/http"
 	"goim-demo/pkg/etcdv3"
 
 	//"goim-demo/internal/logic/user"  //加的业务
@@ -31,7 +31,7 @@ func main() {
 
 	// logic
 	srv := logic.New(conf.Conf)
-	httpSrv := http.New(conf.Conf.HTTPServer, srv)
+	httpSrv := business.New(conf.Conf, srv)
 	rpcSrv := grpc.New(conf.Conf.RPCServer, srv)
 	//可以在此 追加业务代码  抄grpc目录 然后目录下做 业务认证逻辑
 

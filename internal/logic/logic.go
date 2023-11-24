@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"goim-demo/internal/logic/business"
+	"goim-demo/internal/logic/business/service"
 	"goim-demo/internal/logic/conf"
 	"goim-demo/internal/logic/dao"
 	"goim-demo/internal/logic/model"
@@ -21,9 +21,9 @@ const (
 
 // Logic struct
 type Logic struct {
-	c        *conf.Config
-	dao      *dao.Dao
-	Business *business.Business
+	c       *conf.Config
+	dao     *dao.Dao
+	srvHttp *service.Service
 	// online
 	totalIPs   int64
 	totalConns int64
@@ -35,10 +35,10 @@ type Logic struct {
 // New init
 func New(c *conf.Config) (l *Logic) {
 	l = &Logic{
-		c:        c,
-		dao:      dao.New(c),
-		Business: business.New(c), // 第三方业务
-		regions:  make(map[string]string),
+		c:       c,
+		dao:     dao.New(c),
+		srvHttp: service.New(c), // 第三方业务
+		regions: make(map[string]string),
 	}
 	l.initRegions() //初始化regions属性 l.regions[上海] = sh
 	go l.watchComet()
@@ -53,7 +53,7 @@ func (l *Logic) Ping(c context.Context) (err error) {
 // Close close resources.
 func (l *Logic) Close() {
 	l.dao.Close()
-	l.Business.Close()
+	l.srvHttp.Close()
 }
 
 func (l *Logic) initRegions() {
@@ -66,11 +66,13 @@ func (l *Logic) initRegions() {
 
 func (l *Logic) watchComet() {
 	etcdAddr := l.c.Discovery.Nodes
+	username := l.c.Discovery.Username
+	password := l.c.Discovery.Password
 	region := l.c.Env.Region
 	zone := l.c.Env.Zone
 	env := l.c.Env.DeployEnv
 	appid := l.c.Env.TargetAppId // 直接访问目标服务
-	dis := etcdv3.New(etcdAddr)
+	dis := etcdv3.New(etcdAddr, username, password)
 	for {
 		time.Sleep(_onlineTick)
 		ins := dis.ServiceList(env, appid, region, zone)

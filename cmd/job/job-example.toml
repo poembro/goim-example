@@ -5,6 +5,8 @@
 
 [discovery]
     nodes = "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579"
+    username = "root"
+    password = "NOjyVFBqlCvhWM"
 
 [kafka]
     topic = "goim-push-topic"
@@ -14,6 +16,7 @@
 [redis]
     network = "tcp"
     addr = "10.0.41.145:6379"
+    auth = "NOjyVFBqlCvhWM"
     active = 60000
     idle = 1024
     dialTimeout = "200ms"

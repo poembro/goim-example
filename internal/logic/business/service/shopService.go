@@ -1,4 +1,4 @@
-package business
+package service
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 )
 
 // GetShop 获取后台商户
-func (s *Business) GetShop(nickname string) (*model.Shop, error) {
+func (s *Service) GetShop(nickname string) (*model.Shop, error) {
 	body, err := s.dao.GetShop(nickname)
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func (s *Business) GetShop(nickname string) (*model.Shop, error) {
 }
 
 // AddShop 添加后台商户
-func (s *Business) AddShop(mid, nickname, face, password string) error {
+func (s *Service) AddShop(mid, nickname, face, password string) error {
 	dst := model.Shop{
 		Mid:      mid,
 		Nickname: nickname,

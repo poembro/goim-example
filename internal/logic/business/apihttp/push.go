@@ -1,4 +1,4 @@
-package http
+package apihttp
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (s *Server) pushKeys(c *gin.Context) {
+func (s *Router) PushKeys(c *gin.Context) {
 	var arg struct {
 		Op   int32    `form:"operation"`
 		Keys []string `form:"keys"`
@@ -29,7 +29,7 @@ func (s *Server) pushKeys(c *gin.Context) {
 	result(c, nil, OK)
 }
 
-func (s *Server) pushMids(c *gin.Context) {
+func (s *Router) PushMids(c *gin.Context) {
 	var arg struct {
 		Op   int32   `form:"operation"`
 		Mids []int64 `form:"mids"`
@@ -45,13 +45,13 @@ func (s *Server) pushMids(c *gin.Context) {
 		return
 	}
 	if err = s.logic.PushMids(context.TODO(), arg.Op, arg.Mids, msg); err != nil {
-		errors(c, ServerErr, err.Error())
+		errors(c, RouterErr, err.Error())
 		return
 	}
 	result(c, nil, OK)
 }
 
-func (s *Server) pushRoom(c *gin.Context) {
+func (s *Router) PushRoom(c *gin.Context) {
 	var arg struct {
 		Op   int32  `form:"operation" binding:"required"`
 		Type string `form:"type" binding:"required"`
@@ -69,13 +69,13 @@ func (s *Server) pushRoom(c *gin.Context) {
 	}
 
 	if err = s.logic.PushRoom(c, arg.Op, arg.Type, arg.Room, msg); err != nil {
-		errors(c, ServerErr, err.Error())
+		errors(c, RouterErr, err.Error())
 		return
 	}
 	result(c, nil, OK)
 }
 
-func (s *Server) pushAll(c *gin.Context) {
+func (s *Router) PushAll(c *gin.Context) {
 	var arg struct {
 		Op    int32 `form:"operation" binding:"required"`
 		Speed int32 `form:"speed"`
@@ -90,7 +90,7 @@ func (s *Server) pushAll(c *gin.Context) {
 		return
 	}
 	if err = s.logic.PushAll(c, arg.Op, arg.Speed, msg); err != nil {
-		errors(c, ServerErr, err.Error())
+		errors(c, RouterErr, err.Error())
 		return
 	}
 	result(c, nil, OK)

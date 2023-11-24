@@ -72,7 +72,9 @@ func (j *Job) watchComet() {
 	zone := j.c.Env.Zone
 
 	nodes := j.c.Discovery.Nodes
-	dis := etcdv3.New(nodes)
+	username := j.c.Discovery.Username
+	password := j.c.Discovery.Password
+	dis := etcdv3.New(nodes, username, password)
 	go func() {
 		for {
 			ins := dis.ServiceList(env, appid, region, zone)

@@ -1,4 +1,4 @@
-package business
+package service
 
 import (
 	"context"
@@ -6,28 +6,28 @@ import (
 	"goim-demo/internal/logic/conf"
 )
 
-// Business struct
-type Business struct {
+// Service struct
+type Service struct {
 	c   *conf.Config
 	dao *dao.Dao
 }
 
 // New init
-func New(c *conf.Config) (s *Business) {
-	s = &Business{
+func New(c *conf.Config) (s *Service) {
+	s = &Service{
 		c:   c,
 		dao: dao.New(c),
 	}
 	return
 }
 
-// Close Business.
-func (s *Business) Close() {
+// Close Service.
+func (s *Service) Close() {
 	s.dao.Close()
 }
 
 // Ping check server ok.
-func (s *Business) Ping(c context.Context) (err error) {
+func (s *Service) Ping(c context.Context) (err error) {
 	err = s.dao.Ping(c)
 	return
 }

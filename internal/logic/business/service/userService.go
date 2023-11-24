@@ -1,4 +1,4 @@
-package business
+package service
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 // SignIn 长连接登录 (comet服务通过grpc发来的body参数)
 // 方案一: body 是一个jwt token 值 去其他服务拿到对应的 头像昵称等信息
 // 方案二: demo 中 body 是一个json 已经包含了头像昵称等信息
-func (s *Business) SignIn(ctx context.Context, user *model.User, body []byte, connAddr string) error {
+func (s *Service) SignIn(ctx context.Context, user *model.User, body []byte, connAddr string) error {
 	//解析body  得到 deviceId, userId
 	userId := int64(user.Mid)
 	uidStr := strconv.FormatInt(userId, 10)
@@ -29,12 +29,12 @@ func (s *Business) SignIn(ctx context.Context, user *model.User, body []byte, co
 }
 
 // BuildDeviceId 构建 DeviceId
-func (*Business) BuildDeviceId(platform string, userId string) string {
+func (*Service) BuildDeviceId(platform string, userId string) string {
 	return util.Md5(fmt.Sprintf("%s_%s", platform, userId))
 }
 
 // BuildDeviceId 构建 DeviceId
-func (*Business) BuildMid() (uint64, string) {
+func (*Service) BuildMid() (uint64, string) {
 	sID, err := util.SFlake.GetID()
 	if err != nil {
 		return 0, ""
@@ -43,7 +43,7 @@ func (*Business) BuildMid() (uint64, string) {
 	return sID, strconv.FormatUint(sID, 10)
 }
 
-func (s *Business) CreateUser(shopId, shopName, shopFace, remoteAddr, referer, userAgent string) *model.User {
+func (s *Service) CreateUser(shopId, shopName, shopFace, remoteAddr, referer, userAgent string) *model.User {
 	platform := "web"
 	Mid, smid := s.BuildMid()
 	deviceId := s.BuildDeviceId(platform, smid)
@@ -79,7 +79,7 @@ func (s *Business) CreateUser(shopId, shopName, shopFace, remoteAddr, referer, u
 	}
 }
 
-func (s *Business) ShopCreate(shopId, shopName, shopFace, remoteAddr, referer, userAgent string) *model.User {
+func (s *Service) ShopCreate(shopId, shopName, shopFace, remoteAddr, referer, userAgent string) *model.User {
 	platform := "web"
 	userId := shopId
 	sID, _ := strconv.ParseInt(shopId, 10, 64)

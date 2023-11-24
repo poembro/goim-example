@@ -1,4 +1,4 @@
-package business
+package service
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 )
 
 // Sync 消息同步 (comet服务通过grpc发来的body参数)
-func (s *Business) Sync(ctx context.Context, mid int64, body []byte) (int32, []string, []byte, error) {
+func (s *Service) Sync(ctx context.Context, mid int64, body []byte) (int32, []string, []byte, error) {
 	var arg struct {
 		Op     int32  `json:"op"`
 		Page   int64  `json:"id"`
@@ -44,7 +44,7 @@ func (s *Business) Sync(ctx context.Context, mid int64, body []byte) (int32, []s
 }
 
 // MessageACK 消息确认机制 (comet服务通过grpc发来的body参数)
-func (s *Business) MessageACK(ctx context.Context, mid int64, body []byte) error {
+func (s *Service) MessageACK(ctx context.Context, mid int64, body []byte) error {
 	var arg struct {
 		ID     string `json:"id"`
 		Key    string `json:"key"`
@@ -60,27 +60,27 @@ func (s *Business) MessageACK(ctx context.Context, mid int64, body []byte) error
 }
 
 // GetMessageCount 统计未读
-func (s *Business) GetMessageCount(roomId, start, stop string) (int64, error) {
+func (s *Service) GetMessageCount(roomId, start, stop string) (int64, error) {
 	return s.dao.GetMessageCount(roomId, start, stop)
 }
 
 // GetMessageList 取回消息
-func (s *Business) GetMessageList(roomId string, start, stop int64) ([]string, error) {
+func (s *Service) GetMessageList(roomId string, start, stop int64) ([]string, error) {
 	return s.dao.GetMessageList(roomId, start, stop)
 }
 
 // GetMessagePageList 取回消息分页
-func (s *Business) GetMessagePageList(roomId, min, max string, page, limit int64) ([]string, int64, error) {
+func (s *Service) GetMessagePageList(roomId, min, max string, page, limit int64) ([]string, int64, error) {
 	return s.dao.GetMessagePageList(roomId, min, max, page, limit)
 }
 
 // AddMessageList 将消息添加到对应房间 roomId.
-func (s *Business) AddMessageList(roomId string, id int64, msg string) error {
+func (s *Service) AddMessageList(roomId string, id int64, msg string) error {
 	return s.dao.AddMessageList(roomId, id, msg)
 }
 
 // ClearMsg 清理数据
-func (s *Business) ClearMsg(ctx context.Context) error {
+func (s *Service) ClearMsg(ctx context.Context) error {
 	s.dao.ClearMsg()
 	return nil
 }

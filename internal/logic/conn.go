@@ -54,7 +54,7 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 	}
 
 	// 框架之外,第三方业务 逻辑扩展
-	if err = l.Business.SignIn(c, &params, token, server); err != nil {
+	if err = l.srvHttp.SignIn(c, &params, token, server); err != nil {
 		return
 	}
 
@@ -106,12 +106,12 @@ func (l *Logic) RenewOnline(c context.Context, server string, roomCount map[stri
 func (l *Logic) Receive(c context.Context, mid int64, proto *protocol.Proto) (err error) {
 	switch proto.Op {
 	case protocol.OpSync:
-		op, keys, msg, err := l.Business.Sync(c, mid, proto.Body)
+		op, keys, msg, err := l.srvHttp.Sync(c, mid, proto.Body)
 		if op != 0 && err == nil {
 			l.PushKeys(c, op, keys, msg)
 		}
 	case protocol.OpMessageAck:
-		l.Business.MessageACK(c, mid, proto.Body)
+		l.srvHttp.MessageACK(c, mid, proto.Body)
 	default:
 		log.Infof("receive mid:%d message:%+v", mid, proto)
 	}

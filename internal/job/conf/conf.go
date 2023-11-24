@@ -48,9 +48,7 @@ func Init() (err error) {
 func Default() *Config {
 	return &Config{
 		Env: &Env{Region: region, AppId: appId, TargetAppId: targetAppId, Zone: zone, DeployEnv: deployEnv, Host: host},
-		Discovery: &Discovery{
-			Nodes: "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579",
-		},
+
 		Consume: &Consume{
 			KafkaEnable: false,
 			RedisEnable: false,
@@ -81,7 +79,9 @@ type Config struct {
 }
 
 type Discovery struct {
-	Nodes string
+	Nodes    string
+	Username string
+	Password string
 }
 
 type Consume struct {

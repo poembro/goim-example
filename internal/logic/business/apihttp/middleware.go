@@ -1,4 +1,4 @@
-package http
+package apihttp
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	log "github.com/golang/glog"
 )
 
-func loggerHandler(c *gin.Context) {
+func (s *Router) LoggerHandler(c *gin.Context) {
 	// Start timer
 	start := time.Now()
 	path := c.Request.URL.Path
@@ -33,7 +33,7 @@ func loggerHandler(c *gin.Context) {
 	log.Infof("METHOD:%s | PATH:%s | CODE:%d | IP:%s | TIME:%d | ECODE:%d", method, path, statusCode, clientIP, latency/time.Millisecond, ecode)
 }
 
-func recoverHandler(c *gin.Context) {
+func (s *Router) RecoverHandler(c *gin.Context) {
 	defer func() {
 		if err := recover(); err != nil {
 			const size = 64 << 10

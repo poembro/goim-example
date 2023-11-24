@@ -25,25 +25,18 @@ clean:
 	rm -rf target/
 
 run:
-	export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/job -conf=target/job.toml -region=sh -zone=sh001 -deploy.env=prod -weight=10 -addrs=47.111.69.116 -debug=true -host=127.0.0.1 -log_dir=./target -alsologtostderr
+	export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/job -conf=target/job.toml -region=sh -zone=sh001 -deploy.env=prod -host=127.0.0.1 -log_dir=./target -alsologtostderr
 	export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/comet -conf=target/comet.toml -region=sh -zone=sh001 -deploy.env=prod -weight=10 -addrs=47.111.69.116 -debug=true -host=127.0.0.1 -log_dir=./target -alsologtostderr
 	export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/logic -conf=target/logic.toml -region=sh -zone=sh001 -deploy.env=prod -weight=10 -host=127.0.0.1 -log_dir=./target -alsologtostderr
 
 runlogic:
-	export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/logic -conf=target/logic.toml -region=sh -zone=sh001 -deploy.env=prod -host=192.168.84.168 -weight=10 -log_dir=./target  -v=1 -alsologtostderr
-
-runlogic2:
-	export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/logic -conf=target/logic.toml -region=sh -zone=sh004 -deploy.env=prod -host=192.168.84.168 -weight=10 -log_dir=./target  -v=1 -alsologtostderr
+	export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && go run cmd/logic/main.go -conf=cmd/logic/logic-example.toml -region=sh -zone=sh001 -deploy.env=prod -weight=10 -host=127.0.0.1 -log_dir=./target -alsologtostderr
 
 runcomet:
-	export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/comet -conf=target/comet.toml -region=sh -zone=sh003 -deploy.env=prod -addrs=47.111.69.116,0.0.0.117 -weight=10 -debug=true -host=192.168.84.168 -log_dir=./target  -v=1 -alsologtostderr
-
-runcomet2:
-	export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/comet -conf=target/comet.toml -region=sh -zone=sh002 -deploy.env=prod -addrs=47.111.69.116,0.0.0.117 -weight=10 -debug=true -host=127.0.0.1 -log_dir=./target  -v=1 -alsologtostderr
-
-
+	export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && go run cmd/comet/main.go -conf=cmd/comet/comet-example.toml -region=sh -zone=sh001 -deploy.env=prod -weight=10 -addrs=192.168.84.168 -debug=true -host=127.0.0.1 -log_dir=./target -alsologtostderr
+ 
 runjob:
-	export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/job -conf=target/job.toml -region=sh -zone=sh001 -deploy.env=prod -host=192.168.84.168 -log_dir=./target  -v=1 -alsologtostderr
+	export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && go run cmd/job/main.go -conf=cmd/job/job-example.toml -region=sh -zone=sh001 -deploy.env=prod -host=127.0.0.1 -log_dir=./target -alsologtostderr
 
 stop:
 	pkill -f target/comet

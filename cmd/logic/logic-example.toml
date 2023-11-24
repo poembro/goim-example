@@ -5,7 +5,9 @@
     
 [discovery]
     nodes = "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579"
-
+    username = "root"
+    password = "NOjyVFBqlCvhWM"
+    
 [regions]
     "bj" = ["北京","天津","河北","山东","山西","内蒙古","辽宁","吉林","黑龙江","甘肃","宁夏","新疆"]
     "sh" = ["上海","江苏","浙江","安徽","江西","湖北","重庆","陕西","青海","河南","台湾"]
@@ -49,6 +51,7 @@
 [redis]
     network = "tcp"
     addr = "10.0.41.145:6379"
+    auth = "NOjyVFBqlCvhWM"
     active = 60000
     idle = 1024
     dialTimeout = "200ms"
