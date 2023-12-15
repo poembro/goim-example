@@ -17,10 +17,10 @@
     <meta name="format-detection" content="telephone=no">
     
     <title>客服咨询登录 </title>
-	<link rel="stylesheet" href="/static/css/index.css">
-    <script src="/static/js/vue.js"></script>
-	<script src="/static/js/index.js"></script>
-	<script src="/static/js/jquery.min.js"></script>
+	<link rel="stylesheet" href="./static/css/index.css">
+    <script src="./static/js/vue.js"></script>
+	<script src="./static/js/index.js"></script>
+	<script src="./static/js/jquery.min.js"></script>
     <style>
         body {
             background-color: #f5f5f5;
@@ -103,7 +103,7 @@
 </template>
 </div>
 </body>
-<script src="/static/js/functions.js"></script>
+<script src="./static/js/functions.js"></script>
 <script>
 	new Vue({
 		el: '#app',
@@ -162,7 +162,7 @@
                         _this.loading = true;
                         $.ajax({
                             type: "POST",
-                            url: "http://192.168.84.168:3111/api/user/login",
+                            url: "/api/user/login",
                             data:JSON.stringify(data),
                             async: true,
                             dataType: "json", 

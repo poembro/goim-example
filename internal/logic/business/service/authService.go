@@ -33,7 +33,7 @@ func (s *Service) AuthLogin(ctx context.Context, server, cookie string, token []
 	// 标记用户上线 并 存储用户信息
 	s.dao.AddMapping(req.Mid, deviceId, server, string(token))
 	// 将用户归属到指定商户
-	s.dao.AddUserByShop("8000", midStr)
+	s.dao.AddUserByShop(req.RoomID, midStr)
 	return req, nil
 }
 
@@ -66,10 +66,7 @@ func (*Service) BuildDeviceId(platform string, userId string) string {
 
 // BuildDeviceId 构建 DeviceId
 func (*Service) BuildMid() (uint64, string) {
-	sID, err := util.SFlake.GetID()
-	if err != nil {
-		return 0, ""
-	}
+	sID := util.SFlake.GetID()
 
 	return sID, strconv.FormatUint(sID, 10)
 }

@@ -69,7 +69,7 @@ func (r *Resolver) watchers() {
 	r.addresses = make(map[string]resolver.Address)
 	r.Watcher = clientv3.NewWatcher(r.Conn)
 	r.KV = clientv3.NewKV(r.Conn)
-	log.Infoln("---> etcdv3 xx----func (r *Resolver) Watcher  r.prefix:", r.prefix)
+	// log.Infoln("---> etcdv3 xx----func (r *Resolver) Watcher  r.prefix:", r.prefix)
 	// 先获取一次
 	ins, err := r.KV.Get(r.ctx, r.prefix, clientv3.WithPrefix())
 	if err != nil {
@@ -107,7 +107,7 @@ func (r *Resolver) watchers() {
 func (r *Resolver) setAddress(key, address string) {
 	r.Lock()
 	defer r.Unlock()
-	log.Infoln("---> etcdv3 ---- setAddress  key:val => ", key, ":", address)
+	// log.Infoln("---> etcdv3 ---- setAddress  key:val => ", key, ":", address)
 
 	r.addresses[key] = resolver.Address{Addr: string(address)}
 }

@@ -1,6 +1,8 @@
 package util
 
 import (
+	"math/rand"
+
 	"github.com/sony/sonyflake"
 )
 
@@ -8,28 +10,33 @@ var (
 	SFlake *SnowFlake
 )
 
+func init() {
+	n := rand.Intn(15)
+	if n <= 0 {
+		n++
+	}
+	SFlake = NewSnowFlake(uint16(n))
+}
+
 // SnowFlake SnowFlake算法结构体
 type SnowFlake struct {
 	sFlake *sonyflake.Sonyflake
 }
 
-func (s *SnowFlake) GetID() (uint64, error) {
-	return s.sFlake.NextID()
+func (s *SnowFlake) GetID() uint64 {
+	n, err := s.sFlake.NextID()
+	if err != nil {
+		return 0
+	}
+	return n
 }
 
-func init() {
-	SFlake = NewSnowFlake()
-}
-
-// 模拟获取本机的机器ID
-func getMachineID() (mID uint16, err error) {
-	mID = 10
-	return
-}
-
-func NewSnowFlake() *SnowFlake {
+func NewSnowFlake(id uint16) *SnowFlake {
 	st := sonyflake.Settings{
-		MachineID: getMachineID, // machineID是个回调函数
+		MachineID: func() (mID uint16, err error) { // 回调函数 返回当前机器编号
+			mID = id
+			return
+		},
 	}
 
 	return &SnowFlake{

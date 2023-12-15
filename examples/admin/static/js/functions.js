@@ -76,7 +76,7 @@ var faceTitles = ["[a]", "[b]", "[c]", "[d]", "[e]", "[f]", "[g]", "[h]", "[i]",
 function placeFace() {
     var faces = [];
     for (var i = 0; i < faceTitles.length; i++) {
-        faces[faceTitles[i]] = "/static/images/face/" + i + ".gif";
+        faces[faceTitles[i]] = "./static/images/face/" + i + ".gif";
     }
     return faces;
 }

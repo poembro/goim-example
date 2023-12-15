@@ -30,6 +30,8 @@ func New(c *conf.Config, l *logic.Logic) *service.Service {
 	group.GET("/online/total", r.OnlineTotal)
 
 	engine.StaticFS("/_/", http.Dir("./examples/javascript/"))
+	engine.StaticFS("/front", http.Dir("./examples/front/"))
+	engine.StaticFS("/admin", http.Dir("./examples/admin/"))
 
 	// 业务模块
 	engine.Use(r.CorsMiddleware)
