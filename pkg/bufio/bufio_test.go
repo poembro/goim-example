@@ -15,7 +15,7 @@ import (
 	"testing/iotest"
 	"time"
 
-	. "goim-demo/pkg/bufio"
+	. "goim-example/pkg/bufio"
 )
 
 // Reads from a reader and rot13s the result.

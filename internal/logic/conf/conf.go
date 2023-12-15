@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	xtime "goim-demo/pkg/time"
+	xtime "goim-example/pkg/time"
 
 	"github.com/BurntSushi/toml"
 )

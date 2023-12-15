@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"goim-demo/internal/logic/conf"
+	"goim-example/internal/logic/conf"
 
 	"github.com/Shopify/sarama"
 	"github.com/gomodule/redigo/redis"

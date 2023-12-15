@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package goim.comet;
 
-option go_package = "goim-demo/api/comet;comet";
+option go_package = "goim-example/api/comet;comet";
 
-import "goim-demo/api/protocol/protocol.proto";
+import "goim-example/api/protocol/protocol.proto";
 
 message PushMsgReq {
     repeated string keys = 1;

@@ -3,8 +3,8 @@ package job
 import (
 	"context"
 	"fmt"
-	pb "goim-demo/api/logic"
-	"goim-demo/internal/job/conf"
+	pb "goim-example/api/logic"
+	"goim-example/internal/job/conf"
 	"os"
 	"os/signal"
 	"strings"

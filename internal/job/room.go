@@ -4,10 +4,10 @@ import (
 	"errors"
 	"time"
 
-	"goim-demo/api/protocol"
+	"goim-example/api/protocol"
 
-	"goim-demo/internal/job/conf"
-	"goim-demo/pkg/bytes"
+	"goim-example/internal/job/conf"
+	"goim-example/pkg/bytes"
 
 	log "github.com/golang/glog"
 )

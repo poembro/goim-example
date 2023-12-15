@@ -10,10 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	"goim-demo/internal/comet"
-	"goim-demo/internal/comet/conf"
-	"goim-demo/internal/comet/grpc"
-	"goim-demo/pkg/etcdv3"
+	"goim-example/internal/comet"
+	"goim-example/internal/comet/conf"
+	"goim-example/internal/comet/grpc"
+	"goim-example/pkg/etcdv3"
 
 	log "github.com/golang/glog" //日志默认放在/tmp 目录
 )
@@ -31,6 +31,10 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	log.Infof("goim-comet [version: %s conf: %+v] start", ver, conf.Conf)
+	// discovery
+	dis := etcdv3.New(conf.Conf.Discovery.Nodes, conf.Conf.Discovery.Username, conf.Conf.Discovery.Password)
+	dis.ResolverEtcd()
+	Register(dis, conf.Conf.RPCServer.Addr, conf.Conf.Env)
 
 	// new comet server
 	srv := comet.NewServer(conf.Conf)
@@ -53,11 +57,6 @@ func main() {
 		}
 	*/
 	rpcSrv := grpc.New(conf.Conf.RPCServer, srv)
-
-	// discovery
-	dis := etcdv3.New(conf.Conf.Discovery.Nodes)
-	dis.ResolverEtcd()
-	Register(dis, conf.Conf.RPCServer.Addr, conf.Conf.Env)
 
 	// signal
 	c := make(chan os.Signal, 1)

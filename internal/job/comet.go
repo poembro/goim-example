@@ -6,8 +6,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"goim-demo/api/comet"
-	"goim-demo/internal/job/conf"
+	"goim-example/api/comet"
+	"goim-example/internal/job/conf"
 
 	log "github.com/golang/glog"
 	"google.golang.org/grpc"

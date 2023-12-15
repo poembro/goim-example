@@ -19,7 +19,7 @@ func keyListIpblack(shopId string) string {
 // DelIpblack ip从黑名单删除
 // zadd  shop_id  time() ip
 func (d *Dao) DelIpblack(shopId string, ip string) error {
-	err := d.RdsCli.ZRem(keyListIpblack(shopId), ip).Err()
+	err := d.RDSCli.ZRem(keyListIpblack(shopId), ip).Err()
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (d *Dao) DelIpblack(shopId string, ip string) error {
 // zadd  shop_id  time() ip
 func (d *Dao) AddIpblack(shopId string, ip string) error {
 	score := time.Now().UnixNano()
-	err := d.RdsCli.ZAdd(keyListIpblack(shopId), redis.Z{
+	err := d.RDSCli.ZAdd(keyListIpblack(shopId), redis.Z{
 		Score:  float64(score),
 		Member: ip,
 	}).Err()
@@ -49,9 +49,9 @@ func (d *Dao) ListIpblack(shopId, min, max string, page, limit int64) ([]string,
 	var total int64 // 条数
 	var err error
 	key := keyListIpblack(shopId)
-	total, err = d.RdsCli.ZCount(key, min, max).Result()
+	total, err = d.RDSCli.ZCount(key, min, max).Result()
 
-	ids, err := d.RdsCli.ZRevRangeByScore(key, redis.ZRangeBy{
+	ids, err := d.RDSCli.ZRevRangeByScore(key, redis.ZRangeBy{
 		Min:    min, //"-inf"
 		Max:    max, // "+inf"
 		Offset: (page - 1) * limit,

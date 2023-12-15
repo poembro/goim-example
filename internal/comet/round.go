@@ -1,9 +1,9 @@
 package comet
 
 import (
-	"goim-demo/internal/comet/conf"
-	"goim-demo/pkg/bytes"
-	"goim-demo/pkg/time"
+	"goim-example/internal/comet/conf"
+	"goim-example/pkg/bytes"
+	"goim-example/pkg/time"
 )
 
 // RoundOptions round options.

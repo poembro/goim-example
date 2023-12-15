@@ -1,4 +1,4 @@
-module goim-demo
+module goim-example
 
 go 1.17
 

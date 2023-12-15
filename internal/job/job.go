@@ -4,12 +4,12 @@ import (
 	"sync"
 	"time"
 
-	"goim-demo/internal/job/conf"
+	"goim-example/internal/job/conf"
 
 	"github.com/Shopify/sarama"
 	"github.com/gomodule/redigo/redis"
 
-	"goim-demo/pkg/etcdv3"
+	"goim-example/pkg/etcdv3"
 
 	log "github.com/golang/glog"
 )

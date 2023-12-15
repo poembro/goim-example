@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"goim-demo/internal/logic/business/service"
-	"goim-demo/internal/logic/conf"
-	"goim-demo/internal/logic/dao"
-	"goim-demo/internal/logic/model"
+	"goim-example/internal/logic/business/service"
+	"goim-example/internal/logic/conf"
+	"goim-example/internal/logic/dao"
+	"goim-example/internal/logic/model"
 
-	"goim-demo/pkg/etcdv3"
+	"goim-example/pkg/etcdv3"
 
 	log "github.com/golang/glog"
 )

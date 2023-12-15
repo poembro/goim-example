@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"goim-demo/internal/logic/business/dao"
-	"goim-demo/internal/logic/conf"
+	"goim-example/internal/logic/business/dao"
+	"goim-example/internal/logic/conf"
 )
 
 // Service struct

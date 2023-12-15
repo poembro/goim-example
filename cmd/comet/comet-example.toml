@@ -1,7 +1,9 @@
 # This is a TOML document. Boom
 [discovery]
     nodes = "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579"
-
+    username = "root"
+    password = "NOjyVFBqlCvhWM"
+    
 [rpcServer]
     addr = ":3109"
     timeout = "1s"

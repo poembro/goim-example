@@ -6,13 +6,13 @@ import (
 
 	"github.com/go-redis/redis"
 
-	"goim-demo/internal/logic/conf"
+	"goim-example/internal/logic/conf"
 )
 
 // Dao dao
 type Dao struct {
 	c      *conf.Config
-	RdsCli *redis.Client
+	RDSCli *redis.Client
 	expire time.Duration
 }
 
@@ -35,7 +35,7 @@ func newRedis(c *conf.Redis) *redis.Client {
 func New(c *conf.Config) *Dao {
 	d := &Dao{
 		c:      c,
-		RdsCli: newRedis(c.Redis),
+		RDSCli: newRedis(c.Redis),
 		expire: time.Duration(time.Second * 60), //75 * time.Second
 	}
 
@@ -44,14 +44,14 @@ func New(c *conf.Config) *Dao {
 
 // Close  the resource.
 func (d *Dao) Close() {
-	if d.RdsCli != nil {
-		d.RdsCli.Close()
+	if d.RDSCli != nil {
+		d.RDSCli.Close()
 	}
 }
 
 // Ping verify server is ok.
 func (d *Dao) Ping(c context.Context) (err error) {
-	if _, err = d.RdsCli.Ping().Result(); err != nil {
+	if _, err = d.RDSCli.Ping().Result(); err != nil {
 		return
 	}
 

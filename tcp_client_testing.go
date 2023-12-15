@@ -6,13 +6,13 @@ package main
 // third parameter: comet server ip
 
 import (
-	"goim-demo/internal/logic/business/util"
-	"goim-demo/pkg/bufio"
+	"goim-example/internal/logic/business/util"
+	"goim-example/pkg/bufio"
 	"sync"
 
 	"flag"
 	"fmt"
-	"goim-demo/api/protocol"
+	"goim-example/api/protocol"
 	"math/rand"
 	"net"
 	"os"

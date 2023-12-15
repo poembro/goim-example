@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"goim-demo/internal/comet/conf"
+	"goim-example/internal/comet/conf"
 )
 
 var whitelist *Whitelist

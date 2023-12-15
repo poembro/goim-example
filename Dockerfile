@@ -31,9 +31,9 @@ LABEL name="poembro/goim" version="0.0.1" description="这是一个golang goim k
 ENV PATH .:$PATH
 ENV APP_NAME goim
 
-WORKDIR /webser/go_wepapp/goim-demo   
+WORKDIR /webser/go_wepapp/goim-example   
 RUN echo "第二部分中，只需要编译后的可执行文件。 所以跟换为更小的 alpine " 
-COPY --from=builder /app/target /webser/go_wepapp/goim-demo/
+COPY --from=builder /app/target /webser/go_wepapp/goim-example/
 
 #cmd命令 容器启动后默认执行的命令及其参数 但会被docker run 命令后面的命令行参数替换
 CMD ["sh"]

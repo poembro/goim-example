@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"goim-demo/pkg/bufio"
+	"goim-example/pkg/bufio"
 )
 
 const (

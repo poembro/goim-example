@@ -2,30 +2,61 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"goim-demo/internal/logic/business/model"
-	"goim-demo/internal/logic/business/util"
+	"goim-example/internal/logic/business/model"
+	"goim-example/internal/logic/business/util"
 	"strconv"
 	"time"
+
+	log "github.com/golang/glog"
 )
 
-// SignIn 长连接登录 (comet服务通过grpc发来的body参数)
-// 方案一: body 是一个jwt token 值 去其他服务拿到对应的 头像昵称等信息
-// 方案二: demo 中 body 是一个json 已经包含了头像昵称等信息
-func (s *Service) SignIn(ctx context.Context, user *model.User, body []byte, connAddr string) error {
+// AuthLogin 直接拿到客户端传来的明文 token
+func (s *Service) AuthLogin(ctx context.Context, server, cookie string, token []byte) (model.Auth, error) {
+	if cookie != "" { // 如果有cookie 则表示 有其他额外用户体系 解析cookie即可
+		return s.AuthLoginCookie(ctx, server, cookie, token)
+	}
+	var req model.Auth
+	if err := json.Unmarshal(token, &req); err != nil {
+		log.Errorf("json.Unmarshal(%s) error(%v)", token, err)
+		return req, err
+	}
+
 	//解析body  得到 deviceId, userId
-	userId := int64(user.Mid)
-	uidStr := strconv.FormatInt(userId, 10)
-	deviceId := s.BuildDeviceId(user.Platform, uidStr)
-	if user.Key != deviceId {
-		return fmt.Errorf(uidStr + "应该是:" + deviceId + " 结果是:" + user.Key + " 登录认证错误,设备编号对不上!")
+	midStr := strconv.FormatInt(req.Mid, 10)
+	deviceId := s.BuildDeviceId(req.Platform, midStr)
+	if req.Key != deviceId {
+		// return req, fmt.Errorf(midStr + ":" + deviceId + " 结果是:" + req.Key + " 登录认证错误,设备编号对不上!")
 	}
 
 	// 标记用户上线 并 存储用户信息
-	s.dao.AddMapping(userId, deviceId, connAddr, string(body))
-	//将用户归属到指定商户
-	s.dao.AddUserByShop(user.ShopId, uidStr)
-	return nil
+	s.dao.AddMapping(req.Mid, deviceId, server, string(token))
+	// 将用户归属到指定商户
+	s.dao.AddUserByShop("8000", midStr)
+	return req, nil
+}
+
+// AuthLoginCookie 直接拿到客户端传来的明文 token
+func (s *Service) AuthLoginCookie(ctx context.Context, server, cookie string, token []byte) (model.Auth, error) {
+	var req model.Auth
+	if err := json.Unmarshal(token, &req); err != nil {
+		log.Errorf("json.Unmarshal(%s) error(%v)", token, err)
+		return req, err
+	}
+
+	//解析body  得到 deviceId, userId
+	midStr := strconv.FormatInt(req.Mid, 10)
+	deviceId := s.BuildDeviceId(req.Platform, midStr)
+	if req.Key != deviceId {
+		return req, fmt.Errorf(midStr + "应该是:" + deviceId + " 结果是:" + req.Key + " 登录认证错误,设备编号对不上!")
+	}
+
+	// 标记用户上线 并 存储用户信息
+	s.dao.AddMapping(req.Mid, deviceId, server, string(token))
+	// 将用户归属到指定商户
+	s.dao.AddUserByShop("8000", midStr)
+	return req, nil
 }
 
 // BuildDeviceId 构建 DeviceId
@@ -55,15 +86,18 @@ func (s *Service) CreateUser(shopId, shopName, shopFace, remoteAddr, referer, us
 	if err != nil {
 		panic(err)
 	}
+
 	return &model.User{
-		Mid:      model.Int64(Mid),
-		Key:      deviceId,
-		RoomID:   fmt.Sprintf("%s://%s", model.RoomTyp, smid),
-		Platform: platform,
-		// 8000是频道 如: 客服聊天类型 弹幕信息类型 与某人聊天房间类型
-		// 游戏大厅的通知 游戏匹配成功的通知 游戏房间的聊天
-		// 如 在游戏房间刷怪、聊天的同时, 还能接收游戏大厅的广播通知消息)
-		Accepts:    []int32{model.OpGlobal, model.OpMessage},
+		Auth: model.Auth{
+			Mid:      int64(Mid),
+			Key:      deviceId,
+			RoomID:   fmt.Sprintf("%s://%s", model.RoomTyp, smid),
+			Platform: platform,
+			// 8000是频道 如: 客服聊天类型 弹幕信息类型 与某人聊天房间类型
+			// 游戏大厅的通知 游戏匹配成功的通知 游戏房间的聊天
+			// 如 在游戏房间刷怪、聊天的同时, 还能接收游戏大厅的广播通知消息)
+			Accepts: []int32{model.OpGlobal, model.OpMessage},
+		},
 		Nickname:   nickname,
 		Face:       "http://img.touxiangwu.com/2020/3/uq6Bja.jpg", // 随机头像
 		ShopId:     shopId,
@@ -93,11 +127,17 @@ func (s *Service) ShopCreate(shopId, shopName, shopFace, remoteAddr, referer, us
 		panic(err)
 	}
 	return &model.User{
-		Mid:        model.Int64(sID),
-		Key:        deviceId,
-		RoomID:     fmt.Sprintf("%s://%s", model.RoomTyp, shopId),
-		Platform:   platform,
-		Accepts:    []int32{model.OpGlobal, model.OpMessage},
+		Auth: model.Auth{
+			Mid:      int64(sID),
+			Key:      deviceId,
+			RoomID:   fmt.Sprintf("%s://%s", model.RoomTyp, shopId),
+			Platform: platform,
+			// 8000是频道 如: 客服聊天类型 弹幕信息类型 与某人聊天房间类型
+			// 游戏大厅的通知 游戏匹配成功的通知 游戏房间的聊天
+			// 如 在游戏房间刷怪、聊天的同时, 还能接收游戏大厅的广播通知消息)
+			Accepts: []int32{model.OpGlobal, model.OpMessage},
+		},
+
 		Nickname:   nickname,
 		Face:       "http://img.touxiangwu.com/2020/3/uq6Bja.jpg", // 随机头像
 		ShopId:     shopId,

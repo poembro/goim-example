@@ -1,10 +1,11 @@
 package business
 
 import (
-	"goim-demo/internal/logic"
-	"goim-demo/internal/logic/business/apihttp"
-	"goim-demo/internal/logic/business/service"
-	"goim-demo/internal/logic/conf"
+	"goim-example/internal/logic"
+	"goim-example/internal/logic/business/apihttp"
+	"goim-example/internal/logic/business/service"
+	"goim-example/internal/logic/conf"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,6 +19,7 @@ func New(c *conf.Config, l *logic.Logic) *service.Service {
 	engine := gin.New()
 	engine.Use(r.LoggerHandler, r.RecoverHandler)
 
+	// 消息推送模块
 	group := engine.Group("/goim")
 	group.POST("/push/keys", r.PushKeys)
 	group.POST("/push/mids", r.PushMids)
@@ -27,11 +29,15 @@ func New(c *conf.Config, l *logic.Logic) *service.Service {
 	group.GET("/online/room", r.OnlineRoom)
 	group.GET("/online/total", r.OnlineTotal)
 
+	engine.StaticFS("/_/", http.Dir("./examples/javascript/"))
+
+	// 业务模块
 	engine.Use(r.CorsMiddleware)
 	group2 := engine.Group("/api")
 	{
 		group2.POST("/user/login", r.Login)
 		group2.POST("/user/register", r.Register)
+
 		group2.GET("/user/create", r.CreateUser)
 		authorized := group2.Group("")
 		authorized.Use(r.VerifyMiddleware)

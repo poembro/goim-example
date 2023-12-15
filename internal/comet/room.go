@@ -3,8 +3,8 @@ package comet
 import (
 	"sync"
 
-	"goim-demo/api/protocol"
-	"goim-demo/internal/comet/errors"
+	"goim-example/api/protocol"
+	"goim-example/internal/comet/errors"
 )
 
 // Room is a room and store channel room info.

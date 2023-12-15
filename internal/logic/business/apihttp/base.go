@@ -3,58 +3,51 @@ package apihttp
 import (
 	"strconv"
 
+	"goim-example/internal/logic"
+	"goim-example/internal/logic/business/service"
+	"goim-example/internal/logic/conf"
+
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	// OK ok
-	OK = 0
-	// RequestErr request error
-	RequestErr = -400
-	// RouterErr server error
-	RouterErr = -500
+var contextErrCodeKey = "context/err/code"
 
-	contextErrCode = "context/err/code"
-)
-
-type resp struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
+type Router struct {
+	c     *conf.Config
+	logic *logic.Logic
+	svc   *service.Service
 }
 
-func errors(c *gin.Context, code int, msg string) {
-	c.Set(contextErrCode, code)
-	c.JSON(200, resp{
-		Code:    code,
-		Message: msg,
-	})
-}
-
-func result(c *gin.Context, data interface{}, code int) {
-	c.Set(contextErrCode, code)
-	c.JSON(200, resp{
-		Code: code,
-		Data: data,
-	})
+func New(c *conf.Config, l *logic.Logic, s *service.Service) *Router {
+	r := &Router{
+		c:     c,
+		logic: l,
+		svc:   s,
+	}
+	return r
 }
 
 /////////////////////////////////////////////////////////
 // OutData 响应结构体
 type OutData struct {
-	Code    int         `json:"code"`
-	Msg     string      `json:"msg"`
-	Success bool        `json:"success"`
-	Result  interface{} `json:"result"`
+	Code int         `json:"code"`
+	Msg  string      `json:"msg"`
+	Data interface{} `json:"data,omitempty"`
 }
 
-func OutJson(c *gin.Context, dst OutData) {
+func (s *Router) OutJson(c *gin.Context, code int, msg string, data interface{}) {
 	c.Header("Content-Type", "application/json; charset=utf-8")
-	c.JSON(200, dst)
+	c.Set(contextErrCodeKey, code)
+	c.JSON(200, OutData{
+		Code: code,
+		Msg:  msg,
+		Data: data,
+	})
 	c.Abort()
 	return
 }
 
+/////////////////////////////////////////////////////////
 type Pages struct {
 	MinId    int         `json:"from,omitempty"` // 最小id，默认0，降序分页时传入
 	MaxId    int         `json:"to,omitempty"`   // 最大id，默认0，升序分页时传入
@@ -62,7 +55,7 @@ type Pages struct {
 	Total    int64       `json:"total,omitempty"` // total
 	Limit    int         `json:"limit,omitempty"` // 每页20条
 	Page     int         `json:"page,omitempty"`  // 当前页
-	List     interface{} `json:"list"`
+	Data     interface{} `json:"data,omitempty"`
 }
 
 func NewPage(c *gin.Context) *Pages {
@@ -88,14 +81,34 @@ func NewPage(c *gin.Context) *Pages {
 	return param
 }
 
-func OutPageJson(c *gin.Context, data interface{}, p *Pages) {
+/////////////////////////////////////////////////////////
+type OutDataPage struct {
+	//［结构体变量名 ｜ 变量类型 ｜ json 数据 对应字段名]
+	Code int         `json:"code"` //接口响应状态码
+	Msg  string      `json:"msg"`  //接口响应信息
+	Data interface{} `json:"data"`
+
+	MinId    int   `json:"from,omitempty"` // 最小id，默认0，降序分页时传入
+	MaxId    int   `json:"to,omitempty"`   // 最大id，默认0，升序分页时传入
+	LastPage int   `json:"last_page,omitempty"`
+	Total    int64 `json:"total"`                  // total
+	Limit    int   `json:"per_page,omitempty"`     // 每页20条
+	Page     int   `json:"current_page,omitempty"` // 当前页
+}
+
+func (s *Router) OutPageJson(c *gin.Context, data interface{}, p *Pages) {
 	c.Header("Content-Type", "application/json; charset=utf-8")
-	p.List = data
-	dst := &OutData{
-		Success: true,
-		Code:    200,
-		Msg:     "success",
-		Result:  p,
+	c.Set(contextErrCodeKey, 200)
+	dst := &OutDataPage{
+		Code:     200,
+		Msg:      "success",
+		Data:     data,
+		MinId:    p.MinId,
+		MaxId:    p.MaxId,
+		LastPage: p.LastPage,
+		Total:    p.Total,
+		Limit:    p.Limit,
+		Page:     p.Page,
 	}
 	c.JSON(200, dst)
 	c.Abort()

@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"goim-demo/api/protocol"
-	"goim-demo/internal/comet/conf"
-	"goim-demo/pkg/bufio"
-	"goim-demo/pkg/bytes"
-	xtime "goim-demo/pkg/time"
+	"goim-example/api/protocol"
+	"goim-example/internal/comet/conf"
+	"goim-example/pkg/bufio"
+	"goim-example/pkg/bytes"
+	xtime "goim-example/pkg/time"
 
 	log "github.com/golang/glog"
 )

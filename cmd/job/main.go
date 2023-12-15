@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"goim-demo/internal/job"
-	"goim-demo/internal/job/conf"
+	"goim-example/internal/job"
+	"goim-example/internal/job/conf"
 
 	log "github.com/golang/glog"
 )

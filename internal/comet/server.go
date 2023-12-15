@@ -7,8 +7,8 @@ import (
 	"net"
 	"time"
 
-	"goim-demo/api/logic"
-	"goim-demo/internal/comet/conf"
+	"goim-example/api/logic"
+	"goim-example/internal/comet/conf"
 
 	log "github.com/golang/glog"
 	"github.com/zhenjl/cityhash"

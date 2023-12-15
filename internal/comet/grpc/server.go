@@ -5,10 +5,10 @@ import (
 	"net"
 	"time"
 
-	pb "goim-demo/api/comet"
-	"goim-demo/internal/comet"
-	"goim-demo/internal/comet/conf"
-	"goim-demo/internal/comet/errors"
+	pb "goim-example/api/comet"
+	"goim-example/internal/comet"
+	"goim-example/internal/comet/conf"
+	"goim-example/internal/comet/errors"
 
 	log "github.com/golang/glog"
 

@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"goim-demo/internal/logic/conf"
+	"goim-example/internal/logic/conf"
 )
 
 var (

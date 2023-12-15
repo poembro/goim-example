@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	xtime "goim-demo/pkg/time"
+	xtime "goim-example/pkg/time"
 
 	"github.com/BurntSushi/toml"
 )
@@ -73,9 +73,9 @@ func Default() *Config {
 			Addrs:       strings.Split(addrs, ","), // 公网ip 如:192.168.84.168,192.168.84.169
 			Offline:     offline,                   // 在线状态 如:true/false
 		},
-		Discovery: &Discovery{
-			Nodes: "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579",
-		},
+		//Discovery: &Discovery{
+		//	Nodes: "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579",
+		//},
 		RPCClient: &RPCClient{
 			Dial:    xtime.Duration(time.Second),
 			Timeout: xtime.Duration(time.Second),
@@ -150,7 +150,9 @@ type Env struct {
 }
 
 type Discovery struct {
-	Nodes string
+	Nodes    string
+	Username string
+	Password string
 }
 
 // RPCClient is RPC client config.

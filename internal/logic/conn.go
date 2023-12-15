@@ -2,11 +2,9 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"goim-demo/api/protocol"
-	user "goim-demo/internal/logic/business/model"
-	"goim-demo/internal/logic/model"
+	"goim-example/api/protocol"
+	"goim-example/internal/logic/model"
 	"time"
 
 	log "github.com/golang/glog"
@@ -14,31 +12,23 @@ import (
 
 // Connect connected a conn.
 func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) (mid int64, key, roomID string, accepts []int32, hb int64, err error) {
-	/*
-		var params struct {
-			Mid      int64   `json:"mid"`
-			Key      string  `json:"key"`
-			RoomID   string  `json:"room_id"`
-			Platform string  `json:"platform"`
-			Accepts  []int32 `json:"accepts"`
-			Token string  `json:"token"` // 授权token 这里解析 调用第三方api
-		}
-	*/
-	var params user.User
-	if err = json.Unmarshal(token, &params); err != nil {
-		log.Errorf("json.Unmarshal(%s) error(%v)", token, err)
+	// 框架之外,第三方业务 逻辑扩展
+	item, errStr := l.srvHttp.AuthLogin(c, server, cookie, token)
+	if errStr != nil {
+		err = errStr
 		return
 	}
-	roomID = params.RoomID
-	accepts = params.Accepts
-	key = params.Key
+	roomID = item.RoomID
+	accepts = item.Accepts
+	key = item.Key
+	mid = item.Mid
 	hb = int64(l.c.Node.Heartbeat) * int64(l.c.Node.HeartbeatMax)
 
-	if mid = int64(params.Mid); mid == 0 {
+	if mid == 0 {
 		err = fmt.Errorf("mid is err !!")
 		return
 	}
-	if key = params.Key; key == "" {
+	if key == "" {
 		err = fmt.Errorf("key is err !!")
 		return
 	}
@@ -51,11 +41,6 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 	//如果验证通过, 则生成会话数据, 存入 redis 中; 否则返回认证失败
 	if err = l.dao.AddMapping(c, mid, key, server); err != nil {
 		log.Errorf("l.dao.AddMapping(%d,%s,%s) error(%v)", mid, key, server, err)
-	}
-
-	// 框架之外,第三方业务 逻辑扩展
-	if err = l.srvHttp.SignIn(c, &params, token, server); err != nil {
-		return
 	}
 
 	log.Infof("conn connected key:%s server:%s mid:%d token:%s", key, server, mid, token)

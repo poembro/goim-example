@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package goim.logic;
 
-option go_package = "goim-demo/api/logic;logic";
+option go_package = "goim-example/api/logic;logic";
 
-import "goim-demo/api/protocol/protocol.proto";
+import "goim-example/api/protocol/protocol.proto";
 
 message PushMsg {
     enum Type {

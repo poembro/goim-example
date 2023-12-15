@@ -22,13 +22,13 @@ func keyShopUsersList(shopId string) string {
 
 // AddShop 添加后台商户
 func (d *Dao) AddShop(nickname, dst string) error {
-	d.RdsCli.HSet(keyShopList(), nickname, dst).Result()
+	d.RDSCli.HSet(keyShopList(), nickname, dst).Result()
 	return nil
 }
 
 // GetShop 获取后台商户
 func (d *Dao) GetShop(nickname string) ([]byte, error) {
-	return d.RdsCli.HGet(keyShopList(), nickname).Bytes()
+	return d.RDSCli.HGet(keyShopList(), nickname).Bytes()
 }
 
 // GetShopByUsers 查询某商户下的用户
@@ -37,9 +37,9 @@ func (d *Dao) GetShopByUsers(shopId, min, max string, page, limit int64) ([]stri
 	var total int64 // 条数
 	var err error
 	key := keyShopUsersList(shopId)
-	total, err = d.RdsCli.ZCount(key, min, max).Result()
+	total, err = d.RDSCli.ZCount(key, min, max).Result()
 
-	ids, err := d.RdsCli.ZRevRangeByScore(key, redis.ZRangeBy{
+	ids, err := d.RDSCli.ZRevRangeByScore(key, redis.ZRangeBy{
 		Min:    min, //"-inf"
 		Max:    max, // "+inf"
 		Offset: (page - 1) * limit,

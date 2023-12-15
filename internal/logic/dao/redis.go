@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"goim-demo/internal/logic/model"
+	"goim-example/internal/logic/model"
 	"strconv"
 
 	log "github.com/golang/glog"

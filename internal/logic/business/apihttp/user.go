@@ -3,10 +3,10 @@ package apihttp
 import (
 	"context"
 	"encoding/json"
-	"goim-demo/internal/logic/business/model"
-	"goim-demo/internal/logic/business/util"
+	"goim-example/internal/logic/business/model"
+	"goim-example/internal/logic/business/util"
 
-	//"goim-demo/pkg/logger"
+	//"goim-example/pkg/logger"
 	"strconv"
 	"time"
 
@@ -19,24 +19,24 @@ func (s *Router) CreateUser(c *gin.Context) {
 		ShopId string `form:"shop_id"`
 	}
 	if err := c.BindQuery(&arg); err != nil {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	if arg.ShopId == "" {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数不能为空"})
+		s.OutJson(c, -1, "参数不能为空", nil)
 		return
 	}
 	//判断客服是否存在
 	shop, err := s.svc.GetShop(arg.ShopId) // ShopId 就是商户昵称
 	if err != nil || shop == nil || shop.Mid == "" {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数错误"})
+		s.OutJson(c, -1, "参数错误", nil)
 		return
 	}
 	dst := s.svc.CreateUser(shop.Mid, shop.Nickname, shop.Face,
 		c.ClientIP(), c.GetHeader("referer"), c.GetHeader("user-agent"))
 
 	// 客服聊天场景
-	OutJson(c, OutData{Code: 200, Success: true, Msg: "success", Result: dst})
+	s.OutJson(c, 200, "success", dst)
 }
 
 // Login 登录 (后台)
@@ -46,26 +46,26 @@ func (s *Router) Login(c *gin.Context) {
 		Password string `json:"password"`
 	}
 	if err := c.BindJSON(&arg); err != nil {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	if arg.Nickname == "" || arg.Password == "" {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "参数nickname or password不能为空"})
+		s.OutJson(c, -1, "参数nickname or password不能为空", nil)
 		return
 	}
 	shop, err := s.svc.GetShop(arg.Nickname)
 	if err != nil || shop == nil || shop.Mid == "" {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "未注册"})
+		s.OutJson(c, -1, "未注册", nil)
 		return
 	}
 
 	if shop.Password != arg.Password {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "密码错误"})
+		s.OutJson(c, -1, "密码错误", nil)
 		return
 	}
 	dst := s.svc.ShopCreate(shop.Mid, shop.Nickname, shop.Face,
 		c.ClientIP(), c.GetHeader("referer"), c.GetHeader("user-agent"))
-	OutJson(c, OutData{Code: 200, Success: true, Result: dst})
+	s.OutJson(c, 200, "success", dst)
 }
 
 // Register 注册 (后台) 为了演示,临时采用redis存储
@@ -75,12 +75,12 @@ func (s *Router) Register(c *gin.Context) {
 		Password string `json:"password"`
 	}
 	if err := c.BindJSON(&arg); err != nil {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	shop, _ := s.svc.GetShop(arg.Nickname)
 	if shop != nil {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: "已经被注册"})
+		s.OutJson(c, -1, "已经被注册", nil)
 		return
 	}
 
@@ -88,7 +88,7 @@ func (s *Router) Register(c *gin.Context) {
 	_, mid := s.svc.BuildMid()
 	s.svc.AddShop(mid, arg.Nickname, face, arg.Password)
 
-	OutJson(c, OutData{Code: 200, Success: true, Msg: "success", Result: "xxx"})
+	s.OutJson(c, 200, "success", nil)
 }
 
 // ListUser 查看所有与自己聊天的用户
@@ -98,7 +98,7 @@ func (s *Router) ListUser(c *gin.Context) {
 		Typ    string `json:"typ"`
 	}
 	if err := c.BindJSON(&arg); err != nil {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 
@@ -107,11 +107,9 @@ func (s *Router) ListUser(c *gin.Context) {
 		total  int64
 		err    error
 	)
-
 	ids := make([]int64, 0)
 	// 查询在线人数
 	page := NewPage(c)
-
 	if arg.Typ == "offline" {
 		idsTmp, total, err = s.svc.GetShopByUsers(arg.ShopId,
 			"-inf", "+inf", int64(page.Page), int64(page.Limit))
@@ -123,7 +121,7 @@ func (s *Router) ListUser(c *gin.Context) {
 			min, max, int64(page.Page), int64(page.Limit))
 	}
 	if err != nil {
-		OutJson(c, OutData{Code: -1, Success: false, Msg: err.Error()})
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	page.Total = total
@@ -161,7 +159,7 @@ func (s *Router) ListUser(c *gin.Context) {
 			continue
 		}
 
-		user.Unread = model.Int64(count)
+		user.Unread = count
 		user.LastMessage = lastMessage
 
 		user.IsOnline = s.logic.IsOnline(context.TODO(), []string{deviceId})
@@ -175,5 +173,5 @@ func (s *Router) ListUser(c *gin.Context) {
 	}
 
 	onlineTmp = append(onlineTmp, offlineTmp...) //合并离线与在线
-	OutPageJson(c, onlineTmp, page)
+	s.OutPageJson(c, onlineTmp, page)
 }

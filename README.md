@@ -1,5 +1,5 @@
-# goim-demo
-一个 goim 的demo 改服务发现为etcd 改 kafka 为 redis 
+# goim-example
+一个 goim 的example 改服务发现为etcd 改 kafka 为 redis 
 
 ## 特性 
  * 高性能 纯Golang实现.
@@ -21,15 +21,15 @@
 - 服务发现 规则按 /环境/服务名/地区 (即 每个地区可以发现n个节点)
 
 ### kafka 改redis
-- 目前demo代码支持redis/kafka 做中间件
+- 目前example代码支持redis/kafka 做中间件
 - 移除已经弃用的库 github.com/bsm/sarama-cluster 
 
 ## 部署
 - 方案一 选择redis作为消息中间件切换, 仅需要 redis etcd 即可;
 - 方案二 选择kafka作为消息中间件切换, 需要 redis kafka etcd 即可;
 ```sh 
-$ git clone git@github.com:poembro/goim-demo.git
-$ cd goim-demo
+$ git clone git@github.com:poembro/goim-example.git
+$ cd goim-example
 $ go mod tidy
 $ make build
 $ make runjob     ##运行 job 服务
@@ -37,7 +37,8 @@ $ make runlogic   ##运行 logic 服务
 $ make runcomet   ##运行 comet 服务
 
 $ go run tcp_client_testing.go 9999 100 192.168.84.168:3101   ## 运行100个并发测试脚本   
-$ cd examples/javascript/ && go run main.go   ## 运行http静态页面 
+
+$ 浏览器打开 http://127.0.0.1:3111/_/
 $ curl "http://127.0.0.1:3111/goim/push/all?operation=1000&speed=0" -sv  -d 'json'   ## 推送消息
 
 - docker-compose 方式运行 (前提是要先安装docker)
@@ -52,8 +53,8 @@ sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
 
 拉取项目
-$ git clone git@github.com:poembro/goim-demo.git
-$ cd goim-demo
+$ git clone git@github.com:poembro/goim-example.git
+$ cd goim-example
 
 替换对应ip
 $ grep -rl 10.0.41.145 ./ | xargs sed -i "s/10.0.41.145/172.16.75.215/g"
@@ -103,7 +104,7 @@ I0530 14:35:11.114999 1499866 sub_kafka.go:59] consume: goim-push-topic/Partitio
 
 问题四: 不同包路径下的 同名 api.proto 报错提示已经引入
 
-luoyuxiangdeMacBook-Pro:goim-demo luoyuxiang$ make runjob
+luoyuxiangdeMacBook-Pro:goim-example luoyuxiang$ make runjob
 export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn && ./target/job -conf=target/job.toml -region=sh -zone=sh001 -deploy.env=prod -host=192.168.84.168 -log_dir=./target 
 WARNING: proto: file "api.proto" is already registered
 See https://developers.google.com/protocol-buffers/docs/reference/go/faq#namespace-conflict
@@ -248,7 +249,7 @@ export GODEBUG=http2debug=2 && export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
 
 
 ## 看源码过程中 各个结构图
-[![](./goim.png)](https://github.com/poembro/goim-demo)
+[![](./goim.png)](https://github.com/poembro/goim-example)
 
 
 

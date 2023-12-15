@@ -3,8 +3,8 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"goim-demo/internal/logic/business/model"
-	"goim-demo/internal/logic/business/util"
+	"goim-example/internal/logic/business/model"
+	"goim-example/internal/logic/business/util"
 )
 
 // GetShop 获取后台商户

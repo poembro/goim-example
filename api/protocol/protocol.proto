@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package goim.protocol;
 
-option go_package = "goim-demo/api/protocol;protocol";
+option go_package = "goim-example/api/protocol;protocol";
 
 /*
  * v1.0.0

@@ -19,6 +19,7 @@ type Builder struct {
 func (b *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
 	// 即:	target := fmt.Sprintf("discovery:///%s/%s/%s", env, appid, region)
 	prefix := fmt.Sprintf("/%s/", target.Endpoint)
+
 	r := &Resolver{
 		Conn:   b.Conn,
 		cc:     cc,
@@ -68,7 +69,7 @@ func (r *Resolver) watchers() {
 	r.addresses = make(map[string]resolver.Address)
 	r.Watcher = clientv3.NewWatcher(r.Conn)
 	r.KV = clientv3.NewKV(r.Conn)
-
+	log.Infoln("---> etcdv3 xx----func (r *Resolver) Watcher  r.prefix:", r.prefix)
 	// 先获取一次
 	ins, err := r.KV.Get(r.ctx, r.prefix, clientv3.WithPrefix())
 	if err != nil {
@@ -99,13 +100,15 @@ func (r *Resolver) watchers() {
 			Addresses: r.getAddresses(),
 		})
 	}
-	// log.Infof("---> etcdv3 -------func (r *Resolver) Watcher ")
+
 	r.Close()
 }
 
 func (r *Resolver) setAddress(key, address string) {
 	r.Lock()
 	defer r.Unlock()
+	log.Infoln("---> etcdv3 ---- setAddress  key:val => ", key, ":", address)
+
 	r.addresses[key] = resolver.Address{Addr: string(address)}
 }
 

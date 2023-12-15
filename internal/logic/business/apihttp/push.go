@@ -13,20 +13,20 @@ func (s *Router) PushKeys(c *gin.Context) {
 		Keys []string `form:"keys"`
 	}
 	if err := c.BindQuery(&arg); err != nil {
-		errors(c, RequestErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	// read message
 	msg, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		errors(c, RequestErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	if err = s.logic.PushKeys(context.TODO(), arg.Op, arg.Keys, msg); err != nil {
-		result(c, nil, RequestErr)
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
-	result(c, nil, OK)
+	s.OutJson(c, 200, "success", nil)
 }
 
 func (s *Router) PushMids(c *gin.Context) {
@@ -35,20 +35,20 @@ func (s *Router) PushMids(c *gin.Context) {
 		Mids []int64 `form:"mids"`
 	}
 	if err := c.BindQuery(&arg); err != nil {
-		errors(c, RequestErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	// read message
 	msg, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		errors(c, RequestErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	if err = s.logic.PushMids(context.TODO(), arg.Op, arg.Mids, msg); err != nil {
-		errors(c, RouterErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
-	result(c, nil, OK)
+	s.OutJson(c, 200, "success", nil)
 }
 
 func (s *Router) PushRoom(c *gin.Context) {
@@ -58,21 +58,21 @@ func (s *Router) PushRoom(c *gin.Context) {
 		Room string `form:"room" binding:"required"`
 	}
 	if err := c.BindQuery(&arg); err != nil {
-		errors(c, RequestErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	// read message
 	msg, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		errors(c, RequestErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 
 	if err = s.logic.PushRoom(c, arg.Op, arg.Type, arg.Room, msg); err != nil {
-		errors(c, RouterErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
-	result(c, nil, OK)
+	s.OutJson(c, 200, "success", nil)
 }
 
 func (s *Router) PushAll(c *gin.Context) {
@@ -81,17 +81,17 @@ func (s *Router) PushAll(c *gin.Context) {
 		Speed int32 `form:"speed"`
 	}
 	if err := c.BindQuery(&arg); err != nil {
-		errors(c, RequestErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	msg, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		errors(c, RequestErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	if err = s.logic.PushAll(c, arg.Op, arg.Speed, msg); err != nil {
-		errors(c, RouterErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
-	result(c, nil, OK)
+	s.OutJson(c, 200, "success", nil)
 }

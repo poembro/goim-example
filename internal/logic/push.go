@@ -2,7 +2,7 @@ package logic
 
 import (
 	"context"
-	"goim-demo/internal/logic/model"
+	"goim-example/internal/logic/model"
 
 	log "github.com/golang/glog"
 )

@@ -12,15 +12,15 @@ func (s *Router) OnlineTop(c *gin.Context) {
 		Limit int    `form:"limit" binding:"required"`
 	}
 	if err := c.BindQuery(&arg); err != nil {
-		errors(c, RequestErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	res, err := s.logic.OnlineTop(c, arg.Type, arg.Limit)
 	if err != nil {
-		result(c, nil, RequestErr)
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
-	result(c, res, OK)
+	s.OutJson(c, 200, "success", res)
 }
 
 func (s *Router) OnlineRoom(c *gin.Context) {
@@ -29,15 +29,15 @@ func (s *Router) OnlineRoom(c *gin.Context) {
 		Rooms []string `form:"rooms" binding:"required"`
 	}
 	if err := c.BindQuery(&arg); err != nil {
-		errors(c, RequestErr, err.Error())
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
 	res, err := s.logic.OnlineRoom(c, arg.Type, arg.Rooms)
 	if err != nil {
-		result(c, nil, RequestErr)
+		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
-	result(c, res, OK)
+	s.OutJson(c, 200, "success", res)
 }
 
 func (s *Router) OnlineTotal(c *gin.Context) {
@@ -46,5 +46,5 @@ func (s *Router) OnlineTotal(c *gin.Context) {
 		"ip_count":   ipCount,
 		"conn_count": connCount,
 	}
-	result(c, res, OK)
+	s.OutJson(c, 200, "success", res)
 }

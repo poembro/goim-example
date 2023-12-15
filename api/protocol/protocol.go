@@ -3,10 +3,10 @@ package protocol
 import (
 	"errors"
 
-	"goim-demo/pkg/bufio"
-	"goim-demo/pkg/bytes"
-	"goim-demo/pkg/encoding/binary"
-	"goim-demo/pkg/websocket"
+	"goim-example/pkg/bufio"
+	"goim-example/pkg/bytes"
+	"goim-example/pkg/encoding/binary"
+	"goim-example/pkg/websocket"
 )
 
 const (

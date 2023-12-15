@@ -1,9 +1,9 @@
 package comet
 
 import (
-	"goim-demo/api/protocol"
-	"goim-demo/internal/comet/conf"
-	"goim-demo/internal/comet/errors"
+	"goim-example/api/protocol"
+	"goim-example/internal/comet/conf"
+	"goim-example/internal/comet/errors"
 
 	log "github.com/golang/glog"
 )

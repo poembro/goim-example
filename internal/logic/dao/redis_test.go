@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"goim-demo/internal/logic/model"
+	"goim-example/internal/logic/model"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"goim-demo/api/logic"
-	"goim-demo/api/protocol"
-	"goim-demo/pkg/strings"
+	"goim-example/api/logic"
+	"goim-example/api/protocol"
+	"goim-example/pkg/strings"
 
 	log "github.com/golang/glog"
 

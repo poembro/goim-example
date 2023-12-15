@@ -6,7 +6,7 @@ package logic
 import (
 	context "context"
 	fmt "fmt"
-	protocol "goim-demo/api/protocol"
+	protocol "goim-example/api/protocol"
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"

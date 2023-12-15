@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"goim-demo/internal/logic/business/util"
+	"goim-example/internal/logic/business/util"
 	"strconv"
 
 	log "github.com/golang/glog"

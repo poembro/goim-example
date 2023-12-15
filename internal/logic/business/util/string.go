@@ -8,6 +8,7 @@ import (
 
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 )
 
 var r *rand.Rand
@@ -71,4 +72,12 @@ func Md5(str string) string {
 	h := md5.New()
 	h.Write(S2B(str))
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+func JsonMarshal(v interface{}) string {
+	bytes, err := json.Marshal(v)
+	if err != nil {
+		panic(err.Error())
+	}
+	return B2S(bytes)
 }

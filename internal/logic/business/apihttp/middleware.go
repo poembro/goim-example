@@ -2,6 +2,7 @@ package apihttp
 
 import (
 	"fmt"
+	"goim-example/internal/logic/business/util"
 	"net/http/httputil"
 	"os"
 	"runtime"
@@ -10,6 +11,42 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/golang/glog"
 )
+
+func (s *Router) CorsMiddleware(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Headers", "*")
+	c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, PATCH, DELETE")
+	c.Header("Access-Control-Max-Age", "3600")
+	c.Header("Access-Control-Expose-Headers", "*")
+	c.Header("Access-Control-Allow-Credentials", "true")
+	if c.Request.Method == "OPTIONS" {
+		c.AbortWithStatus(200)
+	}
+	c.Next()
+}
+
+func (s *Router) VerifyMiddleware(c *gin.Context) {
+	// 解析token
+	var token string
+	token = c.Query("token")
+	if token == "" {
+		token = c.GetHeader("token")
+	}
+	if token == "" {
+		s.OutJson(c, -1, "参数token不能为空", nil)
+		return
+	}
+	tokenInfo, err := util.DecryptToken(token)
+	if tokenInfo == nil || err != nil {
+		s.OutJson(c, -1, "参数token认证错误", nil)
+		return
+	}
+
+	// c.Set("username", "value") 将用户信息保存到ctx,  方便后续handler读取
+
+	// 去执行后续handler逻辑
+	c.Next()
+}
 
 func (s *Router) LoggerHandler(c *gin.Context) {
 	// Start timer
@@ -25,7 +62,7 @@ func (s *Router) LoggerHandler(c *gin.Context) {
 	end := time.Now()
 	latency := end.Sub(start)
 	statusCode := c.Writer.Status()
-	ecode := c.GetInt(contextErrCode)
+	ecode := c.GetInt(contextErrCodeKey)
 	clientIP := c.ClientIP()
 	if raw != "" {
 		path = path + "?" + raw

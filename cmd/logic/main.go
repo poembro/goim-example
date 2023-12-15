@@ -7,13 +7,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"goim-demo/internal/logic"
-	"goim-demo/internal/logic/business"
-	"goim-demo/internal/logic/conf"
-	"goim-demo/internal/logic/grpc"
-	"goim-demo/pkg/etcdv3"
+	"goim-example/internal/logic"
+	"goim-example/internal/logic/business"
+	"goim-example/internal/logic/conf"
+	"goim-example/internal/logic/grpc"
+	"goim-example/pkg/etcdv3"
 
-	//"goim-demo/internal/logic/user"  //加的业务
+	//"goim-example/internal/logic/user"  //加的业务
 
 	log "github.com/golang/glog"
 )
@@ -36,7 +36,7 @@ func main() {
 	//可以在此 追加业务代码  抄grpc目录 然后目录下做 业务认证逻辑
 
 	// discovery
-	dis := etcdv3.New(conf.Conf.Discovery.Nodes)
+	dis := etcdv3.New(conf.Conf.Discovery.Nodes, conf.Conf.Discovery.Username, conf.Conf.Discovery.Password)
 	Register(dis, conf.Conf.RPCServer.Addr, conf.Conf.Env)
 
 	// signal

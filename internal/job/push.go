@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"goim-demo/api/comet"
-	pb "goim-demo/api/logic"
-	"goim-demo/api/protocol"
-	"goim-demo/pkg/bytes"
+	"goim-example/api/comet"
+	pb "goim-example/api/logic"
+	"goim-example/api/protocol"
+	"goim-example/pkg/bytes"
 
 	log "github.com/golang/glog"
 )

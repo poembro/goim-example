@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	pb "goim-demo/api/logic"
-	"goim-demo/internal/job/conf"
+	pb "goim-example/api/logic"
+	"goim-example/internal/job/conf"
 
 	"github.com/gogo/protobuf/proto"
 	log "github.com/golang/glog"
