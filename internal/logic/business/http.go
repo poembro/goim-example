@@ -18,6 +18,11 @@ func New(c *conf.Config, l *logic.Logic) *service.Service {
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	engine.Use(r.LoggerHandler, r.RecoverHandler)
+	engine.Use(r.CorsMiddleware)
+
+	engine.StaticFS("/_/", http.Dir("./examples/javascript/"))
+	engine.StaticFS("/front", http.Dir("./examples/front/"))
+	engine.StaticFS("/admin", http.Dir("./examples/admin/"))
 
 	// 消息推送模块
 	group := engine.Group("/goim")
@@ -29,30 +34,25 @@ func New(c *conf.Config, l *logic.Logic) *service.Service {
 	group.GET("/online/room", r.OnlineRoom)
 	group.GET("/online/total", r.OnlineTotal)
 
-	engine.StaticFS("/_/", http.Dir("./examples/javascript/"))
-	engine.StaticFS("/front", http.Dir("./examples/front/"))
-	engine.StaticFS("/admin", http.Dir("./examples/admin/"))
-
 	// 业务模块
-	engine.Use(r.CorsMiddleware)
-	group2 := engine.Group("/api")
+	adminGroup := engine.Group("/api")
 	{
-		group2.POST("/user/login", r.Login)
-		group2.POST("/user/register", r.Register)
+		adminGroup.GET("/user/create", r.UserCreate)
 
-		group2.GET("/user/create", r.CreateUser)
-		authorized := group2.Group("")
+		adminGroup.POST("/shop/login", r.ShopLogin)
+		adminGroup.POST("/shop/register", r.ShopRegister)
+		authorized := adminGroup.Group("")
 		authorized.Use(r.VerifyMiddleware)
 		{
-			authorized.POST("/user/list", r.ListUser)
+			authorized.POST("/shop/list", r.ShopList)
 
-			authorized.POST("/msg/push", r.PushMsg)
-			authorized.POST("/msg/list", r.ListMsg)
-			authorized.POST("/msg/clear", r.ClearMsg)
+			authorized.POST("/msg/push", r.MsgPush)
+			authorized.POST("/msg/list", r.MsgList)
+			authorized.POST("/msg/clear", r.MsgClear)
 
-			authorized.POST("/ipblack/add", r.AddIpblack)
-			authorized.POST("/ipblack/del", r.DelIpblack)
-			authorized.POST("/ipblack/list", r.ListIpblack)
+			authorized.POST("/ipblack/add", r.IpblackAdd)
+			authorized.POST("/ipblack/del", r.IpblackDel)
+			authorized.POST("/ipblack/list", r.IpblackList)
 		}
 	}
 	go func() {

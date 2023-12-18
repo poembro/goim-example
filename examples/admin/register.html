@@ -159,13 +159,13 @@
                         data.nickname = _this.kefuForm.username;
                         data.password = _this.kefuForm.password;
                         _this.loading = true;
-                        $.post("http://192.168.84.168:3111/api/user/register", data, function (data) {
-                            if (data.success) {
+                        $.post("/api/shop/register", JSON.stringify(data), function (data) {
+                            if (data.code && data.code== 200) {
                                 _this.$message({
                                     message: data.msg,
                                     type: 'success'
                                 });
-                                window.location.href="/admin/login.html";
+                                window.location.href = "/admin/login.html"
                             } else {
                                 _this.$message({
                                     message: data.msg,
@@ -173,7 +173,7 @@
                                 });
                             }
                             _this.loading = false;
-                        });
+                        },"json");
                     }
                 });
 			},

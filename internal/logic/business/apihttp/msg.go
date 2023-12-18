@@ -12,8 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ListMsg 查历史消息
-func (s *Router) ListMsg(c *gin.Context) {
+// MsgList 查历史消息
+func (s *Router) MsgList(c *gin.Context) {
 	var arg struct {
 		RoomId string `json:"room_id"`
 	}
@@ -23,7 +23,7 @@ func (s *Router) ListMsg(c *gin.Context) {
 	}
 
 	page := NewPage(c)
-	dst, total, err := s.svc.GetMessagePageList(arg.RoomId, "-inf", "+inf", int64(page.Page), int64(page.Limit))
+	dst, total, err := s.svc.MsgList(arg.RoomId, "-inf", "+inf", int64(page.Page), int64(page.Limit))
 	if err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
@@ -33,14 +33,14 @@ func (s *Router) ListMsg(c *gin.Context) {
 	s.OutPageJson(c, dst, page)
 }
 
-// apiClearData 数据清理
-func (s *Router) ClearMsg(c *gin.Context) {
-	s.svc.ClearMsg(context.TODO())
+// MsgClear 数据清理
+func (s *Router) MsgClear(c *gin.Context) {
+	s.svc.MsgClear(context.TODO())
 	s.OutJson(c, 200, "success", nil)
 }
 
 // apiPush 数据推送
-func (s *Router) PushMsg(c *gin.Context) {
+func (s *Router) MsgPush(c *gin.Context) {
 	var arg struct {
 		RoomId string `json:"room_id"`
 		Typ    string `json:"type"`
@@ -66,7 +66,7 @@ func (s *Router) PushMsg(c *gin.Context) {
 		arg.Mid, arg.ShopId, arg.Typ, msg, arg.RoomId, time.Now().Unix(), msgId)
 
 	// 消息持久化
-	err := s.svc.AddMessageList(arg.RoomId, msgId, body)
+	err := s.svc.MsgPush(arg.RoomId, msgId, body)
 	if err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return

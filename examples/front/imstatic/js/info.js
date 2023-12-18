@@ -82,7 +82,7 @@
                     //return console.log('发送中...')
                 },
                 success: function(data) {
-                    if (data.success) {
+                    if (data.code == 200) {
                         self.opt.shop_id = shop_id 
                         if (!data.user_list || data.user_list.length <= 0) { return }
                         var len = data.user_list.length 

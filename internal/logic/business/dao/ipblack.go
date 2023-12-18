@@ -16,9 +16,9 @@ func keyListIpblack(shopId string) string {
 	return fmt.Sprintf(_prefixListIpblack, shopId)
 }
 
-// DelIpblack ip从黑名单删除
+// IpblackDel ip从黑名单删除
 // zadd  shop_id  time() ip
-func (d *Dao) DelIpblack(shopId string, ip string) error {
+func (d *Dao) IpblackDel(shopId string, ip string) error {
 	err := d.RDSCli.ZRem(keyListIpblack(shopId), ip).Err()
 	if err != nil {
 		return err
@@ -27,9 +27,9 @@ func (d *Dao) DelIpblack(shopId string, ip string) error {
 	return nil
 }
 
-// AddIpblack ip添加至黑名单
+// IpblackAdd ip添加至黑名单
 // zadd  shop_id  time() ip
-func (d *Dao) AddIpblack(shopId string, ip string) error {
+func (d *Dao) IpblackAdd(shopId string, ip string) error {
 	score := time.Now().UnixNano()
 	err := d.RDSCli.ZAdd(keyListIpblack(shopId), redis.Z{
 		Score:  float64(score),
@@ -45,7 +45,7 @@ func (d *Dao) AddIpblack(shopId string, ip string) error {
 
 // ListIpblack 查询某商户下的用户
 // zrevrange  shop_id  0, 50
-func (d *Dao) ListIpblack(shopId, min, max string, page, limit int64) ([]string, int64, error) {
+func (d *Dao) IpblackList(shopId, min, max string, page, limit int64) ([]string, int64, error) {
 	var total int64 // 条数
 	var err error
 	key := keyListIpblack(shopId)

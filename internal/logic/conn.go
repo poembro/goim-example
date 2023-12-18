@@ -13,7 +13,7 @@ import (
 // Connect connected a conn.
 func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) (mid int64, key, roomID string, accepts []int32, hb int64, err error) {
 	// 框架之外,第三方业务 逻辑扩展
-	item, errStr := l.srvHttp.AuthLogin(c, server, cookie, token)
+	item, errStr := l.business.AuthLogin(c, server, cookie, token)
 	if errStr != nil {
 		err = errStr
 		return
@@ -45,6 +45,35 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 
 	log.Infof("conn connected key:%s server:%s mid:%d token:%s", key, server, mid, token)
 	return
+}
+
+// Receive receive a message. 框架之外,第三方业务 逻辑扩展
+func (l *Logic) Receive(c context.Context, mid int64, proto *protocol.Proto) (err error) {
+	switch proto.Op {
+	case protocol.OpSync:
+		op, keys, msg, err := l.business.MsgSync(c, mid, proto.Body)
+		if op != 0 && err == nil {
+			l.PushKeys(c, op, keys, msg)
+		}
+	case protocol.OpMessageAck:
+		l.business.MessageACK(c, mid, proto.Body)
+	default:
+		log.Infof("receive mid:%d message:%+v", mid, proto)
+	}
+	return
+}
+
+// Keys is online   框架之外,第三方业务 逻辑扩展
+func (l *Logic) IsOnline(c context.Context, keys []string) bool {
+	servers, err := l.dao.ServersByKeys(c, keys)
+	if err != nil {
+		return false
+	}
+	if len(servers) > 0 && servers[0] == "" {
+		return false
+	}
+
+	return true
 }
 
 // Disconnect disconnect a conn.
@@ -85,33 +114,4 @@ func (l *Logic) RenewOnline(c context.Context, server string, roomCount map[stri
 		return nil, err
 	}
 	return l.roomCount, nil
-}
-
-// Receive receive a message. 框架之外,第三方业务 逻辑扩展
-func (l *Logic) Receive(c context.Context, mid int64, proto *protocol.Proto) (err error) {
-	switch proto.Op {
-	case protocol.OpSync:
-		op, keys, msg, err := l.srvHttp.Sync(c, mid, proto.Body)
-		if op != 0 && err == nil {
-			l.PushKeys(c, op, keys, msg)
-		}
-	case protocol.OpMessageAck:
-		l.srvHttp.MessageACK(c, mid, proto.Body)
-	default:
-		log.Infof("receive mid:%d message:%+v", mid, proto)
-	}
-	return
-}
-
-// Keys is online   框架之外,第三方业务 逻辑扩展
-func (l *Logic) IsOnline(c context.Context, keys []string) bool {
-	servers, err := l.dao.ServersByKeys(c, keys)
-	if err != nil {
-		return false
-	}
-	if len(servers) > 0 && servers[0] == "" {
-		return false
-	}
-
-	return true
 }

@@ -23,12 +23,12 @@ type SnowFlake struct {
 	sFlake *sonyflake.Sonyflake
 }
 
-func (s *SnowFlake) GetID() uint64 {
+func (s *SnowFlake) GetID() int64 {
 	n, err := s.sFlake.NextID()
 	if err != nil {
 		return 0
 	}
-	return n
+	return int64(n)
 }
 
 func NewSnowFlake(id uint16) *SnowFlake {

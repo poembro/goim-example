@@ -21,9 +21,9 @@ const (
 
 // Logic struct
 type Logic struct {
-	c       *conf.Config
-	dao     *dao.Dao
-	srvHttp *service.Service
+	c        *conf.Config
+	dao      *dao.Dao
+	business *service.Service
 	// online
 	totalIPs   int64
 	totalConns int64
@@ -35,10 +35,10 @@ type Logic struct {
 // New init
 func New(c *conf.Config) (l *Logic) {
 	l = &Logic{
-		c:       c,
-		dao:     dao.New(c),
-		srvHttp: service.New(c), // 第三方业务
-		regions: make(map[string]string),
+		c:        c,
+		dao:      dao.New(c),
+		business: service.New(c), // 第三方业务
+		regions:  make(map[string]string),
 	}
 	l.initRegions() //初始化regions属性 l.regions[上海] = sh
 	go l.watchComet()
@@ -53,7 +53,6 @@ func (l *Logic) Ping(c context.Context) (err error) {
 // Close close resources.
 func (l *Logic) Close() {
 	l.dao.Close()
-	l.srvHttp.Close()
 }
 
 func (l *Logic) initRegions() {

@@ -116,7 +116,7 @@ var app=new Vue({
             let _this=this;
             console.log("获取历史消息列表")
             _this.sendAjax("/api/msg/list","post",{room_id:room_id}, function(dst){
-                let result = dst.list
+                let result = dst.data
                 let msg = {}
                 for(let i= result.length - 1; i >=0; i--) {
                     msg = JSON.parse(result[i])
@@ -145,7 +145,7 @@ var app=new Vue({
             _this.ipBlacks = []
             let shop_id = _this.shop.shop_id  // 获取 黑名单列表 放到 _this.ipBlacks 
             _this.sendAjax("/api/ipblack/list","post",{shop_id:shop_id}, function(dst){
-                var result = dst.list
+                var result = dst.data
                
                 for(var i=0;i<result.length;i++){
                     _this.ipBlacks.push({id:i,remote_addr:result[i]})
@@ -169,13 +169,15 @@ var app=new Vue({
         },
         getOnlineUser(){//获取在线用户信息
             let _this=this
-            let shop_id = _this.shop.shop_id
-            _this.sendAjax("/api/user/list","post",{shop_id:shop_id, typ:"online"}, function(dst){
+            let shop_id = _this.shop.shop_name
+            console.log("参数 ",  _this.shop)
+
+            _this.sendAjax("/api/shop/list","post",{shop_id:shop_id, typ:"online"}, function(dst){
                 if (!dst) {
                     return console.log("暂无在线用户")
                 }
                 
-                var result = dst.list
+                var result = dst.data
                 //处理下 json字符串
                 for(var i=0;i<result.length;i++){
                     let dst = result[i].last_message
@@ -191,16 +193,16 @@ var app=new Vue({
                 }
             });
         },
-        getOfflineUser(page){  //获取离线用户
-            console.log("参数 ",page)
+        getOfflineUser(page){  //获取离线用户 
             let _this=this
-            let shop_id = _this.shop.shop_id
-            _this.sendAjax("/api/user/list?page="+page, "post",{shop_id:shop_id, typ:"offline"}, function(dst){
+            let shop_id = _this.shop.shop_name
+            console.log("参数 ",page,  _this.shop)
+            _this.sendAjax("/api/shop/list?page="+page, "post",{shop_id:shop_id, typ:"offline"}, function(dst){
                 if (!dst) {
                     return console.log("暂无离线用户")
                 }
                 console.log(dst)
-                var result = dst.list
+                var result = dst.data
                 //处理下 json字符串
                 for(var i=0;i<result.length;i++){
                     let dst = result[i].last_message
@@ -260,7 +262,6 @@ var app=new Vue({
         },
         sendAjax(url,method,params,callback){
             let _this=this;
-            url = "http://192.168.84.168:3111" + url
             $.ajax({
                 type: method,
                 url: url,
@@ -270,7 +271,7 @@ var app=new Vue({
                 },
                 error:function(res){
                     var data=JSON.parse(res);
-                    if(!data.success){
+                    if(!data.code || data.code!=200){
                         _this.$message({
                             message: data.msg,
                             type: 'error'
@@ -278,14 +279,12 @@ var app=new Vue({
                     }
                 },
                 success: function(data) {
-                    //console.log("-->",url,"--",method,"---", data)
-                    if (!data.success) {
+                    console.log("-->",url,"--",method,"---", data)
+                    if (data.code!=200) {
                         _this.$message({
                             message: data.msg,
                             type: 'error'
                         });
-                    } else if (data.result!=null){
-                        callback(data.result);
                     } else {
                         callback(data);
                     }

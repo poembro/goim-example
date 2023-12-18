@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AddIpblack ip添加至黑名单
-func (s *Router) AddIpblack(c *gin.Context) {
+// IpblackAdd ip添加至黑名单
+func (s *Router) IpblackAdd(c *gin.Context) {
 	var arg struct {
 		IP     string `json:"ip"`
 		ShopId string `json:"shop_id"`
@@ -17,12 +17,12 @@ func (s *Router) AddIpblack(c *gin.Context) {
 		return
 	}
 
-	s.svc.AddIpblack(context.TODO(), arg.ShopId, arg.IP)
+	s.svc.IpblackAdd(context.TODO(), arg.ShopId, arg.IP)
 	s.OutJson(c, 200, "success", nil)
 }
 
 // DelIpblack ip从黑名单删除
-func (s *Router) DelIpblack(c *gin.Context) {
+func (s *Router) IpblackDel(c *gin.Context) {
 	var arg struct {
 		IP     string `json:"ip"`
 		ShopId string `json:"shop_id"`
@@ -32,12 +32,12 @@ func (s *Router) DelIpblack(c *gin.Context) {
 		return
 	}
 
-	s.svc.DelIpblack(context.TODO(), arg.ShopId, arg.IP)
+	s.svc.IpblackDel(context.TODO(), arg.ShopId, arg.IP)
 	s.OutJson(c, 200, "success", nil)
 }
 
-// listIpblack 查看所有ip
-func (s *Router) ListIpblack(c *gin.Context) {
+// IpblackList 查看所有ip
+func (s *Router) IpblackList(c *gin.Context) {
 	var arg struct {
 		ShopId string `json:"shop_id"`
 	}
@@ -48,7 +48,7 @@ func (s *Router) ListIpblack(c *gin.Context) {
 
 	// 查询在线人数
 	page := NewPage(c)
-	dst, total, err := s.svc.ListIpblack(arg.ShopId, "-inf", "+inf", int64(page.Page), int64(page.Limit))
+	dst, total, err := s.svc.IpblackList(arg.ShopId, "-inf", "+inf", int64(page.Page), int64(page.Limit))
 	if err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return

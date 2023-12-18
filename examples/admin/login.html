@@ -162,7 +162,7 @@
                         _this.loading = true;
                         $.ajax({
                             type: "POST",
-                            url: "/api/user/login",
+                            url: "/api/shop/login",
                             data:JSON.stringify(data),
                             async: true,
                             dataType: "json", 
@@ -173,8 +173,8 @@
                             },
                             success: function(dst) {
                                 console.log(dst)
-                                if (dst.success) {
-                                    setLocalStorage("shopinfo", dst.result); 
+                                if (dst.code && dst.code== 200) {
+                                    setLocalStorage("shopinfo", dst.data); 
                                     window.location.href="/admin/main.html";
                                 } else {
                                     _this.$message({

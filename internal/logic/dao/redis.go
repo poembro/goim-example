@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	_prefixMidServer    = "mid_%d" // mid -> key:server
-	_prefixKeyServer    = "key_%s" // key -> server
-	_prefixServerOnline = "ol_%s"  // server -> online
+	_prefixMidServer    = "golang_im:mid_%d" // mid -> key:server
+	_prefixKeyServer    = "golang_im:key_%s" // key -> server
+	_prefixServerOnline = "golang_im:ol_%s"  // server -> online
 )
 
 func keyMidServer(mid int64) string {

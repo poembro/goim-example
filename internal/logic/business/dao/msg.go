@@ -23,9 +23,9 @@ func keyMessageAck(deviceId string) string {
 	return fmt.Sprintf(_prefixMessageAck, deviceId)
 }
 
-// AddMessageACKMapping add a msg ack mapping. 记录用户已读偏移
+// MsgACKMappingAdd add a msg ack mapping. 记录用户已读偏移
 //    HSET userId_123 8000 100000000
-func (d *Dao) AddMessageACKMapping(deviceId, roomId string, deviceAck int64) error {
+func (d *Dao) MsgACKMappingAdd(deviceId, roomId string, deviceAck int64) error {
 	// 一个用户有N个房间 每个房间都有个已读偏移位置
 	_, err := d.RDSCli.HSet(keyMessageAck(deviceId), roomId, deviceAck).Result()
 	if err != nil {
@@ -35,8 +35,8 @@ func (d *Dao) AddMessageACKMapping(deviceId, roomId string, deviceAck int64) err
 	return nil
 }
 
-// GetMessageAckMapping 读取某个用户的已读偏移
-func (d *Dao) GetMessageAckMapping(deviceId, roomId string) (string, error) {
+// MsgAckMapping 读取某个用户的已读偏移
+func (d *Dao) MsgAckMapping(deviceId, roomId string) (string, error) {
 	// 一个用户有N个房间 每个房间都有个已读偏移位置
 	dst, err := d.RDSCli.HGet(keyMessageAck(deviceId), roomId).Result()
 	if err != nil {
@@ -48,9 +48,9 @@ func (d *Dao) GetMessageAckMapping(deviceId, roomId string) (string, error) {
 
 ////////////////////////////////////////////////////////
 
-// AddMessageList 将消息添加到对应房间 roomId.
+// MsgPush 将消息添加到对应房间 roomId.
 // zadd  roomId  time() msg
-func (d *Dao) AddMessageList(roomId string, id int64, msg string) error {
+func (d *Dao) MsgPush(roomId string, id int64, msg string) error {
 	// NX: 不更新存在的成员,只添加新成员
 	// XX: 仅仅更新存在的成员，不添加新成员
 	// CH: 更改的元素是新添加的成员，已经存在的成员更新分数
@@ -67,8 +67,8 @@ func (d *Dao) AddMessageList(roomId string, id int64, msg string) error {
 	return nil
 }
 
-// GetMessageCount 统计未读
-func (d *Dao) GetMessageCount(roomId, start, stop string) (int64, error) {
+// MsgCount 统计未读
+func (d *Dao) MsgCount(roomId, start, stop string) (int64, error) {
 	dst, err := d.RDSCli.ZCount(KeyListMsg(roomId), start, stop).Result()
 	if err != nil {
 		return dst, err
@@ -77,8 +77,8 @@ func (d *Dao) GetMessageCount(roomId, start, stop string) (int64, error) {
 	return dst, nil
 }
 
-// GetMessageList 取回消息 返回切片
-func (d *Dao) GetMessageList(roomId string, start, stop int64) ([]string, error) {
+// MsgListByTop 取回消息 返回切片
+func (d *Dao) MsgListByTop(roomId string, start, stop int64) ([]string, error) {
 	dst, err := d.RDSCli.ZRevRange(KeyListMsg(roomId), start, stop).Result()
 	if err != nil {
 		return dst, err
@@ -87,8 +87,8 @@ func (d *Dao) GetMessageList(roomId string, start, stop int64) ([]string, error)
 	return dst, nil
 }
 
-// GetMessagePageList 取回消息分页  func("10010", "-", "+", 0, 3)
-func (d *Dao) GetMessagePageList(roomId, min, max string, page, limit int64) ([]string, int64, error) {
+// MsgList 取回消息分页  func("10010", "-", "+", 0, 3)
+func (d *Dao) MsgList(roomId, min, max string, page, limit int64) ([]string, int64, error) {
 	var total int64 // 条数
 	var err error
 	key := KeyListMsg(roomId)
@@ -110,8 +110,8 @@ func (d *Dao) GetMessagePageList(roomId, min, max string, page, limit int64) ([]
 
 /////////////////////清理///////////////////////
 
-// ClearData 前1个月的用户清理掉
-func (d *Dao) ClearMsg() error {
+// MsgClear 前1个月的用户清理掉
+func (d *Dao) MsgClear() error {
 	// 获取所有商户
 	shopUsers, err := d.RDSCli.HGetAll(keyShopList()).Result()
 	if err != nil {

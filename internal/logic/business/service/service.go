@@ -4,6 +4,7 @@ import (
 	"context"
 	"goim-example/internal/logic/business/dao"
 	"goim-example/internal/logic/conf"
+	"sync"
 )
 
 // Service struct
@@ -12,13 +13,25 @@ type Service struct {
 	dao *dao.Dao
 }
 
+var (
+	once sync.Once
+	svc  *Service = nil
+)
+
 // New init
 func New(c *conf.Config) (s *Service) {
-	s = &Service{
-		c:   c,
-		dao: dao.New(c),
+	if svc != nil {
+		return svc
 	}
-	return
+
+	once.Do(func() {
+		svc = &Service{
+			c:   c,
+			dao: dao.New(c),
+		}
+	})
+
+	return svc
 }
 
 // Close Service.

@@ -2,6 +2,7 @@ package dao
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/go-redis/redis"
 )
@@ -20,20 +21,20 @@ func keyShopUsersList(shopId string) string {
 	return fmt.Sprintf(_prefixShopUsersList, shopId)
 }
 
-// AddShop 添加后台商户
-func (d *Dao) AddShop(nickname, dst string) error {
-	d.RDSCli.HSet(keyShopList(), nickname, dst).Result()
+// ShopCreate 添加后台商户
+func (d *Dao) ShopCreate(nickname, item string) error {
+	d.RDSCli.HSet(keyShopList(), nickname, item).Result()
 	return nil
 }
 
-// GetShop 获取后台商户
-func (d *Dao) GetShop(nickname string) ([]byte, error) {
+// ShopFindOne 获取后台商户
+func (d *Dao) ShopFindOne(nickname string) ([]byte, error) {
 	return d.RDSCli.HGet(keyShopList(), nickname).Bytes()
 }
 
-// GetShopByUsers 查询某商户下的用户
+// ShopByUsers 查询某商户下的用户
 // zrevrange  shop_id  0, 50
-func (d *Dao) GetShopByUsers(shopId, min, max string, page, limit int64) ([]string, int64, error) {
+func (d *Dao) ShopByUsers(shopId, min, max string, page, limit int64) ([]string, int64, error) {
 	var total int64 // 条数
 	var err error
 	key := keyShopUsersList(shopId)
@@ -51,4 +52,20 @@ func (d *Dao) GetShopByUsers(shopId, min, max string, page, limit int64) ([]stri
 	}
 
 	return ids, total, nil
+}
+
+// ShopAppendUser 将用户添加到商户列表
+// zadd  shop_id  time() user_id
+func (d *Dao) ShopAppendUserId(shopId string, userId string) error {
+	score := time.Now().UnixNano()
+	err := d.RDSCli.ZAdd(keyShopUsersList(shopId), redis.Z{
+		Score:  float64(score),
+		Member: userId,
+	}).Err()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

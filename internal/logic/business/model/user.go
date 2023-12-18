@@ -1,11 +1,11 @@
 package model
 
 type Auth struct {
-	Mid      int64   `json:"mid"`
-	Key      string  `json:"key"`
-	RoomID   string  `json:"room_id"`
-	Platform string  `json:"platform"`
-	Accepts  []int32 `json:"accepts"`
+	Mid      int64   `json:"mid,string"` // 用户id
+	Key      string  `json:"key"`        // 设备id
+	RoomID   string  `json:"room_id"`    // 房间类型  live://8000
+	Platform string  `json:"platform"`   // 平台
+	Accepts  []int32 `json:"accepts"`    // 房间号
 	// Token string  `json:"token"` // 授权token 这里解析 调用第三方api
 }
 
@@ -20,7 +20,7 @@ type User struct {
 	Suburl      string   `json:"suburl"`               // websocket 订阅推送地址
 	Pushurl     string   `json:"pushurl"`              // http 推送地址
 	IsOnline    bool     `json:"is_online"`            // 用户在线标识
-	Unread      int64    `json:"unread"`               // 未读
+	Unread      int64    `json:"unread,string"`        // 未读
 	LastMessage []string `json:"last_message"`         // 最后一条消息
 	Referer     string   `json:"referer"`              // 来源
 	UserAgent   string   `json:"user_agent"`           // 用户标识

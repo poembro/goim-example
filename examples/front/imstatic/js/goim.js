@@ -30,7 +30,6 @@
         _.config.init() //必须最先执行
         _.face.init()  //工具处理 
         _.comet.init()
-        _.websocket.init() 
         _.upload.init()
     }
 
@@ -39,6 +38,8 @@
         $.ajax({
             type: method,
             url: url,
+            dataType: 'json',
+            contentType: 'application/json', 
             data:params,
             async: is_async,
             headers: {
@@ -46,14 +47,15 @@
             },
             error:function(res){
                 var data=JSON.parse(res);
-                if(!data.success){
+                if(data.code != 200){
                     _.alert(data.msg)
                 }
             },
             success: function(data) {
                 console.log("-->",url,"--",method,"---", data)
-                if (!data.success) {
-                    _.alert(data.msg)
+                if (data.code == 200 && callback) {
+                    // _.alert(data.msg)
+                    callback(data.data);
                 } else if (data.result!=null){
                     callback(data.result);
                 } else {
@@ -86,14 +88,18 @@
             if (old) {
                 self.options = old
                 self.handleTitle(self.options.shop_name) 
+                _.websocket.init() 
+
                 return 
             }
             
             var shop_id = getQuery("shop_id")
-            _.sendAjax("http://192.168.84.168:3111/api/user/create", "GET", {shop_id:shop_id}, function(dst){
+            _.sendAjax("/api/user/create", "GET", {shop_id:shop_id}, function(dst){
                 self.options = dst
                 setLocalStorage(__KEY__, dst)
                 self.handleTitle(dst.shop_name) 
+                _.websocket.init() 
+
                 return 
             }, false);
           
@@ -653,7 +659,7 @@
                 fileElementId : $(dom),
                 dataType: 'json',
                 success : function(data) {  
-                    if (data['success']) { //成功  
+                    if (data['code'] == 200) { //成功  
                         self.success(data) 
                     } else {  
                         self.feild(data)   //失败
