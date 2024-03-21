@@ -2,7 +2,7 @@ package business
 
 import (
 	"goim-example/internal/logic"
-	"goim-example/internal/logic/business/apihttp"
+	"goim-example/internal/logic/business/router"
 	"goim-example/internal/logic/business/service"
 	"goim-example/internal/logic/conf"
 	"net/http"
@@ -13,7 +13,7 @@ import (
 func New(c *conf.Config, l *logic.Logic) *service.Service {
 	// 初始化
 	s := service.New(c)
-	r := apihttp.New(c, l, s)
+	r := router.New(c, l, s)
 
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
@@ -50,8 +50,8 @@ func New(c *conf.Config, l *logic.Logic) *service.Service {
 			authorized.POST("/msg/list", r.MsgList)
 			authorized.POST("/msg/clear", r.MsgClear)
 
-			authorized.POST("/ipblack/add", r.IpblackAdd)
-			authorized.POST("/ipblack/del", r.IpblackDel)
+			authorized.POST("/ipblack/add", r.IpblackCreate)
+			authorized.POST("/ipblack/del", r.IpblackRemove)
 			authorized.POST("/ipblack/list", r.IpblackList)
 		}
 	}

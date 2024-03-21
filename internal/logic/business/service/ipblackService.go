@@ -4,15 +4,15 @@ import (
 	"context"
 )
 
-// IpblackDel ip从黑名单删除
-func (s *Service) IpblackDel(ctx context.Context, shopId string, ip string) error {
-	s.dao.IpblackDel(shopId, ip)
+// IpblackRemove ip从黑名单删除
+func (s *Service) IpblackRemove(ctx context.Context, shopId string, ip string) error {
+	s.dao.IpblackRemove(shopId, ip)
 	return nil
 }
 
-// IpblackAdd ip添加至黑名单
-func (s *Service) IpblackAdd(ctx context.Context, shopId string, ip string) error {
-	s.dao.IpblackAdd(shopId, ip)
+// IpblackCreate ip添加至黑名单
+func (s *Service) IpblackCreate(ctx context.Context, shopId string, ip string) error {
+	s.dao.IpblackCreate(shopId, ip)
 	return nil
 }
 

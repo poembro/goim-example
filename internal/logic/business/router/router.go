@@ -1,4 +1,4 @@
-package apihttp
+package router
 
 import (
 	"strconv"
@@ -27,7 +27,7 @@ func New(c *conf.Config, l *logic.Logic, s *service.Service) *Router {
 	return r
 }
 
-/////////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
 // OutData 响应结构体
 type OutData struct {
 	Code int         `json:"code"`
@@ -47,7 +47,7 @@ func (s *Router) OutJson(c *gin.Context, code int, msg string, data interface{})
 	return
 }
 
-/////////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
 type Pages struct {
 	MinId    int         `json:"from,omitempty"` // 最小id，默认0，降序分页时传入
 	MaxId    int         `json:"to,omitempty"`   // 最大id，默认0，升序分页时传入
@@ -81,7 +81,7 @@ func NewPage(c *gin.Context) *Pages {
 	return param
 }
 
-/////////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////
 type OutDataPage struct {
 	//［结构体变量名 ｜ 变量类型 ｜ json 数据 对应字段名]
 	Code int         `json:"code"` //接口响应状态码

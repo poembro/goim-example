@@ -1,4 +1,4 @@
-package apihttp
+package router
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// IpblackAdd ip添加至黑名单
-func (s *Router) IpblackAdd(c *gin.Context) {
+// IpblackCreate ip添加至黑名单
+func (s *Router) IpblackCreate(c *gin.Context) {
 	var arg struct {
 		IP     string `json:"ip"`
 		ShopId string `json:"shop_id"`
@@ -17,12 +17,12 @@ func (s *Router) IpblackAdd(c *gin.Context) {
 		return
 	}
 
-	s.svc.IpblackAdd(context.TODO(), arg.ShopId, arg.IP)
+	s.svc.IpblackCreate(context.TODO(), arg.ShopId, arg.IP)
 	s.OutJson(c, 200, "success", nil)
 }
 
 // DelIpblack ip从黑名单删除
-func (s *Router) IpblackDel(c *gin.Context) {
+func (s *Router) IpblackRemove(c *gin.Context) {
 	var arg struct {
 		IP     string `json:"ip"`
 		ShopId string `json:"shop_id"`
@@ -32,7 +32,7 @@ func (s *Router) IpblackDel(c *gin.Context) {
 		return
 	}
 
-	s.svc.IpblackDel(context.TODO(), arg.ShopId, arg.IP)
+	s.svc.IpblackRemove(context.TODO(), arg.ShopId, arg.IP)
 	s.OutJson(c, 200, "success", nil)
 }
 

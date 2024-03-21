@@ -60,7 +60,7 @@ func (s *Service) MessageACK(ctx context.Context, mid int64, body []byte) error 
 		return err
 	}
 	id, _ := strconv.ParseInt(arg.ID, 10, 64)
-	s.dao.MsgACKMappingAdd(arg.Key, arg.RoomID, id)
+	s.dao.MsgACKMappingCreate(arg.Key, arg.RoomID, id)
 	return nil
 }
 

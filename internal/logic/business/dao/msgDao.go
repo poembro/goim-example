@@ -23,9 +23,10 @@ func keyMessageAck(deviceId string) string {
 	return fmt.Sprintf(_prefixMessageAck, deviceId)
 }
 
-// MsgACKMappingAdd add a msg ack mapping. 记录用户已读偏移
-//    HSET userId_123 8000 100000000
-func (d *Dao) MsgACKMappingAdd(deviceId, roomId string, deviceAck int64) error {
+// MsgACKMappingCreate add a msg ack mapping. 记录用户已读偏移
+//
+//	HSET userId_123 8000 100000000
+func (d *Dao) MsgACKMappingCreate(deviceId, roomId string, deviceAck int64) error {
 	// 一个用户有N个房间 每个房间都有个已读偏移位置
 	_, err := d.RDSCli.HSet(keyMessageAck(deviceId), roomId, deviceAck).Result()
 	if err != nil {
