@@ -7,8 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"goim-example/internal/business"
 	"goim-example/internal/logic"
-	"goim-example/internal/logic/business"
 	"goim-example/internal/logic/conf"
 	"goim-example/internal/logic/grpc"
 	"goim-example/pkg/etcdv3"

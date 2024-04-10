@@ -144,7 +144,7 @@ var app=new Vue({
             let _this=this 
             _this.ipBlacks = []
             let shop_id = _this.shop.shop_id  // 获取 黑名单列表 放到 _this.ipBlacks 
-            _this.sendAjax("/api/ipblack/list","post",{shop_id:shop_id}, function(dst){
+            _this.sendAjax("/api/ip/list","post",{shop_id:shop_id}, function(dst){
                 var result = dst.data
                
                 for(var i=0;i<result.length;i++){
@@ -155,14 +155,14 @@ var app=new Vue({
         addIpblack(ip){ // ip添加至黑名单
             let _this=this
             let shop_id = _this.shop.shop_id
-            _this.sendAjax("/api/ipblack/add","post",{shop_id:shop_id, ip:ip}, function(dst){
+            _this.sendAjax("/api/ip/create","post",{shop_id:shop_id, ip:ip}, function(dst){
                  console.log("ip添加至黑名单")
             })
         },
         delIpblack(ip){ // ip从黑名单删除
             let _this=this
             let shop_id = _this.shop.shop_id 
-            _this.sendAjax("/api/ipblack/del","post",{shop_id:shop_id, ip:ip}, function(dst){
+            _this.sendAjax("/api/ip/del","post",{shop_id:shop_id, ip:ip}, function(dst){
                 console.log("ip从黑名单删除")
                 _this.listIpblack()
             })

@@ -3,8 +3,8 @@ package router
 import (
 	"context"
 	"encoding/json"
-	"goim-example/internal/logic/business/model"
-	"goim-example/internal/logic/business/util"
+	"goim-example/internal/business/model"
+	"goim-example/internal/business/util"
 
 	"strconv"
 	"time"
@@ -26,7 +26,7 @@ func (s *Router) ShopLogin(c *gin.Context) {
 		s.OutJson(c, -1, "参数nickname or password不能为空", nil)
 		return
 	}
-	item, err := s.svc.ShopFindOne(arg.Nickname)
+	item, err := s.svc.ShopFindOne(c.Request.Context(), arg.Nickname)
 	if err != nil || item == nil || item.Mid == "" {
 		s.OutJson(c, -1, "未注册", nil)
 		return
@@ -52,14 +52,14 @@ func (s *Router) ShopRegister(c *gin.Context) {
 		return
 	}
 
-	item, _ := s.svc.ShopFindOne(arg.Nickname)
+	item, _ := s.svc.ShopFindOne(c.Request.Context(), arg.Nickname)
 	if item != nil {
 		s.OutJson(c, -1, "已经被注册", nil)
 		return
 	}
 
 	face := "https://img.wxcha.com/m00/86/59/7c6242363084072b82b6957cacc335c7.jpg"
-	item, err := s.svc.ShopCreate(arg.Nickname, face, arg.Password)
+	item, err := s.svc.ShopCreate(c.Request.Context(), arg.Nickname, face, arg.Password)
 	if err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
@@ -87,13 +87,13 @@ func (s *Router) ShopList(c *gin.Context) {
 	// 查询在线人数
 	page := NewPage(c)
 	if arg.Typ == "offline" {
-		idsTmp, total, err = s.svc.ShopByUsers(arg.ShopId,
+		idsTmp, total, err = s.svc.ShopByUsers(c.Request.Context(), arg.ShopId,
 			"-inf", "+inf", int64(page.Page), int64(page.Limit))
 	} else {
 		max := strconv.FormatInt(time.Now().UnixNano(), 10)
 		min := strconv.FormatInt(time.Now().Add(-time.Hour*1).UnixNano(), 10)
 
-		idsTmp, total, err = s.svc.ShopByUsers(arg.ShopId,
+		idsTmp, total, err = s.svc.ShopByUsers(c.Request.Context(), arg.ShopId,
 			min, max, int64(page.Page), int64(page.Limit))
 	}
 	if err != nil {
@@ -102,7 +102,7 @@ func (s *Router) ShopList(c *gin.Context) {
 	}
 	page.Total = total
 
-	userIds, err := s.svc.UserFinds(idsTmp)
+	userIds, err := s.svc.UserFinds(c.Request.Context(), idsTmp)
 
 	// 查询已读/未读
 	onlineTmp := make([]*model.User, 0)
@@ -119,13 +119,13 @@ func (s *Router) ShopList(c *gin.Context) {
 			continue // 不要展示商户自己
 		}
 		// 获取消息已读偏移
-		index, _ := s.svc.MsgAckMapping(deviceId, item.RoomID)   // 获取消息已读偏移
-		count, err := s.svc.MsgCount(item.RoomID, index, "+inf") // 拿到偏移去统计未读
+		index, _ := s.svc.MsgAckMapping(c.Request.Context(), deviceId, item.RoomID)   // 获取消息已读偏移
+		count, err := s.svc.MsgCount(c.Request.Context(), item.RoomID, index, "+inf") // 拿到偏移去统计未读
 		if err != nil {
 			continue
 		}
 
-		lastMessage, err := s.svc.MsgListByTop(item.RoomID, 0, 0) // 取回消息
+		lastMessage, err := s.svc.MsgListByTop(c.Request.Context(), item.RoomID, 0, 0) // 取回消息
 		if err != nil {
 			continue
 		}

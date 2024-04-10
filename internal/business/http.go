@@ -1,9 +1,9 @@
 package business
 
 import (
+	"goim-example/internal/business/router"
+	"goim-example/internal/business/service"
 	"goim-example/internal/logic"
-	"goim-example/internal/logic/business/router"
-	"goim-example/internal/logic/business/service"
 	"goim-example/internal/logic/conf"
 	"net/http"
 
@@ -13,7 +13,7 @@ import (
 func New(c *conf.Config, l *logic.Logic) *service.Service {
 	// 初始化
 	s := service.New(c)
-	r := router.New(c, l, s)
+	r := router.New(c, s, l)
 
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
@@ -38,7 +38,6 @@ func New(c *conf.Config, l *logic.Logic) *service.Service {
 	adminGroup := engine.Group("/api")
 	{
 		adminGroup.GET("/user/create", r.UserCreate)
-
 		adminGroup.POST("/shop/login", r.ShopLogin)
 		adminGroup.POST("/shop/register", r.ShopRegister)
 		authorized := adminGroup.Group("")
@@ -50,9 +49,9 @@ func New(c *conf.Config, l *logic.Logic) *service.Service {
 			authorized.POST("/msg/list", r.MsgList)
 			authorized.POST("/msg/clear", r.MsgClear)
 
-			authorized.POST("/ipblack/add", r.IpblackCreate)
-			authorized.POST("/ipblack/del", r.IpblackRemove)
-			authorized.POST("/ipblack/list", r.IpblackList)
+			authorized.POST("/ip/create", r.IpCreate)
+			authorized.POST("/ip/del", r.IpRemove)
+			authorized.POST("/ip/list", r.IpList)
 		}
 	}
 	go func() {

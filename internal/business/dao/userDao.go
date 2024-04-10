@@ -22,10 +22,10 @@ func KeyUserIdStrServer(userId string) string {
 
 // UserFinds get a deviceId server by userId.
 // HGETALL userId_123
-func (d *Dao) UserFinds(userIds []string) (map[string]string, error) {
+func (d *Dao) UserFinds(ctx context.Context, userIds []string) (map[string]string, error) {
 	dst := make(map[string]string)
 	for _, userId := range userIds {
-		data, err := d.RDSCli.HGetAll(KeyUserIdStrServer(userId)).Result()
+		data, err := d.RDSCli.HGetAll(ctx, KeyUserIdStrServer(userId)).Result()
 		if err != nil {
 			continue
 		}
@@ -40,11 +40,12 @@ func (d *Dao) UserFinds(userIds []string) (map[string]string, error) {
 }
 
 // UserCreate add a mapping.
-//    HSET userId_123 2000aa78df60000 {id:1,nickname:张三,face:p.png,}
-//    SET  deviceId_2000aa78df60000  192.168.3.222
+//
+//	HSET userId_123 2000aa78df60000 {id:1,nickname:张三,face:p.png,}
+//	SET  deviceId_2000aa78df60000  192.168.3.222
 func (d *Dao) UserCreate(ctx context.Context, userId string, deviceId, server, userinfo string) error {
 	// 一个用户有N个设备 全部在hset上面
-	_, err := d.RDSCli.HSet(KeyUserIdStrServer(userId), deviceId, userinfo).Result()
+	_, err := d.RDSCli.HSet(ctx, KeyUserIdStrServer(userId), deviceId, userinfo).Result()
 	if err != nil {
 		return err
 	}

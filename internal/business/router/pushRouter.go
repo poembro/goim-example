@@ -2,7 +2,7 @@ package router
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +17,7 @@ func (s *Router) PushKeys(c *gin.Context) {
 		return
 	}
 	// read message
-	msg, err := ioutil.ReadAll(c.Request.Body)
+	msg, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
@@ -39,7 +39,7 @@ func (s *Router) PushMids(c *gin.Context) {
 		return
 	}
 	// read message
-	msg, err := ioutil.ReadAll(c.Request.Body)
+	msg, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
@@ -62,7 +62,7 @@ func (s *Router) PushRoom(c *gin.Context) {
 		return
 	}
 	// read message
-	msg, err := ioutil.ReadAll(c.Request.Body)
+	msg, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
@@ -84,7 +84,7 @@ func (s *Router) PushAll(c *gin.Context) {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
-	msg, err := ioutil.ReadAll(c.Request.Body)
+	msg, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return

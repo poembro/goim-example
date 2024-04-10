@@ -13,7 +13,6 @@ require (
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
-	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
@@ -26,6 +25,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/redis/go-redis/v9 v9.0.5
 	github.com/sony/sonyflake v1.0.0
 	github.com/stretchr/testify v1.8.0
 	github.com/ugorji/go/codec v1.1.7 // indirect
@@ -45,6 +45,8 @@ require (
 )
 
 require (
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/eapache/go-resiliency v1.3.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
@@ -58,8 +60,6 @@ require (
 	github.com/jcmturner/gokrb5/v8 v8.4.3 // indirect
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/klauspost/compress v1.15.11 // indirect
-	github.com/onsi/ginkgo v1.16.5 // indirect
-	github.com/onsi/gomega v1.19.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.17 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect

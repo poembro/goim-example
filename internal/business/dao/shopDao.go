@@ -1,10 +1,11 @@
 package dao
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
 )
 
 const (
@@ -22,25 +23,25 @@ func keyShopUsersList(shopId string) string {
 }
 
 // ShopCreate 添加后台商户
-func (d *Dao) ShopCreate(nickname, item string) error {
-	d.RDSCli.HSet(keyShopList(), nickname, item).Result()
+func (d *Dao) ShopCreate(ctx context.Context, nickname, item string) error {
+	d.RDSCli.HSet(ctx, keyShopList(), nickname, item).Result()
 	return nil
 }
 
 // ShopFindOne 获取后台商户
-func (d *Dao) ShopFindOne(nickname string) ([]byte, error) {
-	return d.RDSCli.HGet(keyShopList(), nickname).Bytes()
+func (d *Dao) ShopFindOne(ctx context.Context, nickname string) ([]byte, error) {
+	return d.RDSCli.HGet(ctx, keyShopList(), nickname).Bytes()
 }
 
 // ShopByUsers 查询某商户下的用户
 // zrevrange  shop_id  0, 50
-func (d *Dao) ShopByUsers(shopId, min, max string, page, limit int64) ([]string, int64, error) {
+func (d *Dao) ShopByUsers(ctx context.Context, shopId, min, max string, page, limit int64) ([]string, int64, error) {
 	var total int64 // 条数
 	var err error
 	key := keyShopUsersList(shopId)
-	total, err = d.RDSCli.ZCount(key, min, max).Result()
+	total, err = d.RDSCli.ZCount(ctx, key, min, max).Result()
 
-	ids, err := d.RDSCli.ZRevRangeByScore(key, redis.ZRangeBy{
+	ids, err := d.RDSCli.ZRevRangeByScore(ctx, key, &redis.ZRangeBy{
 		Min:    min, //"-inf"
 		Max:    max, // "+inf"
 		Offset: (page - 1) * limit,
@@ -56,9 +57,9 @@ func (d *Dao) ShopByUsers(shopId, min, max string, page, limit int64) ([]string,
 
 // ShopAppendUser 将用户添加到商户列表
 // zadd  shop_id  time() user_id
-func (d *Dao) ShopAppendUserId(shopId string, userId string) error {
+func (d *Dao) ShopAppendUserId(ctx context.Context, shopId string, userId string) error {
 	score := time.Now().UnixNano()
-	err := d.RDSCli.ZAdd(keyShopUsersList(shopId), redis.Z{
+	err := d.RDSCli.ZAdd(ctx, keyShopUsersList(shopId), redis.Z{
 		Score:  float64(score),
 		Member: userId,
 	}).Err()

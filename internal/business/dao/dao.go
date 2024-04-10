@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
 
 	"goim-example/internal/logic/conf"
 )
@@ -19,15 +19,13 @@ type Dao struct {
 // newRedis 初始化Redis
 func newRedis(c *conf.Redis) *redis.Client {
 	cli := redis.NewClient(&redis.Options{
-		Addr:     c.Addr,
-		DB:       0,
-		Password: c.Auth,
+		Addr:         c.Addr,
+		DB:           0,
+		Password:     c.Auth,
+		PoolSize:     75,
+		MinIdleConns: 50,
 	})
 
-	_, err := cli.Ping().Result()
-	if err != nil {
-		panic(err)
-	}
 	return cli
 }
 
@@ -51,7 +49,7 @@ func (d *Dao) Close() {
 
 // Ping verify server is ok.
 func (d *Dao) Ping(c context.Context) (err error) {
-	if _, err = d.RDSCli.Ping().Result(); err != nil {
+	if _, err = d.RDSCli.Ping(c).Result(); err != nil {
 		return
 	}
 

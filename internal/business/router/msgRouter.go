@@ -1,10 +1,9 @@
 package router
 
 import (
-	"context"
 	"fmt"
-	"goim-example/internal/logic/business/model"
-	"goim-example/internal/logic/business/util"
+	"goim-example/internal/business/model"
+	"goim-example/internal/business/util"
 	utilModel "goim-example/internal/logic/model"
 	"strings"
 	"time"
@@ -23,7 +22,7 @@ func (s *Router) MsgList(c *gin.Context) {
 	}
 
 	page := NewPage(c)
-	dst, total, err := s.svc.MsgList(arg.RoomId, "-inf", "+inf", int64(page.Page), int64(page.Limit))
+	dst, total, err := s.svc.MsgList(c.Request.Context(), arg.RoomId, "-inf", "+inf", int64(page.Page), int64(page.Limit))
 	if err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
@@ -35,7 +34,7 @@ func (s *Router) MsgList(c *gin.Context) {
 
 // MsgClear 数据清理
 func (s *Router) MsgClear(c *gin.Context) {
-	s.svc.MsgClear(context.TODO())
+	s.svc.MsgClear(c.Request.Context())
 	s.OutJson(c, 200, "success", nil)
 }
 
@@ -66,7 +65,7 @@ func (s *Router) MsgPush(c *gin.Context) {
 		arg.Mid, arg.ShopId, arg.Typ, msg, arg.RoomId, time.Now().Unix(), msgId)
 
 	// 消息持久化
-	err := s.svc.MsgPush(arg.RoomId, msgId, body)
+	err := s.svc.MsgPush(c.Request.Context(), arg.RoomId, msgId, body)
 	if err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return

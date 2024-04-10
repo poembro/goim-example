@@ -2,9 +2,8 @@ package service
 
 import (
 	"context"
-	"goim-example/internal/logic/business/dao"
+	"goim-example/internal/business/dao"
 	"goim-example/internal/logic/conf"
-	"sync"
 )
 
 // Service struct
@@ -14,8 +13,7 @@ type Service struct {
 }
 
 var (
-	once sync.Once
-	svc  *Service = nil
+	svc *Service = nil
 )
 
 // New init
@@ -24,12 +22,10 @@ func New(c *conf.Config) (s *Service) {
 		return svc
 	}
 
-	once.Do(func() {
-		svc = &Service{
-			c:   c,
-			dao: dao.New(c),
-		}
-	})
+	svc = &Service{
+		c:   c,
+		dao: dao.New(c),
+	}
 
 	return svc
 }

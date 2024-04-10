@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"goim-example/internal/logic/business/service"
+	"goim-example/internal/business/service"
 	"goim-example/internal/logic/conf"
 	"goim-example/internal/logic/dao"
 	"goim-example/internal/logic/model"

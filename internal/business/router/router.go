@@ -3,8 +3,8 @@ package router
 import (
 	"strconv"
 
+	"goim-example/internal/business/service"
 	"goim-example/internal/logic"
-	"goim-example/internal/logic/business/service"
 	"goim-example/internal/logic/conf"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +18,7 @@ type Router struct {
 	svc   *service.Service
 }
 
-func New(c *conf.Config, l *logic.Logic, s *service.Service) *Router {
+func New(c *conf.Config, s *service.Service, l *logic.Logic) *Router {
 	r := &Router{
 		c:     c,
 		logic: l,

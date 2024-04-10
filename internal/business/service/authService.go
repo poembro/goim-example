@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"goim-example/internal/logic/business/model"
-	"goim-example/internal/logic/business/util"
+	"goim-example/internal/business/model"
+	"goim-example/internal/business/util"
 	utilModel "goim-example/internal/logic/model"
 	"strconv"
 	"time"
@@ -96,6 +96,6 @@ func (s *Service) UserCreate(shop *model.Shop, remoteAddr, referer, userAgent st
 }
 
 // UserFinds 通过userId 获取用户信息
-func (s *Service) UserFinds(userIds []string) (map[string]string, error) {
-	return s.dao.UserFinds(userIds)
+func (s *Service) UserFinds(ctx context.Context, userIds []string) (map[string]string, error) {
+	return s.dao.UserFinds(ctx, userIds)
 }

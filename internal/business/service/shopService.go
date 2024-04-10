@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"goim-example/internal/logic/business/model"
-	"goim-example/internal/logic/business/util"
+	"goim-example/internal/business/model"
+	"goim-example/internal/business/util"
 	"strconv"
 )
 
 // ShopFindOne 获取后台商户
-func (s *Service) ShopFindOne(nickname string) (*model.Shop, error) {
-	body, err := s.dao.ShopFindOne(nickname)
+func (s *Service) ShopFindOne(ctx context.Context, nickname string) (*model.Shop, error) {
+	body, err := s.dao.ShopFindOne(ctx, nickname)
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func (s *Service) ShopFindOne(nickname string) (*model.Shop, error) {
 }
 
 // ShopCreate 添加后台商户
-func (s *Service) ShopCreate(nickname, face, password string) (*model.Shop, error) {
+func (s *Service) ShopCreate(ctx context.Context, nickname, face, password string) (*model.Shop, error) {
 	Mid := util.SFlake.GetID()
 	smid := strconv.FormatInt(Mid, 10)
 
@@ -38,16 +38,16 @@ func (s *Service) ShopCreate(nickname, face, password string) (*model.Shop, erro
 	if err != nil {
 		panic(err.Error())
 	}
-	err = s.dao.ShopCreate(nickname, string(bytes))
+	err = s.dao.ShopCreate(ctx, nickname, string(bytes))
 	return req, err
 }
 
 // ShopByUsers 查询某商户下的所有用户
-func (s *Service) ShopByUsers(shopId, min, max string, page, limit int64) ([]string, int64, error) {
-	return s.dao.ShopByUsers(shopId, min, max, page, limit)
+func (s *Service) ShopByUsers(ctx context.Context, shopId, min, max string, page, limit int64) ([]string, int64, error) {
+	return s.dao.ShopByUsers(ctx, shopId, min, max, page, limit)
 }
 
 // ShopAppendUserId 临时用户id放入 商户列表
 func (s *Service) ShopAppendUserId(ctx context.Context, shopId, mid string) error {
-	return s.dao.ShopAppendUserId(shopId, mid)
+	return s.dao.ShopAppendUserId(ctx, shopId, mid)
 }

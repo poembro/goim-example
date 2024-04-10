@@ -8,7 +8,7 @@ build:
 	rm -rf target/
 	mkdir target/ 
 	## make
-	go mod tidy -compat=1.17
+	go mod tidy -compat=1.20
 	go mod vendor
 	
 	cp cmd/comet/comet-example.toml target/comet.toml

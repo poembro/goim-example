@@ -21,7 +21,7 @@ func (s *Router) UserCreate(c *gin.Context) {
 		return
 	}
 	//判断客服是否存在
-	shop, err := s.svc.ShopFindOne(arg.ShopId) // ShopId 就是商户昵称
+	shop, err := s.svc.ShopFindOne(c.Request.Context(), arg.ShopId) // ShopId 就是商户昵称
 	if err != nil || shop == nil || shop.Mid == "" {
 		s.OutJson(c, -1, "参数错误", nil)
 		return
