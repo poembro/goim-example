@@ -25,7 +25,7 @@ type Job struct {
 	roomsMutex sync.RWMutex
 
 	redis       *redis.Client
-	redisExpire int32
+	redisExpire time.Duration
 }
 
 // New new a push job.
@@ -33,7 +33,7 @@ func New(c *conf.Config) *Job {
 	j := &Job{
 		c:           c,
 		redis:       newRedis(c.Redis),
-		redisExpire: int32(time.Duration(c.Redis.Expire) / time.Second),
+		redisExpire: time.Duration(c.Redis.Expire),
 		rooms:       make(map[string]*Room),
 	}
 	j.watchComet()

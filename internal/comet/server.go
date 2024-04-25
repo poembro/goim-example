@@ -3,12 +3,13 @@ package comet
 import (
 	"context"
 	"fmt"
+	"goim-example/api/logic"
+	"goim-example/internal/comet/conf"
 	"math/rand"
 	"net"
 	"time"
 
-	"goim-example/api/logic"
-	"goim-example/internal/comet/conf"
+	"google.golang.org/grpc/credentials/insecure"
 
 	log "github.com/golang/glog"
 	"github.com/zhenjl/cityhash"
@@ -42,7 +43,8 @@ func newLogicClient(c *conf.Config) logic.LogicClient {
 
 	conn, err := grpc.DialContext(ctx, target,
 		[]grpc.DialOption{
-			grpc.WithInsecure(), // 禁用安全连接TLS协议
+			grpc.WithTransportCredentials(insecure.NewCredentials()), // 返回一个禁用传输安全的凭据。
+			//grpc.WithInsecure(), // 禁用安全连接TLS协议
 			grpc.WithInitialWindowSize(grpcInitialWindowSize),         // 流量传输速度控制限制。
 			grpc.WithInitialConnWindowSize(grpcInitialConnWindowSize), // 传输数据大小限制。
 			grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(grpcMaxCallMsgSize)),
@@ -53,7 +55,8 @@ func newLogicClient(c *conf.Config) logic.LogicClient {
 				Timeout:             grpcKeepAliveTimeout,
 				PermitWithoutStream: true,
 			}),
-			grpc.WithBalancerName(roundrobin.Name),
+			//grpc.WithBalancerName(roundrobin.Name),
+			grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy":"%s"}`, roundrobin.Name)),
 		}...)
 	if err != nil {
 		panic(err)

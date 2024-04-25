@@ -113,7 +113,8 @@
             function auth() {
                 //协议格式对应 /api/comet/grpc/protocol
                 //var token = '{"mid":123, "room_id":"live://1000", "platform":"web", "accepts":[1000,1001,1002]}'
-                var token = '{"mid":' + self.options.mid + ',"key":"123456' + self.options.mid + '", "room_id":"' + self.options.room_id + '", "platform":"' + self.options.platform + '", "accepts":[' + self.options.accepts + ']}'
+                var token = '{"mid":"' + self.options.mid + '","key":"123456' + self.options.mid + '", "room_id":"' + self.options.room_id + '", "platform":"' + self.options.platform + '", "accepts":[' + self.options.accepts + ']}'
+               console.log(token)
                 var headerBuf = new ArrayBuffer(rawHeaderLen); 
                 var headerView = new DataView(headerBuf, 0);
                 var bodyBuf = textEncoder.encode(token); //接收一个String类型的参数返回一个Unit8Array 1个字节

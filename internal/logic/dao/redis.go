@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"goim-example/internal/logic/model"
 	"strconv"
-	"time"
 
 	log "github.com/golang/glog"
 	"github.com/zhenjl/cityhash"
@@ -42,8 +41,8 @@ func (d *Dao) pingRedis(c context.Context) (err error) {
 //	SET  key_2000aa78df60000  192.168.3.222
 func (d *Dao) AddMapping(c context.Context, mid int64, key, server string) (err error) {
 	d.redis.HSet(c, keyMidServer(mid), key, server).Result()
-	d.redis.Expire(c, keyMidServer(mid), time.Duration(d.redisExpire))
-	d.redis.Set(c, keyKeyServer(key), server, time.Duration(d.redisExpire)).Result()
+	d.redis.Expire(c, keyMidServer(mid), d.redisExpire)
+	d.redis.Set(c, keyKeyServer(key), server, d.redisExpire).Result()
 	return nil
 }
 
@@ -51,8 +50,8 @@ func (d *Dao) AddMapping(c context.Context, mid int64, key, server string) (err 
 // EXPIRE mid_123 2000aa78df60000 1000
 // EXPIRE key_2000aa78df60000 1000
 func (d *Dao) ExpireMapping(c context.Context, mid int64, key string) (has bool, err error) {
-	d.redis.Expire(c, keyMidServer(mid), time.Duration(d.redisExpire))
-	d.redis.Expire(c, keyKeyServer(key), time.Duration(d.redisExpire))
+	d.redis.Expire(c, keyMidServer(mid), d.redisExpire)
+	d.redis.Expire(c, keyKeyServer(key), d.redisExpire)
 	return
 }
 
@@ -81,7 +80,8 @@ func (d *Dao) ServersByKeys(c context.Context, keys []string) (res []string, err
 
 // KeysByMids get a key server by mid.  HSET mid_123 2000aa78df60000 192.168.3.222
 // HGETALL mid_123
-func (d *Dao) KeysByMids(c context.Context, mids []int64) (ress map[string]string, olMids []int64, err error) {
+func (d *Dao) KeysByMids(c context.Context, mids []int64) (map[string]string, []int64, error) {
+	ress := make(map[string]string, len(mids))
 	for _, mid := range mids {
 		res := d.redis.HGetAll(c, keyMidServer(mid)).Val()
 		for k, v := range res {
@@ -105,7 +105,8 @@ func (d *Dao) AddServerOnline(c context.Context, server string, online *model.On
 	}
 	key := keyServerOnline(server)
 	for hashKey, value := range roomsMap {
-		err = d.addServerOnline(c, key, strconv.FormatInt(int64(hashKey), 10), &model.Online{RoomCount: value, Server: online.Server, Updated: online.Updated})
+		hashVal := strconv.FormatInt(int64(hashKey), 10)
+		err = d.addServerOnline(c, key, hashVal, &model.Online{RoomCount: value, Server: online.Server, Updated: online.Updated})
 		if err != nil {
 			return
 		}
@@ -116,8 +117,12 @@ func (d *Dao) AddServerOnline(c context.Context, server string, online *model.On
 // addServerOnline 将对应comet服务写入redis "HSET" "ol_192.168.3.222" "43" "{\"server\":\"192.168.3.222\",\"room_count\":{\"live://1000\":1},\"updated\":1577077540}"
 func (d *Dao) addServerOnline(c context.Context, key string, hashKey string, online *model.Online) (err error) {
 	b, _ := json.Marshal(online)
-	d.redis.HSet(c, key, hashKey, b).Err()
-	d.redis.Expire(c, key, time.Duration(d.redisExpire)).Err()
+	err = d.redis.HSet(c, key, hashKey, b).Err()
+
+	if err != nil {
+		log.Errorf("Logic:addServerOnline  key:%s  d.redisExpire : %d  err :%s", key, d.redisExpire, err.Error())
+	}
+	d.redis.Expire(c, key, d.redisExpire).Err()
 	return
 }
 

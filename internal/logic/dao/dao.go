@@ -15,7 +15,7 @@ type Dao struct {
 	c           *conf.Config
 	kafkaPub    sarama.SyncProducer
 	redis       *redis.Client
-	redisExpire int32
+	redisExpire time.Duration
 }
 
 // New new a dao and return.
@@ -23,7 +23,7 @@ func New(c *conf.Config) *Dao {
 	d := &Dao{
 		c:           c,
 		redis:       newRedis(c.Redis),
-		redisExpire: int32(time.Duration(c.Redis.Expire) / time.Second),
+		redisExpire: time.Duration(c.Redis.Expire),
 	}
 
 	// 初始化 kafka 连接
@@ -56,12 +56,12 @@ func newKafkaPub(c *conf.Kafka) sarama.SyncProducer {
 
 func newRedis(c *conf.Redis) *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:         c.Addr,
-		DB:           0,
-		Password:     c.Auth,
-		PoolSize:     75,
-		MinIdleConns: c.Idle,
-		DialTimeout:  time.Duration(c.DialTimeout),
+		Addr:     c.Addr,
+		DB:       0,
+		Password: c.Auth,
+		PoolSize: 75,
+		//MinIdleConns: c.Idle,
+		//DialTimeout:  time.Duration(c.DialTimeout),
 		//ReadTimeout:  time.Duration(c.ReadTimeout),
 		//WriteTimeout: time.Duration(c.WriteTimeout),
 	})

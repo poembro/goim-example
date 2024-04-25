@@ -2,7 +2,6 @@ package job
 
 import (
 	"context"
-	"time"
 
 	pb "goim-example/api/logic"
 	"goim-example/internal/job/conf"
@@ -14,12 +13,12 @@ import (
 
 func newRedis(c *conf.Redis) *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:         c.Addr,
-		DB:           0,
-		Password:     c.Auth,
-		PoolSize:     75,
-		MinIdleConns: c.Idle,
-		DialTimeout:  time.Duration(c.DialTimeout),
+		Addr:     c.Addr,
+		DB:       0,
+		Password: c.Auth,
+		PoolSize: 75,
+		//MinIdleConns: c.Idle,
+		//DialTimeout:  time.Duration(c.DialTimeout),
 		//ReadTimeout:  time.Duration(c.ReadTimeout),
 		//WriteTimeout: time.Duration(c.WriteTimeout),
 	})
