@@ -21,8 +21,8 @@ func New(c *conf.Config, l *logic.Logic) *service.Service {
 	engine.Use(r.CorsMiddleware)
 
 	engine.StaticFS("/_/", http.Dir("./examples/javascript/"))
-	engine.StaticFS("/front", http.Dir("./examples/front/"))
-	engine.StaticFS("/admin", http.Dir("./examples/admin/"))
+	//engine.StaticFS("/front", http.Dir("./examples/front/"))
+	//engine.StaticFS("/admin", http.Dir("./examples/admin/"))
 
 	// 消息推送模块
 	group := engine.Group("/goim")
