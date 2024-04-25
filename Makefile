@@ -8,8 +8,8 @@ build:
 	rm -rf target/
 	mkdir target/ 
 	## make
-	go mod tidy -compat=1.20
-	go mod vendor
+	go mod tidy -compat=1.22.0
+	go work vendor
 	
 	cp cmd/comet/comet-example.toml target/comet.toml
 	cp cmd/logic/logic-example.toml target/logic.toml

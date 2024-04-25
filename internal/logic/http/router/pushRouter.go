@@ -22,7 +22,7 @@ func (s *Router) PushKeys(c *gin.Context) {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
-	if err = s.logic.PushKeys(context.TODO(), arg.Op, arg.Keys, msg); err != nil {
+	if err = s.l.PushKeys(context.TODO(), arg.Op, arg.Keys, msg); err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
@@ -44,7 +44,7 @@ func (s *Router) PushMids(c *gin.Context) {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
-	if err = s.logic.PushMids(context.TODO(), arg.Op, arg.Mids, msg); err != nil {
+	if err = s.l.PushMids(context.TODO(), arg.Op, arg.Mids, msg); err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
@@ -68,7 +68,7 @@ func (s *Router) PushRoom(c *gin.Context) {
 		return
 	}
 
-	if err = s.logic.PushRoom(c, arg.Op, arg.Type, arg.Room, msg); err != nil {
+	if err = s.l.PushRoom(c, arg.Op, arg.Type, arg.Room, msg); err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
@@ -89,7 +89,7 @@ func (s *Router) PushAll(c *gin.Context) {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
-	if err = s.logic.PushAll(c, arg.Op, arg.Speed, msg); err != nil {
+	if err = s.l.PushAll(c, arg.Op, arg.Speed, msg); err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}

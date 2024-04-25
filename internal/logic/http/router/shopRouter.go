@@ -3,8 +3,8 @@ package router
 import (
 	"context"
 	"encoding/json"
-	"goim-example/internal/business/model"
-	"goim-example/internal/business/util"
+	"goim-example/internal/logic/http/model"
+	"goim-example/internal/logic/http/util"
 
 	"strconv"
 	"time"
@@ -133,7 +133,7 @@ func (s *Router) ShopList(c *gin.Context) {
 		item.Unread = count
 		item.LastMessage = lastMessage
 
-		item.IsOnline = s.logic.IsOnline(context.TODO(), []string{deviceId})
+		item.IsOnline = s.l.IsOnline(context.TODO(), []string{deviceId})
 		// 在线的用户先暂存起来
 		if item.IsOnline {
 			onlineTmp = append(onlineTmp, item)

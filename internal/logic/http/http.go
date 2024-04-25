@@ -1,10 +1,10 @@
 package business
 
 import (
-	"goim-example/internal/business/router"
-	"goim-example/internal/business/service"
 	"goim-example/internal/logic"
 	"goim-example/internal/logic/conf"
+	"goim-example/internal/logic/http/router"
+	"goim-example/internal/logic/http/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

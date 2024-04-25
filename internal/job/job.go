@@ -7,7 +7,7 @@ import (
 	"goim-example/internal/job/conf"
 
 	"github.com/Shopify/sarama"
-	"github.com/gomodule/redigo/redis"
+	"github.com/redis/go-redis/v9"
 
 	"goim-example/pkg/etcdv3"
 
@@ -24,7 +24,7 @@ type Job struct {
 	rooms      map[string]*Room
 	roomsMutex sync.RWMutex
 
-	redis       *redis.Pool
+	redis       *redis.Client
 	redisExpire int32
 }
 

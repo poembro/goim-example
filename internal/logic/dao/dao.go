@@ -7,14 +7,14 @@ import (
 	"goim-example/internal/logic/conf"
 
 	"github.com/Shopify/sarama"
-	"github.com/gomodule/redigo/redis"
+	"github.com/redis/go-redis/v9"
 )
 
 // Dao dao.
 type Dao struct {
 	c           *conf.Config
 	kafkaPub    sarama.SyncProducer
-	redis       *redis.Pool
+	redis       *redis.Client
 	redisExpire int32
 }
 
@@ -54,24 +54,36 @@ func newKafkaPub(c *conf.Kafka) sarama.SyncProducer {
 	return pub
 }
 
-func newRedis(c *conf.Redis) *redis.Pool {
-	return &redis.Pool{
-		MaxIdle:     c.Idle,
-		MaxActive:   c.Active,
-		IdleTimeout: time.Duration(c.IdleTimeout),
-		Dial: func() (redis.Conn, error) {
-			conn, err := redis.Dial(c.Network, c.Addr,
-				redis.DialConnectTimeout(time.Duration(c.DialTimeout)),
-				redis.DialReadTimeout(time.Duration(c.ReadTimeout)),
-				redis.DialWriteTimeout(time.Duration(c.WriteTimeout)),
-				redis.DialPassword(c.Auth),
-			)
-			if err != nil {
-				return nil, err
-			}
-			return conn, nil
-		},
-	}
+func newRedis(c *conf.Redis) *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr:         c.Addr,
+		DB:           0,
+		Password:     c.Auth,
+		PoolSize:     75,
+		MinIdleConns: c.Idle,
+		DialTimeout:  time.Duration(c.DialTimeout),
+		//ReadTimeout:  time.Duration(c.ReadTimeout),
+		//WriteTimeout: time.Duration(c.WriteTimeout),
+	})
+	/*
+		&redis.Pool{
+			MaxIdle:     c.Idle,
+			MaxActive:   c.Active,
+			IdleTimeout: time.Duration(c.IdleTimeout),
+			Dial: func() (redis.Conn, error) {
+				conn, err := redis.Dial(c.Network, c.Addr,
+					redis.DialConnectTimeout(time.Duration(c.DialTimeout)),
+					redis.DialReadTimeout(time.Duration(c.ReadTimeout)),
+					redis.DialWriteTimeout(time.Duration(c.WriteTimeout)),
+					redis.DialPassword(c.Auth),
+				)
+				if err != nil {
+					return nil, err
+				}
+				return conn, nil
+			},
+		}
+	*/
 }
 
 // Close close the resource.

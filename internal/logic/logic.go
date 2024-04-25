@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"goim-example/internal/business/service"
 	"goim-example/internal/logic/conf"
 	"goim-example/internal/logic/dao"
+	"goim-example/internal/logic/http/service"
 	"goim-example/internal/logic/model"
 
 	"goim-example/pkg/etcdv3"

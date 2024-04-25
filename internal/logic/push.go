@@ -12,7 +12,6 @@ func (l *Logic) PushKeys(c context.Context, op int32, keys []string, msg []byte)
 	servers, err := l.dao.ServersByKeys(c, keys)
 
 	if err != nil {
-		log.Infoln("--1--(l *Logic) PushKeys--", servers, err)
 		return
 	}
 	pushKeys := make(map[string][]string)
@@ -25,7 +24,6 @@ func (l *Logic) PushKeys(c context.Context, op int32, keys []string, msg []byte)
 
 	for server := range pushKeys {
 		if err = l.dao.PushMsg(c, op, server, pushKeys[server], msg); err != nil {
-			log.Infoln("--2--(l *Logic) PushKeys--", servers, err)
 			return
 		}
 	}
@@ -38,7 +36,6 @@ func (l *Logic) PushMids(c context.Context, op int32, mids []int64, msg []byte) 
 	//              [2000aa78df60001]=192.168.3.222
 	keyServers, _, err := l.dao.KeysByMids(c, mids)
 	if err != nil {
-		log.Infoln("--1--(l *Logic) keyServers--", keyServers, err)
 		return
 	}
 	keys := make(map[string][]string)
@@ -51,7 +48,6 @@ func (l *Logic) PushMids(c context.Context, op int32, mids []int64, msg []byte) 
 	}
 	for server, keys := range keys {
 		if err = l.dao.PushMsg(c, op, server, keys, msg); err != nil {
-			log.Infoln("--2--(l *Logic) keyServers--", keys, err)
 			return
 		}
 	}

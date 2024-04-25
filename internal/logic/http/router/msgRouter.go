@@ -2,8 +2,8 @@ package router
 
 import (
 	"fmt"
-	"goim-example/internal/business/model"
-	"goim-example/internal/business/util"
+	"goim-example/internal/logic/http/model"
+	"goim-example/internal/logic/http/util"
 	utilModel "goim-example/internal/logic/model"
 	"strings"
 	"time"
@@ -74,7 +74,7 @@ func (s *Router) MsgPush(c *gin.Context) {
 	typ, room, _ := utilModel.DecodeRoomKey(arg.RoomId)
 
 	// 推送
-	if err := s.logic.PushRoom(c, model.OpMessage, typ, room, util.S2B(body)); err != nil {
+	if err := s.l.PushRoom(c, model.OpMessage, typ, room, util.S2B(body)); err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}

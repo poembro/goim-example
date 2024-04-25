@@ -15,7 +15,7 @@ func (s *Router) OnlineTop(c *gin.Context) {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
-	res, err := s.logic.OnlineTop(c, arg.Type, arg.Limit)
+	res, err := s.l.OnlineTop(c, arg.Type, arg.Limit)
 	if err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
@@ -32,7 +32,7 @@ func (s *Router) OnlineRoom(c *gin.Context) {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
 	}
-	res, err := s.logic.OnlineRoom(c, arg.Type, arg.Rooms)
+	res, err := s.l.OnlineRoom(c, arg.Type, arg.Rooms)
 	if err != nil {
 		s.OutJson(c, -1, err.Error(), nil)
 		return
@@ -41,7 +41,7 @@ func (s *Router) OnlineRoom(c *gin.Context) {
 }
 
 func (s *Router) OnlineTotal(c *gin.Context) {
-	ipCount, connCount := s.logic.OnlineTotal(context.TODO())
+	ipCount, connCount := s.l.OnlineTotal(context.TODO())
 	res := map[string]interface{}{
 		"ip_count":   ipCount,
 		"conn_count": connCount,

@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"goim-example/internal/business/model"
-	"goim-example/internal/business/util"
+	"goim-example/internal/logic/http/model"
+	"goim-example/internal/logic/http/util"
 	"strconv"
 )
 

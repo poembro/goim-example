@@ -3,9 +3,9 @@ package router
 import (
 	"strconv"
 
-	"goim-example/internal/business/service"
 	"goim-example/internal/logic"
 	"goim-example/internal/logic/conf"
+	"goim-example/internal/logic/http/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,16 +13,16 @@ import (
 var contextErrCodeKey = "context/err/code"
 
 type Router struct {
-	c     *conf.Config
-	logic *logic.Logic
-	svc   *service.Service
+	c   *conf.Config
+	l   *logic.Logic
+	svc *service.Service
 }
 
 func New(c *conf.Config, s *service.Service, l *logic.Logic) *Router {
 	r := &Router{
-		c:     c,
-		logic: l,
-		svc:   s,
+		c:   c,
+		l:   l,
+		svc: s,
 	}
 	return r
 }
