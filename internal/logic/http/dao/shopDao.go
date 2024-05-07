@@ -25,6 +25,9 @@ func keyShopUsersList(shopId string) string {
 // ShopCreate 添加后台商户
 func (d *Dao) ShopCreate(ctx context.Context, nickname, item string) error {
 	d.RDSCli.HSet(ctx, keyShopList(), nickname, item).Result()
+
+	d.RDSCli.Expire(ctx, keyShopList(), d.expire).Err()
+
 	return nil
 }
 
@@ -67,6 +70,7 @@ func (d *Dao) ShopAppendUserId(ctx context.Context, shopId string, userId string
 	if err != nil {
 		return err
 	}
+	d.RDSCli.Expire(ctx, keyShopUsersList(shopId), d.expire).Err()
 
 	return nil
 }

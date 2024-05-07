@@ -40,7 +40,7 @@ func (d *Dao) IpCreate(ctx context.Context, shopId string, ip string) error {
 	if err != nil {
 		return err
 	}
-
+	d.RDSCli.Expire(ctx, keyListIp(shopId), d.expire).Err()
 	return nil
 }
 

@@ -49,5 +49,7 @@ func (d *Dao) UserCreate(ctx context.Context, userId string, deviceId, server, u
 	if err != nil {
 		return err
 	}
+	d.RDSCli.Expire(ctx, KeyUserIdStrServer(userId), d.expire).Err()
+
 	return nil
 }

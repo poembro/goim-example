@@ -74,25 +74,25 @@ func (l *Logic) watchComet() {
 	dis := etcdv3.New(etcdAddr, username, password)
 	for {
 		time.Sleep(_onlineTick)
-		ins := dis.ServiceList(env, appid, region, zone)
-		if err := l.loadOnline(ins); err != nil {
+		items := dis.LoadOnlineNodes(env, appid, region, zone)
+		if err := l.loadOnline(items); err != nil {
 			log.Errorf("watchComet error(%v)", err)
 		}
 	}
 }
 
-func (l *Logic) loadOnline(ins map[string]string) (err error) {
+func (l *Logic) loadOnline(items map[string]string) (err error) {
 	var (
 		roomCount = make(map[string]int32)
 		online    *model.Online
 	)
-	for _, grpcAddr := range ins {
-		online, err = l.dao.GetServerOnline(context.Background(), grpcAddr)
+	for _, addr := range items {
+		online, err = l.dao.GetServerOnline(context.Background(), addr)
 		if err != nil {
 			return
 		}
 		if time.Since(time.Unix(online.Updated, 0)) > _onlineDeadline {
-			_ = l.dao.DelServerOnline(context.Background(), grpcAddr)
+			_ = l.dao.DelServerOnline(context.Background(), addr)
 			continue
 		}
 		for roomID, count := range online.RoomCount {

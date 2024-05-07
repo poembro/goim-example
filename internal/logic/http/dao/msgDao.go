@@ -33,6 +33,7 @@ func (d *Dao) MsgACKMappingCreate(ctx context.Context, deviceId, roomId string, 
 	if err != nil {
 		return err
 	}
+	d.RDSCli.Expire(ctx, keyMessageAck(deviceId), d.expire).Err()
 
 	return nil
 }
@@ -65,6 +66,7 @@ func (d *Dao) MsgPush(ctx context.Context, roomId string, id int64, msg string) 
 	if err != nil {
 		return err
 	}
+	d.RDSCli.Expire(ctx, KeyListMsg(roomId), d.expire).Err()
 
 	return nil
 }

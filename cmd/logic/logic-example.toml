@@ -31,7 +31,7 @@
 
 [rpcServer]
     network = "tcp"
-    addr = ":3118"
+    addr = ":3119"
     timeout = "1s"
 
 [rpcClient]
@@ -40,7 +40,7 @@
 
 [httpServer]
     network = "tcp"
-    addr = ":3112"
+    addr = ":3111"
 	readTimeout = "1s"
 	writeTimeout = "1s"
 

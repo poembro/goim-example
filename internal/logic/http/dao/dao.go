@@ -34,7 +34,7 @@ func New(c *conf.Config) *Dao {
 	d := &Dao{
 		c:      c,
 		RDSCli: newRedis(c.Redis),
-		expire: time.Duration(time.Second * 60), //75 * time.Second
+		expire: time.Duration(time.Minute * 1800), //75 * time.Second
 	}
 
 	return d

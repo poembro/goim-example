@@ -52,7 +52,7 @@ type Registry struct {
 }
 
 // New creates etcd registry
-func New(nodes string, username, password string) (r *Registry) {
+func New(nodes string, username, password string) *Registry {
 	op := &Options{
 		ctx:       context.Background(),
 		namespace: "",
@@ -74,7 +74,7 @@ func New(nodes string, username, password string) (r *Registry) {
 
 func (r *Registry) ResolverEtcd() {
 	builder := &Builder{
-		Conn: r.Conn,
+		etcdConn: r.Conn,
 	}
 
 	resolver.Register(builder)
@@ -110,10 +110,10 @@ func (r *Registry) Deregister() error {
 	return err
 }
 
-// AllService return the service instances in memory according to the service name.
-func (r *Registry) ServiceList(env, appid, region, zone string) map[string]string {
+// LoadOnlineNodes return the service instances in memory according to the service name.
+func (r *Registry) LoadOnlineNodes(env, appid, region, zone string) map[string]string {
 	dst := make(map[string]string)
-	key := fmt.Sprintf("/%s/%s/%s", env, appid, region) // 服务发现 上海所有节点
+	key := fmt.Sprintf("/%s/%s/%s/%s", env, appid, region, zone) // 服务发现 上海所有节点
 	resp, err := r.KV.Get(r.Opts.ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		log.Infof("---> etcdv3 err k:\"%s\"  v:\"%s\" ", key, err.Error())

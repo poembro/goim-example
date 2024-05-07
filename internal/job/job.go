@@ -77,8 +77,8 @@ func (j *Job) watchComet() {
 	dis := etcdv3.New(nodes, username, password)
 	go func() {
 		for {
-			ins := dis.ServiceList(env, appid, region, zone)
-			err := j.newAddress(ins)
+			items := dis.LoadOnlineNodes(env, appid, region, zone)
+			err := j.newAddress(items)
 			if err != nil {
 				return
 			}
@@ -87,9 +87,9 @@ func (j *Job) watchComet() {
 	}()
 }
 
-func (j *Job) newAddress(ins map[string]string) error {
+func (j *Job) newAddress(items map[string]string) error {
 	comets := map[string]*Comet{}
-	for _, grpcAddr := range ins {
+	for _, grpcAddr := range items {
 		if old, ok := j.cometServers[grpcAddr]; ok {
 			comets[grpcAddr] = old
 			continue

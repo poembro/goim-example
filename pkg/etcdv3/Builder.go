@@ -2,7 +2,6 @@ package etcdv3
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	log "github.com/golang/glog"
@@ -13,19 +12,19 @@ import (
 )
 
 type Builder struct {
-	Conn *clientv3.Client
+	etcdConn *clientv3.Client
 }
 
-func (b *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
+func (s *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
 	// 即:	target := fmt.Sprintf("discovery:///%s/%s/%s", env, appid, region)
-	prefix := fmt.Sprintf("/%s/", target.Endpoint)
 
 	r := &Resolver{
-		Conn:   b.Conn,
-		cc:     cc,
-		prefix: prefix,
+		etcdConn:   s.etcdConn,
+		targetConn: cc,
+		Prefix:     target.URL.Path,
+		addrs:      make(map[string]resolver.Address),
 	}
-	log.Infof("---> etcdv3 grpc to find target:%s \r\n", prefix)
+	log.Infof("---> etcdv3 grpc to find target:%#v \r\n", target.URL)
 	go r.watchers()
 	r.ResolveNow(resolver.ResolveNowOptions{})
 	return r, nil
@@ -38,18 +37,14 @@ func (r *Builder) Scheme() string {
 ////////////////////////////////////////////////////////////
 
 type Resolver struct {
-	sync.RWMutex
+	lock sync.RWMutex
 
-	cc        resolver.ClientConn
-	prefix    string
-	addresses map[string]resolver.Address
+	targetConn resolver.ClientConn
+	addrs      map[string]resolver.Address
+	Prefix     string
 
 	//////////etcd//////////
-	Conn    *clientv3.Client
-	KV      clientv3.KV
-	Watcher clientv3.Watcher
-	ctx     context.Context
-	cancel  context.CancelFunc
+	etcdConn *clientv3.Client
 }
 
 func (r *Resolver) ResolveNow(rn resolver.ResolveNowOptions) {
@@ -58,72 +53,70 @@ func (r *Resolver) ResolveNow(rn resolver.ResolveNowOptions) {
 
 func (r *Resolver) Close() {
 	log.Infof("---> etcdv3 -------Close()")
-	r.cancel()
-	r.Watcher.Close()
 	return
 }
 
 func (r *Resolver) watchers() {
-	r.ctx, r.cancel = context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	r.addresses = make(map[string]resolver.Address)
-	r.Watcher = clientv3.NewWatcher(r.Conn)
-	r.KV = clientv3.NewKV(r.Conn)
-	// log.Infoln("---> etcdv3 xx----func (r *Resolver) Watcher  r.prefix:", r.prefix)
+	watcher := clientv3.NewWatcher(r.etcdConn)
+	defer watcher.Close()
+
+	etcdkv := clientv3.NewKV(r.etcdConn)
+	// log.Infoln("---> etcdv3 xx----func (r *Resolver) Watcher  r.Prefix:", r.Prefix)
 	// 先获取一次
-	ins, err := r.KV.Get(r.ctx, r.prefix, clientv3.WithPrefix())
+	items, err := etcdkv.Get(ctx, r.Prefix, clientv3.WithPrefix())
 	if err != nil {
 		log.Infof("---> etcdv3 err: %s", err.Error())
 		return
 	}
-	for _, kv := range ins.Kvs {
-		r.setAddress(string(kv.Key), string(kv.Value))
+	for _, kv := range items.Kvs {
+		r.setAddrs(string(kv.Key), string(kv.Value))
 	}
 
-	r.cc.UpdateState(resolver.State{
-		Addresses: r.getAddresses(),
+	r.targetConn.UpdateState(resolver.State{
+		Addresses: r.getAddrs(),
 	})
 
 	// 监听key
-	watchChan := r.Watcher.Watch(r.ctx, r.prefix, clientv3.WithPrefix(), clientv3.WithRev(0)) // 监听的revision起点
+	watchChan := watcher.Watch(ctx, r.Prefix, clientv3.WithPrefix(), clientv3.WithRev(0)) // 监听的revision起点
 	for response := range watchChan {
 		for _, event := range response.Events {
 			switch event.Type {
 			case mvccpb.PUT:
-				r.setAddress(string(event.Kv.Key), string(event.Kv.Value))
+				r.setAddrs(string(event.Kv.Key), string(event.Kv.Value))
 			case mvccpb.DELETE:
-				r.delAddress(string(event.Kv.Key))
+				r.removeAddrs(string(event.Kv.Key))
 			}
 		}
 
-		r.cc.UpdateState(resolver.State{
-			Addresses: r.getAddresses(),
+		r.targetConn.UpdateState(resolver.State{
+			Addresses: r.getAddrs(),
 		})
 	}
-
-	r.Close()
 }
 
-func (r *Resolver) setAddress(key, address string) {
-	r.Lock()
-	defer r.Unlock()
-	// log.Infoln("---> etcdv3 ---- setAddress  key:val => ", key, ":", address)
-
-	r.addresses[key] = resolver.Address{Addr: string(address)}
+func (r *Resolver) setAddrs(key, address string) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	// log.Infoln("---> etcdv3 ---- setAddrs  key:val => ", key, ":", address)
+	r.addrs[key] = resolver.Address{Addr: string(address)}
 }
 
-func (r *Resolver) delAddress(key string) {
-	r.Lock()
-	defer r.Unlock()
-	delete(r.addresses, key)
-}
+func (r *Resolver) getAddrs() []resolver.Address {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
 
-func (r *Resolver) getAddresses() []resolver.Address {
-	items := make([]resolver.Address, 0, len(r.addresses))
-
-	for _, v := range r.addresses {
+	items := make([]resolver.Address, 0, len(r.addrs))
+	for _, v := range r.addrs {
 		items = append(items, v)
 	}
-
 	return items
+}
+
+func (r *Resolver) removeAddrs(key string) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	delete(r.addrs, key)
 }
