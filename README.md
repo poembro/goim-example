@@ -1,5 +1,5 @@
 # goim-example
-一个 goim 的example 改服务发现为etcd 改 kafka 为 redis 
+一个 [goim](https://github.com/Terry-Mao/goim) 的example 改服务发现为etcd 改 kafka 为 redis 
 
 ## 特性 
  * 高性能 纯Golang实现.
