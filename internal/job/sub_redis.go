@@ -2,6 +2,8 @@ package job
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"time"
 
 	pb "goim-example/api/logic"
@@ -32,21 +34,31 @@ func (j *Job) ConsumeRedis() error {
 		default:
 			values, err := j.redis.BRPop(context.TODO(), time.Second*5, j.c.Kafka.Topic).Result()
 			if err != nil {
+				if errors.Is(err, redis.Nil) {
+					continue
+				}
+
+				if strings.Contains(err.Error(), "timeout") {
+					continue
+				}
+
 				log.Errorf("ConsumeRedis  error(%v)", err)
+				return err
 			}
+
 			if len(values) < 2 {
 				continue
 			}
 			msg := values[1]
 			pushMsg := new(pb.PushMsg)
 			if err := proto.Unmarshal([]byte(msg), pushMsg); err != nil {
-				log.Errorf("proto.Unmarshal(%v) error(%v)", msg, err)
+				log.Errorf("ConsumeRedis proto.Unmarshal(%v) error(%v)", msg, err)
 				return err
 			}
 
-			log.Infoln("Subscribe message:", pushMsg)
+			log.Infoln("ConsumeRedis message:", pushMsg)
 			if err := j.Push(context.Background(), pushMsg); err != nil {
-				log.Errorf("j.Push(%v) error(%v)", pushMsg, err)
+				log.Errorf("ConsumeRedis j.Push(%v) error(%v)", pushMsg, err)
 				return err
 			}
 		}
