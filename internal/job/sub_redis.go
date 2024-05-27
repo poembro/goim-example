@@ -2,6 +2,7 @@ package job
 
 import (
 	"context"
+	"time"
 
 	pb "goim-example/api/logic"
 	"goim-example/internal/job/conf"
@@ -16,7 +17,7 @@ func newRedis(c *conf.Redis) *redis.Client {
 		Addr:     c.Addr,
 		DB:       0,
 		Password: c.Auth,
-		PoolSize: 75,
+		//PoolSize: 75,
 		//MinIdleConns: c.Idle,
 		//DialTimeout:  time.Duration(c.DialTimeout),
 		//ReadTimeout:  time.Duration(c.ReadTimeout),
@@ -26,28 +27,19 @@ func newRedis(c *conf.Redis) *redis.Client {
 
 // Subscribe
 func (j *Job) ConsumeRedis() error {
-	ctx := context.TODO()
-	pubsub := j.redis.Subscribe(ctx, j.c.Kafka.Topic)
-	defer pubsub.Close()
-	// 在发布任何内容之前，请等待确认已创建订阅
-	_, err := pubsub.Receive(ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	ch := pubsub.Channel()
 	for {
 		select {
-		case msg, ok := <-ch:
-			if !ok {
-				return nil
+		default:
+			values, err := j.redis.BRPop(context.TODO(), time.Second*5, j.c.Kafka.Topic).Result()
+			if err != nil {
+				log.Errorf("ConsumeRedis  error(%v)", err)
 			}
-			if len(msg.Payload) <= 0 {
+			if len(values) < 2 {
 				continue
 			}
-
+			msg := values[1]
 			pushMsg := new(pb.PushMsg)
-			if err := proto.Unmarshal([]byte(msg.Payload), pushMsg); err != nil {
+			if err := proto.Unmarshal([]byte(msg), pushMsg); err != nil {
 				log.Errorf("proto.Unmarshal(%v) error(%v)", msg, err)
 				return err
 			}
@@ -59,5 +51,4 @@ func (j *Job) ConsumeRedis() error {
 			}
 		}
 	}
-
 }

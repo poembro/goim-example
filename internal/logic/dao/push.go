@@ -37,7 +37,7 @@ func (d *Dao) Send(pushMsg *pb.PushMsg) (err error) {
 	}
 
 	if d.c.Consume.RedisEnable {
-		_, err = d.redis.Publish(context.TODO(), d.c.Kafka.Topic, string(b)).Result()
+		_, err = d.redis.LPush(context.TODO(), d.c.Kafka.Topic, string(b)).Result()
 		if err != nil {
 			log.Errorf("PushMsg.send(broadcast_room pushMsg:%v) error(%v)", pushMsg, err)
 			return

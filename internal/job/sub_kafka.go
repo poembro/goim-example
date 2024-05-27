@@ -76,7 +76,7 @@ func newKafkaSub(c *conf.Kafka) sarama.ConsumerGroup {
 	//多个partition 自动计算, 设置选择分区的策略为Hash
 	// 生产消息时记得 &sarama.ProducerMessage{ Key: sarama.StringEncoder(strconv.Itoa(RecvID)),)
 	// Kafka客户端会根据Key进行Hash，我们通过把接收用户ID作为Key，这样就能让所有发给某个人的消息落到同一个分区了，也就有序了。
-	//p.config.Producer.Partitioner = sarama.NewHashPartitioner  // 默认 hash
+	//config.Producer.Partitioner = sarama.NewHashPartitioner  // 默认 hash
 
 	config.Consumer.Return.Errors = true
 

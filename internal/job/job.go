@@ -38,11 +38,11 @@ func New(c *conf.Config) *Job {
 	}
 	j.watchComet()
 
-	j.Init() // 消费端初始化
+	j.Consume() // 消费端初始化
 	return j
 }
 
-func (j *Job) Init() {
+func (j *Job) Consume() {
 	if j.c.Consume.KafkaEnable {
 		j.consumer = newKafkaSub(j.c.Kafka)
 		go j.ConsumeKafka()
