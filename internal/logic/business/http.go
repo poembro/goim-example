@@ -2,9 +2,9 @@ package business
 
 import (
 	"goim-example/internal/logic"
+	"goim-example/internal/logic/business/router"
+	"goim-example/internal/logic/business/service"
 	"goim-example/internal/logic/conf"
-	"goim-example/internal/logic/http/router"
-	"goim-example/internal/logic/http/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

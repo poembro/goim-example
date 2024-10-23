@@ -81,8 +81,8 @@ func (r *Registry) ResolverEtcd() {
 }
 
 // Register the registration.
-func (r *Registry) Register(env, appid, region, zone, ip, port string) error {
-	key := fmt.Sprintf("/%s/%s/%s/%s/%s:%s", env, appid, region, zone, ip, port)
+func (r *Registry) Register(appid, env, region, zone, ip, port string) error {
+	key := fmt.Sprintf("/%s/%s/%s/%s/%s:%s", appid, env, region, zone, ip, port)
 	value := fmt.Sprintf("%s:%s", ip, port)
 	log.Infof("---> etcdv3 service register to etcd \"%s\" ", key)
 	r.Opts.namespace = key
@@ -111,22 +111,22 @@ func (r *Registry) Deregister() error {
 }
 
 // LoadOnlineNodes return the service instances in memory according to the service name.
-func (r *Registry) LoadOnlineNodes(env, appid, region, zone string) map[string]string {
-	dst := make(map[string]string)
-	key := fmt.Sprintf("/%s/%s/%s/%s", env, appid, region, zone) // 服务发现 上海所有节点
+func (r *Registry) LoadOnlineNodes(appid, env, region, zone string) map[string]string {
+	items := make(map[string]string)
+	key := fmt.Sprintf("/%s/%s/%s/%s", appid, env, region, zone) // 服务发现 上海所有节点
 	resp, err := r.KV.Get(r.Opts.ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		log.Infof("---> etcdv3 err k:\"%s\"  v:\"%s\" ", key, err.Error())
-		return dst
+		return items
 	}
 
 	for _, kv := range resp.Kvs {
 		k := string(kv.Key)
 		v := string(kv.Value)
-		dst[k] = v
+		items[k] = v
 	}
 
-	return dst
+	return items
 }
 
 // registerWithKV create a new lease, return current leaseID

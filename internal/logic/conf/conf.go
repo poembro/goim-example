@@ -51,11 +51,17 @@ func Init() (err error) {
 // Default new a config with specified defualt value.
 func Default() *Config {
 	return &Config{
-		Env: &Env{Region: region, AppId: appId, TargetAppId: targetAppId, Zone: zone, DeployEnv: deployEnv, Host: host, Weight: weight},
-
+		Env: &Env{
+			Region:      region,
+			AppId:       appId,
+			TargetAppId: targetAppId,
+			Zone:        zone,
+			DeployEnv:   deployEnv,
+			Host:        host,
+			Weight:      weight,
+		},
 		Consume: &Consume{
 			KafkaEnable: false,
-			RedisEnable: false,
 		},
 		Kafka: &Kafka{
 			Topic:   "goim-push-topic",
@@ -116,7 +122,6 @@ type Discovery struct {
 
 type Consume struct {
 	KafkaEnable bool
-	RedisEnable bool
 }
 
 // Node node config.

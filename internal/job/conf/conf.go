@@ -25,7 +25,7 @@ var (
 	Conf *Config
 )
 
-//注意 注意  没有Addr字段
+// 注意 注意  没有Addr字段
 func init() {
 	var (
 		defHost, _ = os.Hostname()
@@ -51,7 +51,6 @@ func Default() *Config {
 
 		Consume: &Consume{
 			KafkaEnable: false,
-			RedisEnable: false,
 		},
 		Kafka: &Kafka{
 			Topic:   "goim-push-topic",
@@ -86,7 +85,6 @@ type Discovery struct {
 
 type Consume struct {
 	KafkaEnable bool
-	RedisEnable bool
 }
 
 // Room is room config.

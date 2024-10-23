@@ -150,7 +150,7 @@ func (d *Dao) getServerOnline(c context.Context, key string, hashKey string) (on
 	if err != nil {
 		return
 	}
-	online = new(model.Online)
+
 	if err = json.Unmarshal(b, online); err != nil {
 		log.Errorf("serverOnline json.Unmarshal(%s) error(%v)", b, err)
 		return

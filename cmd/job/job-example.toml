@@ -1,8 +1,7 @@
 # This is a TOML document. Boom
 [consume]
     kafkaEnable = false
-    redisEnable = true
-
+    
 [discovery]
     nodes = "http://10.0.41.145:2379,http://10.0.41.145:2479,http://10.0.41.145:2579"
     username = "root"

@@ -8,9 +8,9 @@ import (
 	"syscall"
 
 	"goim-example/internal/logic"
+	business "goim-example/internal/logic/business"
 	"goim-example/internal/logic/conf"
 	"goim-example/internal/logic/grpc"
-	business "goim-example/internal/logic/http"
 	"goim-example/pkg/etcdv3"
 
 	//"goim-example/internal/logic/user"  //加的业务
@@ -71,5 +71,5 @@ func Register(dis *etcdv3.Registry, node string, c *conf.Env) error {
 	zone := c.Zone
 	ip := c.Host
 	// 服务注册至ETCD
-	return dis.Register(env, appid, region, zone, ip, port)
+	return dis.Register(appid, env, region, zone, ip, port)
 }

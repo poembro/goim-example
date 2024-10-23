@@ -89,5 +89,5 @@ func Register(dis *etcdv3.Registry, node string, c *conf.Env) error {
 	zone := c.Zone
 	ip := c.Host
 	// 服务注册至ETCD
-	return dis.Register(env, appid, region, zone, ip, port)
+	return dis.Register(appid, env, region, zone, ip, port)
 }

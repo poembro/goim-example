@@ -4,8 +4,8 @@ import (
 	"strconv"
 
 	"goim-example/internal/logic"
+	"goim-example/internal/logic/business/service"
 	"goim-example/internal/logic/conf"
-	"goim-example/internal/logic/http/service"
 
 	"github.com/gin-gonic/gin"
 )

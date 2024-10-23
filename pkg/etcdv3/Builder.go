@@ -22,7 +22,7 @@ func (s *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		etcdConn:   s.etcdConn,
 		targetConn: cc,
 		Prefix:     target.URL.Path,
-		addrs:      make(map[string]resolver.Address),
+		Addrs:      make(map[string]resolver.Address),
 	}
 	log.Infof("---> etcdv3 grpc to find target:%#v \r\n", target.URL)
 	go r.watchers()
@@ -40,7 +40,7 @@ type Resolver struct {
 	lock sync.RWMutex
 
 	targetConn resolver.ClientConn
-	addrs      map[string]resolver.Address
+	Addrs      map[string]resolver.Address
 	Prefix     string
 
 	//////////etcd//////////
@@ -101,15 +101,15 @@ func (r *Resolver) setAddrs(key, address string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	// log.Infoln("---> etcdv3 ---- setAddrs  key:val => ", key, ":", address)
-	r.addrs[key] = resolver.Address{Addr: string(address)}
+	r.Addrs[key] = resolver.Address{Addr: string(address)}
 }
 
 func (r *Resolver) getAddrs() []resolver.Address {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
-	items := make([]resolver.Address, 0, len(r.addrs))
-	for _, v := range r.addrs {
+	items := make([]resolver.Address, 0, len(r.Addrs))
+	for _, v := range r.Addrs {
 		items = append(items, v)
 	}
 	return items
@@ -118,5 +118,5 @@ func (r *Resolver) getAddrs() []resolver.Address {
 func (r *Resolver) removeAddrs(key string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	delete(r.addrs, key)
+	delete(r.Addrs, key)
 }

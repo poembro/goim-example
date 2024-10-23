@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
+	"goim-example/internal/logic/business/service"
 	"goim-example/internal/logic/conf"
 	"goim-example/internal/logic/dao"
-	"goim-example/internal/logic/http/service"
 	"goim-example/internal/logic/model"
 
 	"goim-example/pkg/etcdv3"
@@ -74,7 +74,7 @@ func (l *Logic) watchComet() {
 	dis := etcdv3.New(etcdAddr, username, password)
 	for {
 		time.Sleep(_onlineTick)
-		items := dis.LoadOnlineNodes(env, appid, region, zone)
+		items := dis.LoadOnlineNodes(appid, env, region, zone)
 		if err := l.loadOnline(items); err != nil {
 			log.Errorf("watchComet error(%v)", err)
 		}
@@ -99,6 +99,9 @@ func (l *Logic) loadOnline(items map[string]string) (err error) {
 			roomCount[roomID] += count
 		}
 	}
+
+	// 提示 WARNING: DATA RACE
+	// roomCount 是直接替换整个map引用，并没有进行修改和删除。所以这里并不会有问题。
 	l.roomCount = roomCount
 	return
 }

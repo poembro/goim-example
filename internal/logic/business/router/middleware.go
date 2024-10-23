@@ -2,7 +2,7 @@ package router
 
 import (
 	"fmt"
-	"goim-example/internal/logic/http/util"
+	"goim-example/internal/logic/business/util"
 	"net/http/httputil"
 	"os"
 	"runtime"

@@ -46,9 +46,7 @@ func (j *Job) Consume() {
 	if j.c.Consume.KafkaEnable {
 		j.consumer = newKafkaSub(j.c.Kafka)
 		go j.ConsumeKafka()
-	}
-
-	if j.c.Consume.RedisEnable {
+	} else {
 		go j.ConsumeRedis()
 	}
 }
@@ -77,9 +75,8 @@ func (j *Job) watchComet() {
 	dis := etcdv3.New(nodes, username, password)
 	go func() {
 		for {
-			items := dis.LoadOnlineNodes(env, appid, region, zone)
-			err := j.newAddress(items)
-			if err != nil {
+			items := dis.LoadOnlineNodes(appid, env, region, zone)
+			if err := j.newAddress(items); err != nil {
 				return
 			}
 			time.Sleep(time.Second * 10)
@@ -110,6 +107,8 @@ func (j *Job) newAddress(items map[string]string) error {
 			log.Infof("watchComet DelComet:%s", key)
 		}
 	}
+	// 提示 WARNING: DATA RACE
+	// cometServers 是直接替换整个map引用，并没有进行修改和删除。所以这里并不会有问题。
 	j.cometServers = comets
 	return nil
 }
