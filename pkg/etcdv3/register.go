@@ -32,7 +32,7 @@ var svc *Registry = nil
 // New creates etcd registry
 func New(nodes string, username, password string) *Registry {
 	if svc != nil {
-		log.Infof("---> etcdv3  err:复用 ")
+		log.Infof("etcdv3  err:复用 ")
 
 		return svc
 	}
@@ -51,7 +51,7 @@ func New(nodes string, username, password string) *Registry {
 		Password:           password,
 	})
 	if err != nil {
-		log.Infof("---> etcdv3  err: \"%s\" ", err.Error())
+		log.Infof("etcdv3  err: \"%s\" ", err.Error())
 		return nil
 	}
 
@@ -73,7 +73,7 @@ func New(nodes string, username, password string) *Registry {
 func (r *Registry) Register(appid, env, region, zone, ip, port string) error {
 	key := fmt.Sprintf("/%s/%s/%s/%s/%s:%s", appid, env, region, zone, ip, port)
 	value := fmt.Sprintf("%s:%s", ip, port)
-	log.Infof("---> etcdv3 service register to etcd \"%s\" ", key)
+	log.Infof("etcdv3 service register to etcd \"%s\" ", key)
 	r.Opts.namespace = key
 	if r.lease != nil {
 		r.lease.Close()
@@ -105,10 +105,10 @@ func (r *Registry) LoadOnlineNodes(appid, env, region, zone string) map[string]s
 	key := fmt.Sprintf("/%s/%s/%s/%s", appid, env, region, zone) // 服务发现 上海所有节点
 	resp, err := r.KV.Get(r.Opts.ctx, key, clientv3.WithPrefix())
 	if err != nil {
-		log.Infof("---> etcdv3 err k:\"%s\"  v:\"%s\" ", key, err.Error())
+		log.Infof("etcdv3 err k:\"%s\"  v:\"%s\" ", key, err.Error())
 		return items
 	}
-	// log.Infof("---> etcdv3 resp.Kvs  %+v ", resp.Kvs)
+	// log.Infof("etcdv3 resp.Kvs  %+v ", resp.Kvs)
 
 	for _, kv := range resp.Kvs {
 		k := string(kv.Key)

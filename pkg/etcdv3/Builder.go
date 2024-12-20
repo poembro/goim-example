@@ -24,7 +24,7 @@ func (s *Builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		Prefix:     target.URL.Path,
 		Items:      make(map[string]resolver.Address),
 	}
-	log.Infof("---> etcdv3 grpc to find target:%#v \r\n", target.URL)
+	log.Infof("etcdv3 grpc to find target:%#v \r\n", target.URL)
 	go r.watchers()
 	r.ResolveNow(resolver.ResolveNowOptions{})
 	return r, nil
@@ -52,7 +52,7 @@ func (r *Resolver) ResolveNow(rn resolver.ResolveNowOptions) {
 }
 
 func (r *Resolver) Close() {
-	log.Infof("---> etcdv3 -------Close()")
+	log.Infof("etcdv3 -------Close()")
 	return
 }
 
@@ -64,14 +64,14 @@ func (r *Resolver) watchers() {
 	defer watcher.Close()
 
 	etcdkv := clientv3.NewKV(r.etcdConn)
-	log.Infoln("---> etcdv3  r.Prefix  :", r.Prefix)
+	log.Infoln("etcdv3  r.Prefix  :", r.Prefix)
 	// 先获取一次
 	items, err := etcdkv.Get(ctx, r.Prefix, clientv3.WithPrefix())
 	if err != nil {
-		log.Infof("---> etcdv3 err: %s", err.Error())
+		log.Infof("etcdv3 err: %s", err.Error())
 		return
 	}
-	log.Infoln("---> etcdv3 items:", items.Kvs)
+	log.Infoln("etcdv3 items:", items.Kvs)
 	for _, kv := range items.Kvs {
 		r.creates(string(kv.Key), string(kv.Value))
 	}
@@ -101,7 +101,7 @@ func (r *Resolver) watchers() {
 func (r *Resolver) creates(key, address string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	log.Infoln("---> etcdv3 ---- setAddrs  key:val => ", key, ":", address)
+	log.Infoln("etcdv3 ---- setAddrs  key:val => ", key, ":", address)
 	r.Items[key] = resolver.Address{Addr: address}
 }
 
