@@ -33,7 +33,7 @@ func main() {
 	log.Infof("goim-comet [version: %s conf: %+v] start", ver, conf.Conf)
 	// discovery
 	dis := etcdv3.New(conf.Conf.Discovery.Nodes, conf.Conf.Discovery.Username, conf.Conf.Discovery.Password)
-	dis.ResolverEtcd()
+
 	Register(dis, conf.Conf.RPCServer.Addr, conf.Conf.Env)
 
 	// new comet server

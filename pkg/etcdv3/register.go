@@ -5,36 +5,12 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"sync"
 	"time"
 
 	log "github.com/golang/glog"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc/resolver"
 )
-
-var (
-	once     sync.Once
-	etcdConn *clientv3.Client = nil
-)
-
-func newClient(etcdAddr, username, password string) (*clientv3.Client, error) {
-	if etcdConn != nil {
-		return etcdConn, nil
-	}
-	var err error
-	once.Do(func() {
-		etcdConn, err = clientv3.New(clientv3.Config{
-			Endpoints:          strings.Split(etcdAddr, ","),
-			DialTimeout:        time.Second * time.Duration(5),
-			MaxCallSendMsgSize: 2 * 1024 * 1024,
-			Username:           username,
-			Password:           password,
-		})
-	})
-
-	return etcdConn, err
-}
 
 type Options struct {
 	ctx       context.Context
@@ -51,33 +27,46 @@ type Registry struct {
 	lease clientv3.Lease
 }
 
+var svc *Registry = nil
+
 // New creates etcd registry
 func New(nodes string, username, password string) *Registry {
+	if svc != nil {
+		log.Infof("---> etcdv3  err:复用 ")
+
+		return svc
+	}
 	op := &Options{
 		ctx:       context.Background(),
 		namespace: "",
 		ttl:       time.Second * 15,
 		maxRetry:  5, // 重试 5次
 	}
-	client, err := newClient(nodes, username, password)
+
+	cc, err := clientv3.New(clientv3.Config{
+		Endpoints:          strings.Split(nodes, ","),
+		DialTimeout:        time.Second * time.Duration(5),
+		MaxCallSendMsgSize: 2 * 1024 * 1024,
+		Username:           username,
+		Password:           password,
+	})
 	if err != nil {
 		log.Infof("---> etcdv3  err: \"%s\" ", err.Error())
 		return nil
 	}
 
-	return &Registry{
+	svc = &Registry{
 		Opts: op,
-		Conn: client,
-		KV:   clientv3.NewKV(client),
+		Conn: cc,
+		KV:   clientv3.NewKV(cc),
 	}
-}
 
-func (r *Registry) ResolverEtcd() {
 	builder := &Builder{
-		etcdConn: r.Conn,
+		etcdConn: cc,
 	}
-
 	resolver.Register(builder)
+
+	return svc
 }
 
 // Register the registration.
@@ -119,6 +108,7 @@ func (r *Registry) LoadOnlineNodes(appid, env, region, zone string) map[string]s
 		log.Infof("---> etcdv3 err k:\"%s\"  v:\"%s\" ", key, err.Error())
 		return items
 	}
+	// log.Infof("---> etcdv3 resp.Kvs  %+v ", resp.Kvs)
 
 	for _, kv := range resp.Kvs {
 		k := string(kv.Key)

@@ -49,7 +49,7 @@ func (b *Bucket) RoomCount() int {
 	return len(b.rooms)
 }
 
-// RoomsCount 获取多少房间在线
+// RoomsCount 获取房间多少在线
 func (b *Bucket) RoomsCount() (res map[string]int32) {
 	var (
 		roomID string

@@ -70,10 +70,14 @@ $ docker-compose up -d
 ```
 问题一 : 房间号如果是 用户id  (目前采用该方式,缺点在可接受范围)
 
-1. 房间号太多 分散到redis 64个hset类型key, 每个key的value值有个 room_count 会非常大  
- comet服务会上报房间号写入 redis "HSET" "ol_192.168.3.222" "43" "{\"server\":\"192.168.3.222\",\"room_count\":{\"live://1000\":1},\"updated\":1577077540}" 
-2.单个节点如果有 10000人在线 则1个key的value值中json room_count的长度为  1w / 64 = 156 个房间 
-3.房间下线 room_count 会对应 减少
+1. comet服务会上报房间号对应人数到redis,  n个comet节点 就有n个 redis hash key 如: "ol_192.168.3.222" 
+ 子key就是房间号 但是只被hash取余64个子key,  如果房间号过多 则被放弃统计
+ 每个子key的value值就是 "{\"server\":\"192.168.3.222\",\"room_count\":{\"live://1000\":1},\"updated\":1577077540}" 
+
+完整案例
+  redis "HSET" "ol_192.168.3.222" "0-63" "{\"server\":\"192.168.3.222\",\"room_count\":{\"live://1000\":1},\"updated\":1577077540}" 
+
+2. 房间下线 room_count 会对应 减少
 
 
 问题二 : 多台机器部署 kafka 的 group id 需要一致 

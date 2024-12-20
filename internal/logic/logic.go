@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"goim-example/internal/logic/business/service"
 	"goim-example/internal/logic/conf"
 	"goim-example/internal/logic/dao"
 	"goim-example/internal/logic/model"
@@ -21,9 +20,8 @@ const (
 
 // Logic struct
 type Logic struct {
-	c        *conf.Config
-	dao      *dao.Dao
-	business *service.Service
+	c   *conf.Config
+	dao *dao.Dao
 	// online
 	totalIPs   int64
 	totalConns int64
@@ -35,10 +33,9 @@ type Logic struct {
 // New init
 func New(c *conf.Config) (l *Logic) {
 	l = &Logic{
-		c:        c,
-		dao:      dao.New(c),
-		business: service.New(c), // 第三方业务
-		regions:  make(map[string]string),
+		c:       c,
+		dao:     dao.New(c),
+		regions: make(map[string]string),
 	}
 	l.initRegions() //初始化regions属性 l.regions[上海] = sh
 	go l.watchComet()

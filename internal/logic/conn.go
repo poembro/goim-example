@@ -2,46 +2,41 @@ package logic
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"goim-example/api/protocol"
 	"goim-example/internal/logic/model"
 	"time"
 
 	log "github.com/golang/glog"
+	"github.com/google/uuid"
 )
 
 // Connect connected a conn.
 func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) (mid int64, key, roomID string, accepts []int32, hb int64, err error) {
-	// 框架之外,第三方业务 逻辑扩展
-	item, errStr := l.business.AuthLogin(c, server, cookie, token)
-	if errStr != nil {
-		err = errStr
+	var params struct {
+		Mid      int64   `json:"mid"`
+		Key      string  `json:"key"`
+		RoomID   string  `json:"room_id"`
+		Platform string  `json:"platform"`
+		Accepts  []int32 `json:"accepts"`
+	}
+	if err = json.Unmarshal(token, &params); err != nil {
+		log.Errorf("json.Unmarshal(%s) error(%v)", token, err)
 		return
 	}
-	roomID = item.RoomID
-	accepts = item.Accepts
-	key = item.Key
-	mid = item.Mid
+	log.Infof("conn connected params:%+v", params)
+
+	mid = params.Mid
+	roomID = params.RoomID
+	accepts = params.Accepts
 	hb = int64(l.c.Node.Heartbeat) * int64(l.c.Node.HeartbeatMax)
-
-	if mid == 0 {
-		err = fmt.Errorf("mid is err !!")
-		return
+	if key = params.Key; key == "" {
+		key = uuid.New().String()
 	}
-	if key == "" {
-		err = fmt.Errorf("key is err !!")
-		return
-	}
-
-	// TODO
-	// 授权方案:
-	// 1.游客模式 本地cookie没有token 则调用http接口 得到token 带到这里调用第三方api 能解开表示授权成功
-	// 2.会员对接 有token 通过json参数 带到这里 调用第三方api 能解开表示授权成功
-
-	//如果验证通过, 则生成会话数据, 存入 redis 中; 否则返回认证失败
 	if err = l.dao.AddMapping(c, mid, key, server); err != nil {
 		log.Errorf("l.dao.AddMapping(%d,%s,%s) error(%v)", mid, key, server, err)
 	}
+	log.Infof("conn connected err:%+v", err)
 
 	log.Infof("conn connected key:%s server:%s mid:%d token:%s", key, server, mid, token)
 	return
@@ -51,12 +46,12 @@ func (l *Logic) Connect(c context.Context, server, cookie string, token []byte) 
 func (l *Logic) Receive(c context.Context, mid int64, proto *protocol.Proto) (err error) {
 	switch proto.Op {
 	case protocol.OpSync:
-		op, keys, msg, err := l.business.MsgSync(c, mid, proto.Body)
-		if op != 0 && err == nil {
-			l.PushKeys(c, op, keys, msg)
-		}
+		// op, keys, msg, err := l.business.MsgSync(c, mid, proto.Body)
+		// if op != 0 && err == nil {
+		// 	l.PushKeys(c, op, keys, msg)
+		// }
 	case protocol.OpMessageAck:
-		l.business.MessageACK(c, mid, proto.Body)
+		// l.business.MessageACK(c, mid, proto.Body)
 	default:
 		log.Infof("receive mid:%d message:%+v", mid, proto)
 	}

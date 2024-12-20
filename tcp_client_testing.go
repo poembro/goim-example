@@ -6,7 +6,6 @@ package main
 // third parameter: comet server ip
 
 import (
-	"goim-example/internal/logic/business/util"
 	"goim-example/pkg/bufio"
 	"sync"
 
@@ -101,8 +100,8 @@ func startClient(mid int64) {
 	wr := bufio.NewWriter(conn)
 	rd := bufio.NewReader(conn)
 
-	deviceId := util.Md5(fmt.Sprintf("%s_%d", "web", mid))
-	f := fmt.Sprintf(`{"mid":"%d","key":"%s", "room_id":"live://1000", "platform":"web", "accepts":[1000,1001,1002]}`, mid, deviceId)
+	deviceId := (fmt.Sprintf("%s_%d", "web", mid))
+	f := fmt.Sprintf(`{"mid":%d,"key":"%s", "room_id":"live://1000", "platform":"web", "accepts":[1000,1001,1002]}`, mid, deviceId)
 
 	proto := new(protocol.Proto)
 	proto.Ver = 1

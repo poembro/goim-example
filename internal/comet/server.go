@@ -37,9 +37,9 @@ func newLogicClient(c *conf.Config) logic.LogicClient {
 	env := c.Env.DeployEnv
 	appid := c.Env.TargetAppId // 目标服务
 	region := c.Env.Region
-	//zone := c.Env.Zone
+	zone := c.Env.Zone
 
-	target := fmt.Sprintf("discovery:///%s/%s/%s", env, appid, region)
+	target := fmt.Sprintf("discovery:///%s/%s/%s/%s", appid, env, region, zone)
 
 	conn, err := grpc.DialContext(ctx, target,
 		[]grpc.DialOption{
