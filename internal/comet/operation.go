@@ -61,6 +61,7 @@ func (s *Server) RenewOnline(ctx context.Context, serverID string, roomCount map
 
 // Receive receive a message.
 func (s *Server) Receive(ctx context.Context, mid int64, p *protocol.Proto) (err error) {
+	// 可以根据不同的 协议编号 发送到不同的 rpc服务 去
 	_, err = s.rpcClient.Receive(ctx, &logic.ReceiveReq{Mid: mid, Proto: p})
 	return
 }
@@ -83,7 +84,8 @@ func (s *Server) Operate(ctx context.Context, p *protocol.Proto, ch *Channel, b 
 			ch.UnWatch(ops...)
 		}
 		p.Op = protocol.OpUnsubReply
-	case protocol.OpSendMsg: // 第三方业务扩展，游戏中不存储，直接广播消息至该用户所在房间
+	case protocol.OpSendMsg:
+		// 第三方业务扩展，游戏中不存储，直接广播消息至该用户所在房间(只针对单个comet)
 		p.Op = protocol.OpSendMsgReply
 		for _, bucket := range s.Buckets() {
 			if room := bucket.Room(ch.Room.ID); room != nil {
@@ -94,6 +96,7 @@ func (s *Server) Operate(ctx context.Context, p *protocol.Proto, ch *Channel, b 
 		// TODO ack ok&failed
 		if err := s.Receive(ctx, ch.Mid, p); err != nil {
 			log.Errorf("s.Report(%d) op:%d error(%v)", ch.Mid, p.Op, err)
+			return err
 		}
 		p.Body = nil
 		p.Op++ // 第三方业务扩展，响应op比请求op大1

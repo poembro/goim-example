@@ -12,7 +12,6 @@ import (
 	log "github.com/golang/glog"
 )
 
-//Subscribe message: operation:1001 server:"127.0.0.1" keys:"123456123" msg:"11111111111111111111111"
 func (j *Job) Push(ctx context.Context, pushMsg *pb.PushMsg) (err error) {
 	switch pushMsg.Type {
 	case pb.PushMsg_PUSH:

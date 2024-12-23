@@ -35,6 +35,7 @@ func (d *Dao) Send(pushMsg *pb.PushMsg) (err error) {
 			log.Errorf("PushMsg.send(push pushMsg:%v) error(%v)", pushMsg, err)
 		}
 	} else {
+		// 防止单key redis 无法集群化 可以随机多个key  job 监听多个key
 		_, err = d.redis.LPush(context.TODO(), d.c.Kafka.Topic, string(b)).Result()
 		if err != nil {
 			log.Errorf("PushMsg.send(broadcast_room pushMsg:%v) error(%v)", pushMsg, err)

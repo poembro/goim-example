@@ -253,7 +253,7 @@ func (s *Server) dispatchTCP(conn *net.TCPConn, wr *bufio.Writer, wp *bytes.Pool
 			log.Infof("key:%s dispatch msg:%v", ch.Key, *p)
 		}
 		switch p {
-		case protocol.ProtoFinish: //protocol.ProtoFinish 协议值为11,表示proto值已经准备好
+		case protocol.ProtoFinish: //protocol.ProtoFinish 协议值为11, 通知客户端关闭连接
 			if white {
 				whitelist.Printf("key: %s receive proto finish\n", ch.Key)
 			}

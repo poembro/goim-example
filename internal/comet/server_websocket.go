@@ -207,7 +207,7 @@ func (s *Server) ServeWebsocket(conn net.Conn, rp, wp *bytes.Pool, tr *xtime.Tim
 	}
 	// must not setadv, only used in auth
 	step = 3
-	if p, err = ch.CliProto.Set(); err == nil {
+	if p, err = ch.CliProto.Set(); err == nil { // 从池子里拿一个下标为4的 *protocol.Proto结构
 		if ch.Mid, ch.Key, rid, accepts, hb, err = s.authWebsocket(ctx, ws, p, req.Header.Get("Cookie")); err == nil {
 			ch.Watch(accepts...)
 			b = s.Bucket(ch.Key)
@@ -239,7 +239,7 @@ func (s *Server) ServeWebsocket(conn net.Conn, rp, wp *bytes.Pool, tr *xtime.Tim
 	go s.dispatchWebsocket(ws, wp, wb, ch)
 	serverHeartbeat := s.RandServerHearbeat()
 	for {
-		if p, err = ch.CliProto.Set(); err != nil {
+		if p, err = ch.CliProto.Set(); err != nil { // for 第一次 任然从池子里拿下标为4的 *protocol.Proto结构
 			break
 		}
 		if white {
@@ -273,7 +273,7 @@ func (s *Server) ServeWebsocket(conn net.Conn, rp, wp *bytes.Pool, tr *xtime.Tim
 		if white {
 			whitelist.Printf("key: %s process proto:%v\n", ch.Key, p)
 		}
-		ch.CliProto.SetAdv()
+		ch.CliProto.SetAdv() //标记 下一次再调用ch.CliProto.Set()时, 拿的是下标为3的*protocol.Proto结构
 		ch.Signal()
 		if white {
 			whitelist.Printf("key: %s signal\n", ch.Key)
@@ -338,7 +338,7 @@ func (s *Server) dispatchWebsocket(ws *websocket.Conn, wp *bytes.Pool, wb *bytes
 		case protocol.ProtoReady:
 			// fetch message from svrbox(client send)
 			for {
-				if p, err = ch.CliProto.Get(); err != nil {
+				if p, err = ch.CliProto.Get(); err != nil { // for 第一次 从池子里拿下标为3的 *protocol.Proto结构
 					break
 				}
 				if white {
@@ -359,8 +359,8 @@ func (s *Server) dispatchWebsocket(ws *websocket.Conn, wp *bytes.Pool, wb *bytes
 				if white {
 					whitelist.Printf("key: %s write client proto%v\n", ch.Key, p)
 				}
-				p.Body = nil // avoid memory leak
-				ch.CliProto.GetAdv()
+				p.Body = nil         // avoid memory leak
+				ch.CliProto.GetAdv() //标记 下一次再调用ch.CliProto.Get()时, 拿的是下标为2的*protocol.Proto结构
 			}
 		default:
 			if white {
